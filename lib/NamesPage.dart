@@ -32,13 +32,14 @@ class NamesPageState extends State<NamesPage> {
       body: Center(
         child: Flex(
           direction: Axis.vertical,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             AnimationLimiter(
                 child: ListView.builder(
                     scrollDirection: Axis.vertical,
                     shrinkWrap: true,
+                    padding: EdgeInsets.all(8),
                     itemCount: names.length,
                     itemBuilder: (context, i) {
                       return AnimationConfiguration.staggeredList(
@@ -57,15 +58,26 @@ class NamesPageState extends State<NamesPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          HttpClientRequest request =
+        onPressed: () {
+          /* HttpClientRequest request =
               await HttpClient().post("0.0.0.0", 4040, "") /*1*/
                 ..headers.contentType = ContentType.text /*2*/
                 ..write(utf8.encoder.convert(names.toString())); /*3*/
           HttpClientResponse response = await request.close(); /*4*/
-          await utf8.decoder.bind(response /*5*/).forEach(print);
+          await utf8.decoder.bind(response /*5*/).forEach(print);*/
 
-          await search();
+          search().then((value) {
+            value.listen((addr) async {
+              if (addr.exists) {
+                HttpClientRequest request2 =
+                    await HttpClient().post(addr.ip, 4040, "") /*1*/
+                      ..headers.contentType = ContentType.text /*2*/
+                      ..write(utf8.encoder.convert(names.toString())); /*3*/
+                HttpClientResponse response2 = await request2.close(); /*4*/
+                await utf8.decoder.bind(response2 /*5*/).forEach(print);
+              }
+            });
+          });
 
           setState(() {
             names.shuffle(Random(names.length + 1));
@@ -80,15 +92,11 @@ class NamesPageState extends State<NamesPage> {
   }
 }
 
-Future<void> search() async {
+Future<Stream<NetworkAddress>> search() async {
   final String ip = await Wifi.ip;
   final String subnet = ip.substring(0, ip.lastIndexOf('.'));
   final int port = 4040;
 
   final stream = NetworkAnalyzer.discover2(subnet, port);
-  stream.listen((NetworkAddress addr) {
-    if (addr.exists) {
-      print('Found device: ${addr.ip}');
-    }
-  });
+  return stream;
 }

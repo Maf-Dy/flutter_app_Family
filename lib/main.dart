@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_app5/NamesPage.dart';
+import 'package:wifi/wifi.dart';
 
 void main() async {
   runApp(MyApp());
@@ -15,7 +16,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Family V2',
-      theme: ThemeData(primarySwatch: Colors.blueGrey),
+      theme: ThemeData(
+        primarySwatch: Colors.blueGrey,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
       home: MyHomePage(title: 'Family 2'),
     );
   }
@@ -135,7 +139,9 @@ Future<void> createHttp() async {
     "0.0.0.0",
     4040,
   );
-  print('Listening on localhost:${server.port}');
+  print('Listening on ${server.address.address} localhost:${server.port}');
+
+  print(Wifi.ip.then((value) => value));
 
   await for (HttpRequest request in server) {
     request.response
