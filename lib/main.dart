@@ -1,9 +1,13 @@
+import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_app5/NamesPage.dart';
+import 'package:wifi/wifi.dart';
 
-void main() {
+void main() async {
   runApp(MyApp());
+
+  await createHttp();
 }
 
 class MyApp extends StatelessWidget {
@@ -127,5 +131,23 @@ class _MyHomePageState extends State<MyHomePage> {
         onWillPop: () async {
           return false;
         });
+  }
+}
+
+Future<void> createHttp() async {
+  var server = await HttpServer.bind(
+    "0.0.0.0",
+    4040,
+  );
+  print('Listening on ${server.address.address} localhost:${server.port}');
+
+  print(Wifi.ip.then((value) => value));
+
+  await for (HttpRequest request in server) {
+    request.response
+      ..headers.contentType = ContentType("text", "plain", charset: "utf-8")
+      ..write("hello world");
+    await request.response.flush();
+    await request.response.close();
   }
 }

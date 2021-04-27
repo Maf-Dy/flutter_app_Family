@@ -1,6 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:ping_discover_network/ping_discover_network.dart';
+import 'package:wifi/wifi.dart';
 
 class NamesPage extends StatefulWidget {
   List<String> names;
@@ -54,6 +59,26 @@ class NamesPageState extends State<NamesPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          /* HttpClientRequest request =
+              await HttpClient().post("0.0.0.0", 4040, "") /*1*/
+                ..headers.contentType = ContentType.text /*2*/
+                ..write(utf8.encoder.convert(names.toString())); /*3*/
+          HttpClientResponse response = await request.close(); /*4*/
+          await utf8.decoder.bind(response /*5*/).forEach(print);*/
+
+          search().then((value) {
+            value.listen((addr) async {
+              if (addr.exists) {
+                HttpClientRequest request2 =
+                    await HttpClient().post(addr.ip, 4040, "") /*1*/
+                      ..headers.contentType = ContentType.text /*2*/
+                      ..write(utf8.encoder.convert(names.toString())); /*3*/
+                HttpClientResponse response2 = await request2.close(); /*4*/
+                await utf8.decoder.bind(response2 /*5*/).forEach(print);
+              }
+            });
+          });
+
           setState(() {
             names.shuffle(Random(names.length + 1));
             names.shuffle();
@@ -65,4 +90,13 @@ class NamesPageState extends State<NamesPage> {
       ),
     );
   }
+}
+
+Future<Stream<NetworkAddress>> search() async {
+  final String ip = await Wifi.ip;
+  final String subnet = ip.substring(0, ip.lastIndexOf('.'));
+  final int port = 4040;
+
+  final stream = NetworkAnalyzer.discover2(subnet, port);
+  return stream;
 }
