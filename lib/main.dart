@@ -1,13 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app5/NamesPage.dart';
-import 'package:wifi/wifi.dart';
+import 'dart:isolate';
 
-void main() async {
+void main() {
   runApp(MyApp());
-
-  await createHttp();
+  Isolate.spawn(createHttp, null);
 }
 
 class MyApp extends StatelessWidget {
@@ -81,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Card(
                     borderOnForeground: true,
                     child: TextField(
+                      key: new Key('TextField1'),
                       controller: controller,
                       style: TextStyle(
                         fontSize: 20,
@@ -134,16 +136,25 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-Future<void> createHttp() async {
+void createHttp(_) async {
   var server = await HttpServer.bind(
     "0.0.0.0",
     4040,
   );
   print('Listening on ${server.address.address} localhost:${server.port}');
-
-  print(Wifi.ip.then((value) => value));
+  //print(Wifi.ip.then((value) => value));
 
   await for (HttpRequest request in server) {
+    String st = request.requestedUri.toString();
+
+    Map content =
+        await json.decode(await utf8.decoder.bind(request).join()) as Map;
+
+    List<String> fileName = [];
+    request.uri.queryParameters.forEach((element, element2) {
+      fileName.add(element2);
+    });
+
     request.response
       ..headers.contentType = ContentType("text", "plain", charset: "utf-8")
       ..write("hello world");

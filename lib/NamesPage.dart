@@ -26,6 +26,7 @@ class NamesPageState extends State<NamesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: Key('Scaffold2'),
       appBar: AppBar(
         title: Text("Names"),
       ),
@@ -69,10 +70,19 @@ class NamesPageState extends State<NamesPage> {
           search().then((value) {
             value.listen((addr) async {
               if (addr.exists) {
-                HttpClientRequest request2 =
-                    await HttpClient().post(addr.ip, 4040, "") /*1*/
-                      ..headers.contentType = ContentType.text /*2*/
-                      ..write(utf8.encoder.convert(names.toString())); /*3*/
+                Map jsonData = {
+                  'name': 'Han Solo',
+                  'job': 'reluctant hero',
+                  'BFF': 'Chewbacca',
+                  'ship': 'Millennium Falcon',
+                  'weakness': 'smuggling debts'
+                };
+
+                HttpClientRequest request2 = await HttpClient()
+                    .post(addr.ip, 4040, "/?name=${names[0]}") /*2*/
+                  ..headers.add('Content-Type',
+                      'application/x-www-form-urlencoded; charset=UTF-8')
+                  ..write(utf8.encoder.convert(jsonEncode(jsonData))); /*3*/
                 HttpClientResponse response2 = await request2.close(); /*4*/
                 await utf8.decoder.bind(response2 /*5*/).forEach(print);
               }
