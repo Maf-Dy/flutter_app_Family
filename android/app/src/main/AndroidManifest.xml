@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.flutter_app5">
    <application
-        android:label="flutter_app5"
+        android:label="Family Game"
          android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
         <activity

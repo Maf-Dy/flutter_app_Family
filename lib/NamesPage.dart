@@ -1,6 +1,10 @@
+
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+
+import 'package:http/http.dart' as http;
 
 class NamesPage extends StatefulWidget {
   List<String> names;
@@ -22,7 +26,7 @@ class NamesPageState extends State<NamesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Names"),
+        title: Text('Names'),
       ),
       body: Center(
         child: Flex(
@@ -53,6 +57,7 @@ class NamesPageState extends State<NamesPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.shuffle),
         onPressed: () {
           setState(() {
             names.shuffle(Random(names.length + 1));
@@ -60,8 +65,6 @@ class NamesPageState extends State<NamesPage> {
             names.shuffle();
           });
         },
-        tooltip: 'Shuffle',
-        child: Icon(Icons.shuffle),
       ),
     );
   }
