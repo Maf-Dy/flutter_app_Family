@@ -1,4 +1,4 @@
-package com.example.flutter_app5
+package com.mafdy.familygame
 
 import io.flutter.embedding.android.FlutterActivity
 

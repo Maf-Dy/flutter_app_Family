@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.flutter_app5">
+    package="com.mafdy.familygame">
    <application
         android:label="Family Game"
          android:usesCleartextTraffic="true"
