@@ -56,8 +56,12 @@ class NamesPageState extends State<NamesPage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.shuffle),
+      floatingActionButton: FloatingActionButton.extended(
+        label: Text('Shuffle'),
+        icon: Icon(Icons.shuffle),
+        isExtended: true,
+        backgroundColor: Color(0xFF607D8B),
+        foregroundColor: Colors.white,
         onPressed: () {
           setState(() {
             names.shuffle(Random(names.length + 1));
