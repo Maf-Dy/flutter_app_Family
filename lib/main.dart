@@ -7,9 +7,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_share/flutter_share.dart';
-import 'package:http/http.dart' as http;
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:wifi_ip/wifi_ip.dart';
 
 import 'NamesPage.dart';
 
@@ -23,8 +21,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Family Game',
+      darkTheme: ThemeData.dark(useMaterial3: true),
       theme: ThemeData(
+        useMaterial3: true,
         primarySwatch: Colors.blueGrey,
+        colorSchemeSeed: Colors.blueGrey,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(title: 'Family Game'),
@@ -151,7 +152,17 @@ class _MyHomePageState extends State<MyHomePage> {
   HttpServer _server; // Add a variable to store the HttpServer instance
 
   Future<void> _startServer() async {
-    var ip = (await WifiIp.getWifiIp).ip;
+    var ip;
+
+    final interfaces = await NetworkInterface.list(
+        type: InternetAddressType.IPv4, includeLinkLocal: true);
+
+    try {
+      NetworkInterface interface =
+          interfaces.firstWhere((element) => element.name.contains("wlan"));
+      ip = interface.addresses.first.address;
+    } catch (ex) {}
+
     _server = await HttpServer.bind(ip, 8182);
     _serverUrl =
         'http://${_server.address.host}:${_server.port}'; // Set the server URL
@@ -186,29 +197,71 @@ class _MyHomePageState extends State<MyHomePage> {
 
   StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
+  Timer _timer;
+  bool lanWorking = false;
+
+  Future<void> _checkNetworkStatus() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    //if (connectivityResult != ConnectivityResult.none) {
+    try {
+      await _stopServer();
+    } catch (e) {
+      print(e);
+    }
+    try {
+      await _startServer();
+      lanWorking = true;
+    } catch (e) {
+      print(e);
+      lanWorking = false;
+    } finally {
+      setState(() {});
+    }
+    //}
+  }
+
   @override
   void initState() {
     super.initState();
-    _startServer();
+    try {
+      _startServer();
+      lanWorking = true;
+    } catch (e) {
+      print(e);
+      lanWorking = false;
+    } finally {
+      setState(() {});
+    }
     _connectivitySubscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) async {
-      if (result != ConnectivityResult.none) {
-        try {
-          await _stopServer();
-        } catch (e) {
-          print(e);
-        }
-        try {
-          await _startServer();
-        } catch (e) {
-          print(e);
-        } finally {
-          setState(() {});
-        }
+      //if (result != ConnectivityResult.none) {
+      try {
+        await _stopServer();
+      } catch (e) {
+        print(e);
       }
+      try {
+        await _startServer();
+        lanWorking = true;
+      } catch (e) {
+        print(e);
+        lanWorking = false;
+      } finally {
+        setState(() {});
+      }
+      //}
 
       setState(() {});
+    });
+
+    // Start a timer to periodically check network status
+    _timer = Timer.periodic(Duration(seconds: 4), (timer) {
+      try {
+        _checkNetworkStatus();
+      } catch (e) {
+        print(e);
+      }
     });
   }
 
@@ -217,6 +270,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return WillPopScope(
       child: Scaffold(
         appBar: AppBar(
+          elevation: 4,
           title: Text(widget.title),
           actions: [
             IconButton(
@@ -238,10 +292,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 }
                 try {
                   await _startServer();
+                  lanWorking = true;
                 } catch (e) {
                   print(e);
+                  lanWorking = false;
+                } finally {
+                  setState(() {});
                 }
-                setState(() {});
               },
             ),
           ],
@@ -258,47 +315,52 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               Text(
-                'List count: $_counter',
+                'Count: $_counter',
                 style: TextStyle(
                   fontSize: 20,
                 ),
               ),
               SizedBox(height: 40),
-              GestureDetector(
-                onTap: () async {
-                  Clipboard.setData(ClipboardData(text: '$_serverUrl'));
-                  await FlutterShare.share(
-                      title: 'Enter Name link',
-                      chooserTitle: 'Share link to enter names',
-                      text: 'Link to enter names:',
-                      linkUrl: '$_serverUrl');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Link copied to clipboard'),
-                      duration: Duration(seconds: 1),
+              lanWorking && _serverUrl != ''
+                  ? GestureDetector(
+                      onTap: () async {
+                        Clipboard.setData(ClipboardData(text: '$_serverUrl'));
+                        await FlutterShare.share(
+                            title: 'Enter Name link',
+                            chooserTitle: 'Share link to enter names',
+                            text: 'Link to enter names:',
+                            linkUrl: '$_serverUrl');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Link copied to clipboard'),
+                            duration: Duration(seconds: 1),
+                          ),
+                        );
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          QrImage(
+                            backgroundColor: Colors.white,
+                            data: '$_serverUrl',
+                            version: QrVersions.auto,
+                            size: 200.0,
+                          ),
+                          SizedBox(height: 20),
+                          Text(
+                            '👥 Tap to Share Game Link 🎮',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                          Text(
+                            '$_serverUrl',
+                            style: TextStyle(fontSize: 18, color: Colors.blue),
+                          ),
+                        ],
+                      ),
+                    )
+                  : Container(
+                      height: 200,
                     ),
-                  );
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    QrImage(
-                      data: '$_serverUrl',
-                      version: QrVersions.auto,
-                      size: 200.0,
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      'tap to copy and share the link:',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    Text(
-                      '$_serverUrl',
-                      style: TextStyle(fontSize: 18, color: Colors.blue),
-                    ),
-                  ],
-                ),
-              ),
               SizedBox(height: 20),
               Card(
                 borderOnForeground: true,
@@ -385,7 +447,15 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       );
 
-                      await _startServer();
+                      try {
+                        await _startServer();
+                        lanWorking = true;
+                      } catch (e) {
+                        print(e);
+                        lanWorking = false;
+                      } finally {
+                        setState(() {});
+                      }
                     }
                   }
                 },
@@ -425,6 +495,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void dispose() {
     _connectivitySubscription.cancel();
     _stopServer();
+    _timer.cancel(); // Cancel the timer on dispose
     super.dispose();
   }
 }

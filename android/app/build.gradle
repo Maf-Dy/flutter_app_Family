@@ -18,6 +18,10 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
+
+    ndkVersion "25.1.8937393"
+
+
     compileSdkVersion 33
 
     sourceSets {
@@ -29,13 +33,13 @@ android {
         applicationId "com.mafdy.familygame"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 2
+        versionCode 3
         versionName '1.0'
     }
 
     buildTypes {
         release {
-            
+
         }
     }
 }
