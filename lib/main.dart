@@ -7,6 +7,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_share/flutter_share.dart';
+import 'package:lottie/lottie.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import 'NamesPage.dart';
@@ -24,7 +25,6 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeData.dark(useMaterial3: true),
       theme: ThemeData(
         useMaterial3: true,
-        primarySwatch: Colors.blueGrey,
         colorSchemeSeed: Colors.blueGrey,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
@@ -360,7 +360,20 @@ class _MyHomePageState extends State<MyHomePage> {
                     )
                   : Container(
                       height: 200,
-                    ),
+                      child: Lottie.asset(
+                        'assets/animations/lost_connection.json',
+                        repeat: false,
+                        frameRate: FrameRate(60),
+                        delegates: LottieDelegates(
+                          values: [
+                            ValueDelegate.color(
+                              // keyPath order: ['layer name', 'group name', 'shape name']
+                              const ['**', '3d_box', '**'],
+                              value: Colors.blueGrey,
+                            ),
+                          ],
+                        ),
+                      )),
               SizedBox(height: 20),
               Card(
                 borderOnForeground: true,

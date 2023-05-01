@@ -38,7 +38,7 @@ dependencies:
   network_info_plus: ^2.1.0
   flutter_share: ^2.0.0
   permission_handler: ^10.2.0
-  rive: ^0.10.4
+  lottie: ^2.3.2
 
 dev_dependencies:
   flutter_test:
@@ -56,8 +56,8 @@ flutter:
   uses-material-design: true
 
 
-  # assets:
-  #  - assets/rive/
+  assets:
+   - assets/animations/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
