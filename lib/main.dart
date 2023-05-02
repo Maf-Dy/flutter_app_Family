@@ -43,7 +43,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   int _counter = 0;
 
   TextEditingController controller = TextEditingController();
@@ -304,174 +304,211 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'Enter Names',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Theme.of(context).primaryColor,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Opacity(
+                opacity: 0.5,
+                child: Lottie.asset(
+                  'assets/animations/background.json',
+                  fit: BoxFit.cover,
                 ),
               ),
-              Text(
-                'Count: $_counter',
-                style: TextStyle(
-                  fontSize: 20,
-                ),
-              ),
-              SizedBox(height: 40),
-              lanWorking && _serverUrl != ''
-                  ? GestureDetector(
-                      onTap: () async {
-                        Clipboard.setData(ClipboardData(text: '$_serverUrl'));
-                        await FlutterShare.share(
-                            title: 'Enter Name link',
-                            chooserTitle: 'Share link to enter names',
-                            text: 'Link to enter names:',
-                            linkUrl: '$_serverUrl');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Link copied to clipboard'),
-                            duration: Duration(seconds: 1),
-                          ),
-                        );
-                      },
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          QrImage(
-                            backgroundColor: Colors.white,
-                            data: '$_serverUrl',
-                            version: QrVersions.auto,
-                            size: 200.0,
-                          ),
-                          SizedBox(height: 20),
-                          Text(
-                            '👥 Tap to Share Game Link 🎮',
-                            style: TextStyle(fontSize: 18),
-                          ),
-                          Text(
-                            '$_serverUrl',
-                            style: TextStyle(fontSize: 18, color: Colors.blue),
-                          ),
-                        ],
-                      ),
-                    )
-                  : Container(
-                      height: 200,
-                      child: Lottie.asset(
-                        'assets/animations/lost_connection.json',
-                        repeat: false,
-                        frameRate: FrameRate(60),
-                        delegates: LottieDelegates(
-                          values: [
-                            ValueDelegate.color(
-                              // keyPath order: ['layer name', 'group name', 'shape name']
-                              const ['**', '3d_box', '**'],
-                              value: Colors.blueGrey,
-                            ),
-                          ],
-                        ),
-                      )),
-              SizedBox(height: 20),
-              Card(
-                borderOnForeground: true,
-                child: Padding(
-                  padding: EdgeInsets.all(10),
-                  child: Form(
-                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                    child: TextFormField(
-                      controller: controller,
-                      validator: (value) {
-                        if (value.replaceAll(" ", "").isNotEmpty) {
-                          return 'Please remember to add the name';
-                        }
-                        return null;
-                      },
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'Enter Names',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                  AnimatedDefaultTextStyle(
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    style: TextStyle(fontSize: 20),
+                    child: Text(
+                      'Count: $_counter',
                       style: TextStyle(
                         fontSize: 20,
                       ),
-                      decoration: InputDecoration(
-                        icon: Icon(Icons.contact_page),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(5),
-                          ),
-                        ),
-                        labelText: 'Name',
-                      ),
-                      maxLines: 1,
                     ),
                   ),
-                ),
-              ),
-              SizedBox(height: 20),
-              OutlinedButton(
-                child: Text(
-                  'Start',
-                  style: TextStyle(
-                    fontSize: 15,
+                  SizedBox(height: 30),
+                  AnimatedContainer(
+                    duration: Duration(milliseconds: 500),
+                    curve: Curves.easeInOut,
+                    height: lanWorking && _serverUrl != '' ? 300 : 200,
+                    child: lanWorking && _serverUrl != ''
+                        ? GestureDetector(
+                            onTap: () async {
+                              Clipboard.setData(
+                                  ClipboardData(text: '$_serverUrl'));
+                              await FlutterShare.share(
+                                  title: 'Enter Name link',
+                                  chooserTitle: 'Share link to enter names',
+                                  text: 'Link to enter names:',
+                                  linkUrl: '$_serverUrl');
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Link copied to clipboard'),
+                                  duration: Duration(seconds: 1),
+                                ),
+                              );
+                            },
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                AnimatedSize(
+                                  duration: Duration(milliseconds: 1000),
+                                  curve: Curves.easeInOut,
+                                  child: QrImage(
+                                    backgroundColor: Colors.white,
+                                    data: '$_serverUrl',
+                                    version: QrVersions.auto,
+                                    size: 200.0,
+                                  ),
+                                ),
+                                SizedBox(height: 20),
+                                AnimatedDefaultTextStyle(
+                                  duration: Duration(milliseconds: 2000),
+                                  curve: Curves.easeInOut,
+                                  style: TextStyle(fontSize: 18),
+                                  child: Text(
+                                    '👥 Tap to Share Game Link 🎮',
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                AnimatedDefaultTextStyle(
+                                  duration: Duration(milliseconds: 2000),
+                                  curve: Curves.easeInOut,
+                                  style:
+                                      TextStyle(fontSize: 18, color: Colors.blue),
+                                  child: Text(
+                                    '$_serverUrl',
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Container(
+                            child: Lottie.asset(
+                              'assets/animations/lost_connection.json',
+                              repeat: false,
+                              frameRate: FrameRate(60),
+                              delegates: LottieDelegates(
+                                values: [
+                                  ValueDelegate.color(
+                                    // keyPath order: ['layer name', 'group name', 'shape name']
+                                    const ['**', '3d_box', '**'],
+                                    value: Colors.blueGrey,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                   ),
-                ),
-                onPressed: () async {
-                  if (widget.names.length > 0) {
-                    bool confirm = await showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text("Confirmation"),
-                          content: Text("Are you sure ?"),
-                          actions: [
-                            TextButton(
-                              child: Text("Cancel"),
-                              onPressed: () {
-                                Navigator.of(context).pop(false);
-                              },
+                  SizedBox(height: 10),
+                  Card(
+                    borderOnForeground: true,
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Form(
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        child: TextFormField(
+                          controller: controller,
+                          validator: (value) {
+                            if (value.replaceAll(" ", "").isNotEmpty) {
+                              return 'Please remember to add the name';
+                            }
+                            return null;
+                          },
+                          style: TextStyle(
+                            fontSize: 20,
+                          ),
+                          decoration: InputDecoration(
+                            icon: Icon(Icons.person),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(5),
+                              ),
                             ),
-                            TextButton(
-                              child: Text("Yes"),
-                              onPressed: () {
-                                Navigator.of(context).pop(true);
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    );
-
-                    if (confirm) {
-                      widget.names.shuffle(Random(widget.names.length + 1));
-                      widget.names.shuffle();
-                      widget.names.shuffle();
-
-                      await _stopServer();
-
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) {
-                            return NamesPage(
-                              names: widget.names
-                                  .map((entry) => entry['name'].toString())
-                                  .toList(),
+                            labelText: 'Name',
+                          ),
+                          maxLines: 1,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  OutlinedButton(
+                    child: Text(
+                      'Start',
+                      style: TextStyle(
+                        fontSize: 15,
+                      ),
+                    ),
+                    onPressed: () async {
+                      if (widget.names.length > 0) {
+                        bool confirm = await showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text("Confirmation"),
+                              content: Text("Are you sure ?"),
+                              actions: [
+                                TextButton(
+                                  child: Text("Cancel"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop(false);
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text("Yes"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop(true);
+                                  },
+                                ),
+                              ],
                             );
                           },
-                        ),
-                      );
+                        );
 
-                      try {
-                        await _startServer();
-                        lanWorking = true;
-                      } catch (e) {
-                        print(e);
-                        lanWorking = false;
-                      } finally {
-                        setState(() {});
+                        if (confirm) {
+                          widget.names.shuffle(Random(widget.names.length + 1));
+                          widget.names.shuffle();
+                          widget.names.shuffle();
+
+                          await _stopServer();
+
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return NamesPage(
+                                  names: widget.names
+                                      .map((entry) => entry['name'].toString())
+                                      .toList(),
+                                );
+                              },
+                            ),
+                          );
+
+                          try {
+                            await _startServer();
+                            lanWorking = true;
+                          } catch (e) {
+                            print(e);
+                            lanWorking = false;
+                          } finally {
+                            setState(() {});
+                          }
+                        }
                       }
-                    }
-                  }
-                },
+                    },
+                  ),
+                ],
               ),
             ],
           ),
