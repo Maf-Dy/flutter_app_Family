@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:async';
 import 'dart:io';
 
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -317,25 +318,49 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(
-                    'Enter Names',
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Theme.of(context).primaryColor,
+                  Container(
+                    height: 80,
+                    child: AnimatedTextKit(
+                      repeatForever: true,
+                      pause: Duration(milliseconds: 0),
+                      animatedTexts: [
+                        RotateAnimatedText('Enter Names Here',
+                            transitionHeight: 50,
+                            duration: Duration(milliseconds: 7000),
+                            textAlign: TextAlign.center,
+                            textStyle: TextStyle(
+                              fontSize: 20,
+                            )),
+                        RotateAnimatedText(
+                            'Share link with friends\n to enter Names',
+                            duration: Duration(milliseconds: 7000),
+                            transitionHeight: 50,
+                            textAlign: TextAlign.center,
+                            textStyle: TextStyle(
+
+                              fontSize: 20,
+                            ))
+                      ],
                     ),
                   ),
-                  AnimatedDefaultTextStyle(
-                    duration: Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    style: TextStyle(fontSize: 20),
-                    child: Text(
-                      'Count: $_counter',
-                      style: TextStyle(
-                        fontSize: 20,
-                      ),
+                  Container(
+                    height: 40,
+                    child: AnimatedTextKit(
+                      repeatForever: true,
+                      pause: Duration(milliseconds: 0),
+                      animatedTexts: [ColorizeAnimatedText(
+                        'Count: $_counter',
+                        speed: Duration(milliseconds: 200),
+                        textStyle: TextStyle(
+                          fontSize: 20,
+                        ), colors: [
+                        Colors.blueGrey.shade200,
+                        Colors.deepOrange,
+                        Colors.brown,],
+                      )],
                     ),
                   ),
-                  SizedBox(height: 30),
+                  SizedBox(height: 20),
                   AnimatedContainer(
                     duration: Duration(milliseconds: 500),
                     curve: Curves.easeInOut,
@@ -383,8 +408,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                                 AnimatedDefaultTextStyle(
                                   duration: Duration(milliseconds: 2000),
                                   curve: Curves.easeInOut,
-                                  style:
-                                      TextStyle(fontSize: 18, color: Colors.blue),
+                                  style: TextStyle(
+                                      fontSize: 18, color: Colors.blue),
                                   child: Text(
                                     '$_serverUrl',
                                   ),
