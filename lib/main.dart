@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_share/flutter_share.dart';
 import 'package:lottie/lottie.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:vibration/vibration.dart';
 
 import 'NamesPage.dart';
 
@@ -136,6 +137,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         name.isNotEmpty &&
         (cookie == null ||
             !widget.names.any((entry) => entry['clientID'] == cookie.value))) {
+
+      vibrate();
+
       setState(() {
         widget.names.add(
             {'name': name, 'clientID': cookie != null ? cookie.value : null});
@@ -148,6 +152,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     request.response.cookies.add(Cookie('clientID',
         cookie?.value ?? DateTime.now().millisecondsSinceEpoch.toString()));
     await request.response.close();
+  }
+
+  void vibrate() {
+    Vibration.vibrate(pattern: [200, 200, 200, 200,400,200]);
   }
 
   HttpServer _server; // Add a variable to store the HttpServer instance
@@ -541,6 +549,9 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
             if (controller.text.replaceAll(' ', '').length > 0) {
+
+              vibrate();
+
               setState(() {
                 widget.names.add({'name': controller.text, 'clientID': ''});
 
