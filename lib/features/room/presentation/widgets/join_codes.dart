@@ -177,6 +177,7 @@ class _HotspotCodesState extends State<HotspotCodes> {
         const SizedBox(height: 10),
         AnimatedSwitcher(
           duration: Motion.of(context, Motion.standard),
+          transitionBuilder: Motion.fadeSwitch,
           child: _step == 1
               ? Card(
                   key: const ValueKey(1),

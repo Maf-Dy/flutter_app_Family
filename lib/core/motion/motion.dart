@@ -27,6 +27,12 @@ abstract final class Motion {
 
   static bool isReduced(BuildContext context) => MediaQuery.maybeDisableAnimationsOf(context) ?? false;
 
+  /// A plain cross-fade for [AnimatedSwitcher]. Its default fade keys each copy
+  /// by its child's key, so a child that comes back while its old copy is still
+  /// fading out (A, B, A quickly) clashes with it, and the screen stops drawing.
+  static Widget fadeSwitch(Widget child, Animation<double> animation) =>
+      FadeTransition(opacity: animation, child: child);
+
   /// [duration], or zero when the user asked for reduced motion.
   static Duration of(BuildContext context, Duration duration) => isReduced(context) ? Duration.zero : duration;
 }

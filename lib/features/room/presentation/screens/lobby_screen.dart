@@ -61,6 +61,7 @@ class LobbyScreen extends StatelessWidget {
                       const SizedBox(height: 12),
                       AnimatedSwitcher(
                         duration: Motion.of(context, Motion.standard),
+                        transitionBuilder: Motion.fadeSwitch,
                         child: KeyedSubtree(
                           key: ValueKey(state.connection.runtimeType),
                           child: _connectionSection(context, state, room),

@@ -84,7 +84,7 @@ class _StageSwitcherState extends State<StageSwitcher> {
       transitionBuilder: (stage, animation) {
         final incoming = stage.key == current.key;
         final shift = (incoming ? direction : -direction) * Motion.axisShift;
-        return AnimatedBuilder(
+        final moving = AnimatedBuilder(
           animation: animation,
           builder: (context, stage) => Opacity(
             opacity: animation.value.clamp(0.0, 1.0),
@@ -92,6 +92,10 @@ class _StageSwitcherState extends State<StageSwitcher> {
           ),
           child: stage,
         );
+        // Each stage has its own Scaffold, so mid-swap both show the same snack
+        // bar, and leaving the page then would fly two heroes with one tag. The
+        // stage on its way out keeps its heroes to itself.
+        return HeroMode(enabled: incoming, child: moving);
       },
       child: current,
     );
