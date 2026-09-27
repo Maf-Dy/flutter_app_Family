@@ -2,14 +2,18 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../core/motion/motion.dart';
-import '../../../../core/theme/game_colors.dart';
+import '../motion/motion.dart';
+import '../theme/game_colors.dart';
 
-/// The home-screen bowl with slips bobbing gently inside it.
+/// The bowl with slips bobbing gently inside it: the home screen hero, and the
+/// bowl that shakes the names out when reading starts.
 class Bowl extends StatefulWidget {
-  const Bowl({super.key, this.width = 200});
+  const Bowl({super.key, this.width = 200, this.full = true});
 
   final double width;
+
+  /// Whether slips peek out of the bowl. The reading intro empties it.
+  final bool full;
 
   @override
   State<Bowl> createState() => _BowlState();
@@ -44,6 +48,7 @@ class _BowlState extends State<Bowl> with SingleTickerProviderStateMixin {
           bowl: Theme.of(context).colorScheme.primary,
           shine: Theme.of(context).colorScheme.onPrimary,
           colors: context.gameColors,
+          full: widget.full,
         ),
       ),
     );
@@ -51,13 +56,14 @@ class _BowlState extends State<Bowl> with SingleTickerProviderStateMixin {
 }
 
 class _BowlPainter extends CustomPainter {
-  _BowlPainter({required this.bob, required this.bowl, required this.shine, required this.colors})
+  _BowlPainter({required this.bob, required this.bowl, required this.shine, required this.colors, required this.full})
     : super(repaint: bob);
 
   final Animation<double> bob;
   final Color bowl;
   final Color shine;
   final GameColors colors;
+  final bool full;
 
   // x, y, width, height, tilt in degrees, bob phase. In a 200×132 box.
   static const _slips = [
@@ -74,7 +80,8 @@ class _BowlPainter extends CustomPainter {
     final edge = Paint()
       ..color = colors.slipEdge
       ..style = PaintingStyle.stroke;
-    for (final (x, y, w, h, tilt, phase) in _slips) {
+    for (final (x, y, w, h, tilt, phase)
+        in full ? _slips : const <(double, double, double, double, double, double)>[]) {
       final lift = -5 * math.sin(2 * math.pi * (bob.value + phase)).abs();
       canvas
         ..save()
@@ -116,86 +123,6 @@ class _BowlPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_BowlPainter old) => old.bowl != bowl || old.colors != colors || old.shine != shine;
-}
-
-/// Small bowl next to the lobby count. A slip drops into it each time [count] grows.
-class BowlCount extends StatefulWidget {
-  const BowlCount({super.key, required this.count});
-
-  final int count;
-
-  @override
-  State<BowlCount> createState() => _BowlCountState();
-}
-
-class _BowlCountState extends State<BowlCount> with SingleTickerProviderStateMixin {
-  late final AnimationController _drop = AnimationController(vsync: this, duration: Motion.drop);
-
-  @override
-  void didUpdateWidget(BowlCount oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.count > oldWidget.count && !Motion.isReduced(context)) _drop.forward(from: 0);
-  }
-
-  @override
-  void dispose() {
-    _drop.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final colors = context.gameColors;
-    Widget slip(double angle) => Transform.rotate(
-      angle: angle,
-      child: Container(
-        width: 22,
-        height: 14,
-        decoration: BoxDecoration(
-          color: colors.slipPaper,
-          border: Border.all(color: colors.slipEdge),
-          borderRadius: BorderRadius.circular(1.5),
-        ),
-      ),
-    );
-    return ExcludeSemantics(
-      child: SizedBox(
-        width: 74,
-        height: 56,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned(left: 18, top: 4, child: slip(-0.24)),
-            Positioned(left: 34, top: 2, child: slip(0.2)),
-            AnimatedBuilder(
-              animation: _drop,
-              builder: (context, child) {
-                final t = Motion.emphasized.transform(_drop.value);
-                if (_drop.value == 0 || _drop.isCompleted) return const SizedBox.shrink();
-                return Positioned(
-                  left: 26,
-                  top: -44 + 58 * t,
-                  child: Opacity(opacity: t < 0.8 ? 1 : ((1 - t) / 0.2).clamp(0.0, 1.0), child: slip(-0.5 + 0.7 * t)),
-                );
-              },
-            ),
-            Positioned(
-              left: 4,
-              right: 4,
-              top: 18,
-              bottom: 2,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: scheme.primary,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(6), bottom: Radius.circular(40)),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  bool shouldRepaint(_BowlPainter old) =>
+      old.bowl != bowl || old.colors != colors || old.shine != shine || old.full != full;
 }

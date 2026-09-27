@@ -9,7 +9,14 @@ abstract final class Motion {
   static const settle = Duration(milliseconds: 500);
   static const flip = Duration(milliseconds: 550);
   static const drop = Duration(milliseconds: 750);
-  static const revealGap = Duration(milliseconds: 350);
+  static const revealGap = Duration(milliseconds: 650);
+  static const reveal = Duration(milliseconds: 900);
+  static const wobble = Duration(milliseconds: 900);
+  static const shuffle = Duration(milliseconds: 1700);
+  static const confetti = Duration(milliseconds: 2600);
+
+  /// How long a "Lina's name is in" banner stays up, including its slide in and out.
+  static const banner = Duration(milliseconds: 2200);
   static const bob = Duration(milliseconds: 3200);
 
   static const Curve emphasized = Easing.emphasizedDecelerate;

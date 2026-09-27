@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/motion/motion.dart';
 import '../../../../core/motion/shared_axis.dart';
 import '../../../../core/widgets/keep_screen_on.dart';
 import '../../round_route.dart';
 import '../state/round_cubit.dart';
+import '../widgets/shuffle_intro.dart';
 import 'names_board_screen.dart';
 import 'read_aloud_screen.dart';
 import 'who_wrote_screen.dart';
@@ -24,14 +26,25 @@ class RoundScreen extends StatelessWidget {
   }
 }
 
-class _RoundFlow extends StatelessWidget {
+class _RoundFlow extends StatefulWidget {
   const _RoundFlow({required this.args});
 
   final RoundArgs args;
 
   @override
+  State<_RoundFlow> createState() => _RoundFlowState();
+}
+
+class _RoundFlowState extends State<_RoundFlow> {
+  /// The bowl-shaking intro plays once per round, before the first name.
+  bool _shuffling = true;
+
+  RoundArgs get args => widget.args;
+
+  @override
   Widget build(BuildContext context) {
     final stage = context.select((RoundCubit cubit) => cubit.state.stage);
+    final showIntro = _shuffling && !Motion.isReduced(context);
     return PopScope<Object?>(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
@@ -40,13 +53,23 @@ class _RoundFlow extends StatelessWidget {
         if (cubit.state.stage == RoundStage.reveal) return cubit.backToBoard();
         if (await _confirmLeave(context) && context.mounted) Navigator.of(context).pop();
       },
-      child: StageSwitcher(
-        position: stage.index,
-        child: switch (stage) {
-          RoundStage.reading => const ReadAloudScreen(key: ValueKey(RoundStage.reading)),
-          RoundStage.board => const NamesBoardScreen(key: ValueKey(RoundStage.board)),
-          RoundStage.reveal => WhoWroteScreen(key: const ValueKey(RoundStage.reveal), players: args.players),
-        },
+      child: AnimatedSwitcher(
+        duration: Motion.of(context, Motion.standard),
+        child: showIntro
+            ? ShuffleIntro(
+                key: const ValueKey('shuffle'),
+                count: args.slips.length,
+                onDone: () => setState(() => _shuffling = false),
+              )
+            : StageSwitcher(
+                key: const ValueKey('stages'),
+                position: stage.index,
+                child: switch (stage) {
+                  RoundStage.reading => const ReadAloudScreen(key: ValueKey(RoundStage.reading)),
+                  RoundStage.board => const NamesBoardScreen(key: ValueKey(RoundStage.board)),
+                  RoundStage.reveal => WhoWroteScreen(key: const ValueKey(RoundStage.reveal), players: args.players),
+                },
+              ),
       ),
     );
   }

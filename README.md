@@ -66,7 +66,7 @@ lib/
 │   ├── motion/                    # durations, curves, shared-axis transitions
 │   ├── platform/haptics.dart
 │   ├── router/app_router.dart
-│   └── widgets/                   # KeepScreenOn, PlayerAvatar
+│   └── widgets/                   # Bowl, KeepScreenOn, PlayerAvatar
 └── features/
     ├── room/                      # hosting: new room + lobby
     │   ├── domain/                # Room rules, RoomHost and NetworkAccess contracts
@@ -80,5 +80,10 @@ android/app/src/main/kotlin/…/LocalHotspot.kt   # Android local-only hotspot b
 
 - **Room hosting.** The server listens on every IPv4 interface on port 8182, falling back to any free port. It keeps working when the phone moves between Wi-Fi, its own hotspot and the app's hotspot; only the address shown in the QR code changes. Each friend gets a random id cookie, so they can edit their slip until reading starts.
 - **Hotspot.** Android's `LocalOnlyHotspot`. It needs the Nearby devices permission on Android 13+, and Location on Android 8–12 (location itself is never read).
-- **Motion.** Material 3 easing: shared-axis page and stage transitions, slips that flip and settle, a slip that drops into the bowl when a friend joins. All of it turns off when the system "remove animations" setting is on. Haptics mark a name arriving, reading starting, and each slip turning.
+- **Motion.** The big moments get the drama; play itself stays calm.
+  - **Lobby:** a slip drops into the bowl and a "Lina's name is in" banner pops up in her colour. When enough players are in, the bowl wobbles and Start pulses.
+  - **Start reading:** the bowl shakes and blank slips fly out into a deck (tap to skip). Then each name flips over.
+  - **Who wrote what:** each card shrinks and wobbles, flips, and lands in the writer's colour. The last one sets off confetti.
+  - **Friend's phone:** their slip drops into a bowl with confetti, and when reading starts the page flashes and buzzes so they look up.
+  - **Everywhere:** Material 3 easing and shared-axis transitions. Everything turns off with the system "remove animations" setting. There is no sound.
 - **Fonts** (bundled, so they work offline): Bricolage Grotesque, Nunito and Kalam, under the SIL Open Font License (`assets/fonts/OFL-*.txt`, also listed on the app's licences page).

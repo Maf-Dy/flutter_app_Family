@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/router/app_router.dart';
-import '../widgets/bowl.dart';
+import '../../../../core/widgets/bowl.dart';
 import '../widgets/how_to_play_sheet.dart';
 
 class HomeScreen extends StatelessWidget {

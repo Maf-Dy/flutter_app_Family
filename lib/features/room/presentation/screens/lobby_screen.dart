@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,7 +11,8 @@ import '../../../../core/theme/game_colors.dart';
 import '../../../round/round_route.dart';
 import '../../domain/room.dart';
 import '../state/room_cubit.dart';
-import '../widgets/bowl.dart';
+import '../widgets/arrival_banner.dart';
+import '../widgets/bowl_count.dart';
 import '../widgets/host_secret_field.dart';
 import '../widgets/join_codes.dart';
 import '../widgets/no_network_card.dart';
@@ -37,60 +39,67 @@ class LobbyScreen extends StatelessWidget {
           ),
           title: Text(room.category),
         ),
-        body: SafeArea(
-          bottom: false,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final connection = Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: _LiveChip(connection: state.connection, playersIn: room.playersIn.length),
-                  ),
-                  const SizedBox(height: 12),
-                  AnimatedSwitcher(
-                    duration: Motion.of(context, Motion.standard),
-                    child: KeyedSubtree(
-                      key: ValueKey(state.connection.runtimeType),
-                      child: _connectionSection(context, state, room),
+        body: Stack(
+          children: [
+            SafeArea(
+              bottom: false,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final connection = Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: _LiveChip(connection: state.connection, playersIn: room.playersIn.length),
+                      ),
+                      const SizedBox(height: 12),
+                      AnimatedSwitcher(
+                        duration: Motion.of(context, Motion.standard),
+                        child: KeyedSubtree(
+                          key: ValueKey(state.connection.runtimeType),
+                          child: _connectionSection(context, state, room),
+                        ),
+                      ),
+                    ],
+                  );
+                  final bowl = _BowlSection(room: room, onHostSecret: cubit.addHostSecret);
+                  const padding = EdgeInsets.fromLTRB(16, 0, 16, 24);
+                  // Landscape and tablets: codes beside the bowl, each side scrolls on its own.
+                  if (constraints.maxWidth >= 640) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: SingleChildScrollView(padding: padding, child: connection),
+                        ),
+                        Expanded(
+                          child: SingleChildScrollView(padding: padding, child: bowl),
+                        ),
+                      ],
+                    );
+                  }
+                  return SingleChildScrollView(
+                    padding: padding,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [connection, const SizedBox(height: 16), bowl],
                     ),
-                  ),
-                ],
-              );
-              final bowl = _BowlSection(room: room, onHostSecret: cubit.addHostSecret);
-              const padding = EdgeInsets.fromLTRB(16, 0, 16, 24);
-              // Landscape and tablets: codes beside the bowl, each side scrolls on its own.
-              if (constraints.maxWidth >= 640) {
-                return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(padding: padding, child: connection),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(padding: padding, child: bowl),
-                    ),
-                  ],
-                );
-              }
-              return SingleChildScrollView(
-                padding: padding,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [connection, const SizedBox(height: 16), bowl],
-                ),
-              );
-            },
-          ),
+                  );
+                },
+              ),
+            ),
+            const SafeArea(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Padding(padding: EdgeInsets.fromLTRB(16, 8, 16, 0), child: ArrivalBanners()),
+              ),
+            ),
+          ],
         ),
         bottomNavigationBar: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-            child: FilledButton(
-              onPressed: room.canStart ? () => _startReading(context) : null,
-              child: const Text('Start reading'),
-            ),
+            child: _StartButton(onPressed: room.canStart ? () => _startReading(context) : null),
           ),
         ),
       ),
@@ -145,6 +154,43 @@ class LobbyScreen extends StatelessWidget {
   }
 }
 
+/// "Start reading", which pulses twice the moment the room becomes ready.
+class _StartButton extends StatefulWidget {
+  const _StartButton({required this.onPressed});
+
+  final VoidCallback? onPressed;
+
+  @override
+  State<_StartButton> createState() => _StartButtonState();
+}
+
+class _StartButtonState extends State<_StartButton> with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(vsync: this, duration: const Duration(milliseconds: 800));
+
+  @override
+  void didUpdateWidget(_StartButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final becameReady = oldWidget.onPressed == null && widget.onPressed != null;
+    if (becameReady && !Motion.isReduced(context)) _pulse.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _pulse,
+      builder: (context, child) =>
+          Transform.scale(scale: 1 + 0.05 * math.sin(_pulse.value * math.pi * 2).abs(), child: child),
+      child: FilledButton(onPressed: widget.onPressed, child: const Text('Start reading')),
+    );
+  }
+}
+
 class _BowlSection extends StatelessWidget {
   const _BowlSection({required this.room, required this.onHostSecret});
 
@@ -159,7 +205,7 @@ class _BowlSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            BowlCount(count: room.slipCount),
+            BowlCount(count: room.slipCount, ready: room.canStart),
             const SizedBox(width: 14),
             Expanded(
               child: Column(

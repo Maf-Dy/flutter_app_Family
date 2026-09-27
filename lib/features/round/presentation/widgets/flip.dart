@@ -31,31 +31,3 @@ class FlipIn extends StatelessWidget {
     );
   }
 }
-
-/// A two-sided card that turns from [front] to [back] when [showBack] becomes true.
-class FlipCard extends StatelessWidget {
-  const FlipCard({super.key, required this.showBack, required this.front, required this.back});
-
-  final bool showBack;
-  final Widget front;
-  final Widget back;
-
-  @override
-  Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(end: showBack ? 1 : 0),
-      duration: Motion.of(context, Motion.settle),
-      curve: Motion.emphasized,
-      builder: (context, turn, _) {
-        final backVisible = turn >= 0.5;
-        return Transform(
-          alignment: Alignment.center,
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.0012)
-            ..rotateY(turn * math.pi + (backVisible ? math.pi : 0)),
-          child: backVisible ? back : front,
-        );
-      },
-    );
-  }
-}

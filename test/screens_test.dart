@@ -203,16 +203,66 @@ void main() {
       ..join('a', 'Omar', ['Messi'])
       ..join('b', 'Nour', ['Fairuz'])
       ..join('c', 'Yara', ['Adele']);
-    await frames();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('Omar\'s name is in'), findsOneWidget, reason: 'arrivals are announced one at a time');
+    await frames(160);
     expect(find.text('3 in the bowl'), findsOneWidget);
-    await tapAndRun('Start reading');
+    expect(find.textContaining('name is in'), findsNothing, reason: 'every banner has come and gone');
+
+    await tester.tap(find.text('Start reading'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Shuffling 3 names…'), findsOneWidget);
+    await frames();
+    expect(find.text('Read aloud'), findsOneWidget);
     await tapAndRun('Next name');
     await tapAndRun('Next name');
     await tapAndRun('Done reading');
     await tapAndRun('Who wrote what?');
     await tapAndRun('Reveal all');
+    await frames(40);
+    expect(find.text('That\'s all of them!'), findsOneWidget);
     expect(find.text('New round, same room'), findsOneWidget);
     await tapAndRun('New round, same room');
     expect(find.text('0 in the bowl'), findsOneWidget);
+  });
+
+  testWidgets('tapping the shuffle skips straight to the first name', (tester) async {
+    tester.view
+      ..physicalSize = sizes['portrait']!
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MultiRepositoryProvider(
+        providers: [
+          RepositoryProvider<NetworkAccess>.value(value: network),
+          RepositoryProvider<RoomHostFactory>.value(value: () => host = FakeRoomHost()),
+        ],
+        child: MaterialApp(theme: AppTheme.light(), onGenerateRoute: AppRoutes.onGenerateRoute),
+      ),
+    );
+    Future<void> frames(int count) async {
+      for (var i = 0; i < count; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+      }
+    }
+
+    await tester.tap(find.text('Host a room'));
+    await frames(20);
+    await tester.tap(find.text('Open room'));
+    await frames(20);
+    host
+      ..join('a', 'Omar', ['Messi'])
+      ..join('b', 'Nour', ['Fairuz'])
+      ..join('c', 'Yara', ['Adele']);
+    await frames(120);
+    await tester.tap(find.text('Start reading'));
+    // Wait out the page transition (it ignores taps), but not the shuffle itself.
+    await frames(10);
+    expect(find.text('Shuffling 3 names…'), findsOneWidget);
+    await tester.tap(find.text('Shuffling 3 names…'));
+    await frames(12);
+    expect(find.text('Shuffling 3 names…'), findsNothing);
+    expect(find.text('Read aloud'), findsOneWidget);
   });
 }

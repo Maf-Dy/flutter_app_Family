@@ -52,25 +52,37 @@ abstract final class JoinPage {
     body:
         '''
     <div class="center stack">
-      <div class="check" aria-hidden="true">✓</div>
+      <div class="drop" aria-hidden="true"><span class="fly"></span><span class="bowl"></span><span class="check">✓</span></div>
       <h1>You're in</h1>
       <p class="muted">Your ${player.secrets.length == 1 ? 'slip is' : 'slips are'} in the bowl.
-        <span id="count">${room.slipCount}</span> names so far. Listen for the host to read them out.</p>
+        Names in the bowl so far: <span id="count">${room.slipCount}</span>. Listen for the host to read them out.</p>
       <a class="ghost" href="/?edit=1">Change my ${player.secrets.length == 1 ? 'name' : 'names'}</a>
-    </div>''',
+    </div>
+    ${_confetti()}''',
   );
 
-  static String reading(Room room, Player? player) => _layout(
-    room: room,
-    player: player,
-    body:
-        '''
+  static String reading(Room room, Player? player) {
+    final isIn = player?.hasSubmitted ?? false;
+    return _layout(
+      room: room,
+      player: player,
+      // Everyone is looking at their own phone; the flash and buzz make them look up.
+      bodyClass: isIn ? 'alert' : '',
+      body:
+          '''
     <div class="center stack">
-      <div class="check" aria-hidden="true">📣</div>
-      <h1>Reading has started</h1>
-      <p class="muted">${player?.hasSubmitted ?? false ? 'Your name is in the bowl. Listen up!' : 'You missed this round. You can join the next one from this page.'}</p>
-    </div>''',
-  );
+      <div class="megaphone" aria-hidden="true">📣</div>
+      <h1 class="${isIn ? 'big' : ''}">${isIn ? 'Look up!' : 'Reading has started'}</h1>
+      <p class="muted">${isIn ? 'The host is reading the names. Yours is in there somewhere.' : 'You missed this round. You can join the next one from this page.'}</p>
+    </div>
+    ${isIn ? '<script>try{navigator.vibrate && navigator.vibrate([200, 100, 200]);}catch(e){}</script>' : ''}''',
+    );
+  }
+
+  /// Paper confetti in the players' colours; positions vary by index so the page
+  /// needs no script.
+  static String _confetti() =>
+      '<div class="confetti" aria-hidden="true">${[for (var i = 0; i < 18; i++) '<span style="--x:${(i * 37 + 11) % 100}%;--d:${(0.8 + (i % 6) * 0.07).toStringAsFixed(2)}s;--c:var(--p${i % 6});--r:${(i.isEven ? 1 : -1) * (240 + i * 23)}deg"></span>'].join()}</div>';
 
   static String full(Room room) => _layout(
     room: room,
@@ -90,7 +102,7 @@ abstract final class JoinPage {
     SubmissionError.tooLong => 'That is a bit long. Names can be up to ${Room.maxSecretLength} letters.',
   };
 
-  static String _layout({required Room room, required Player? player, required String body}) =>
+  static String _layout({required Room room, required Player? player, required String body, String bodyClass = ''}) =>
       '''<!doctype html>
 <html lang="en">
 <head>
@@ -100,9 +112,11 @@ abstract final class JoinPage {
 <title>Family · Room ${_esc(room.code)}</title>
 <style>
 :root{--bg:#F2F1F8;--card:#fff;--ink:#1D1A33;--muted:#625E7A;--line:#D8D5E8;--primary:#4A3FCF;--on-primary:#fff;
---slip:#FFE7A0;--slip-edge:#E9C868;--slip-ink:#2A2440;--good:#18896D;--error:#B3261E;--accent:#D9480F}
+--slip:#FFE7A0;--slip-edge:#E9C868;--slip-ink:#2A2440;--good:#18896D;--error:#B3261E;--accent:#D9480F;
+--p0:#4A3FCF;--p1:#D9480F;--p2:#18896D;--p3:#B8327A;--p4:#1C7ED6;--p5:#8E6A00}
 @media (prefers-color-scheme: dark){:root{--bg:#14121F;--card:#1E1B2C;--ink:#ECEAF6;--muted:#A29DBD;--line:#37324F;
---primary:#B3AAFF;--on-primary:#1B1560;--slip:#EFD68A;--slip-edge:#C9AE5C;--good:#4FD1AE;--error:#FFB4AB;--accent:#FF8A50}}
+--primary:#B3AAFF;--on-primary:#1B1560;--slip:#EFD68A;--slip-edge:#C9AE5C;--good:#4FD1AE;--error:#FFB4AB;--accent:#FF8A50;
+--p0:#8F85FF;--p1:#FF8A50;--p2:#4FD1AE;--p3:#F07AB8;--p4:#5BB0FF;--p5:#E0B94A}}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 main{max-width:460px;margin:0 auto;padding:20px 18px 32px;min-height:100vh;display:flex;flex-direction:column;gap:22px}
@@ -124,15 +138,29 @@ button:active{transform:scale(.98)}
 .note{margin:8px 0 0;font-weight:700;color:var(--accent)}
 .error{margin:0;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--error) 14%,transparent);color:var(--error);font-weight:700}
 .center{flex:1;justify-content:center;align-items:center;text-align:center}
-.check{width:72px;height:72px;border-radius:50%;background:var(--good);color:#fff;display:grid;place-items:center;font-size:34px;font-weight:800;animation:pop .6s cubic-bezier(.34,1.56,.64,1) both}
-@keyframes pop{from{transform:scale(.3);opacity:0}}
+.drop{position:relative;width:130px;height:110px}
+.drop .bowl{position:absolute;left:12px;right:12px;bottom:0;height:56px;background:var(--primary);border-radius:8px 8px 64px 64px}
+.drop .fly{position:absolute;left:47px;top:6px;width:36px;height:24px;background:var(--slip);border:1px solid var(--slip-edge);border-radius:2px;animation:fly .8s cubic-bezier(.2,0,0,1) both}
+@keyframes fly{0%{transform:translateY(-80px) rotate(-30deg);opacity:0}30%{opacity:1}80%{transform:translateY(38px) rotate(10deg);opacity:1}100%{transform:translateY(44px) rotate(8deg);opacity:0}}
+.drop .check{position:absolute;right:0;top:0;width:44px;height:44px;border-radius:50%;background:var(--good);color:#fff;display:grid;place-items:center;font-size:22px;font-weight:800;animation:pop .6s .75s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes pop{from{transform:scale(.2);opacity:0}}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.confetti span{position:absolute;top:-14px;left:var(--x);width:10px;height:6px;background:var(--c);opacity:0;animation:fall 2.4s var(--d) cubic-bezier(.3,.6,.5,1) forwards}
+@keyframes fall{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(100vh) rotate(var(--r))}}
+body.alert{animation:flash 1.6s ease-out both}
+body.alert main,body.alert .muted,body.alert .room,body.alert footer{animation:flash-ink 1.6s ease-out both}
+@keyframes flash{0%,35%{background:var(--primary)}100%{background:var(--bg)}}
+@keyframes flash-ink{0%,35%{color:var(--on-primary)}}
+.megaphone{font-size:60px;line-height:1;animation:ring 1.1s ease-in-out 3}
+@keyframes ring{0%,100%{transform:rotate(0)}20%{transform:rotate(-14deg) scale(1.12)}40%{transform:rotate(12deg) scale(1.12)}60%{transform:rotate(-8deg)}80%{transform:rotate(5deg)}}
+h1.big{font-size:44px}
 .ghost{color:var(--primary);font-weight:800;text-decoration:none;padding:10px}
 footer{margin-top:auto;text-align:center;font-size:13px;color:var(--muted)}
 footer a{color:var(--primary);font-weight:700}
 @media (prefers-reduced-motion: reduce){*{animation:none!important}}
 </style>
 </head>
-<body>
+<body class="$bodyClass">
 <main>
   <header><span class="brand">family<i></i></span><span class="room">Room ${_esc(room.code)}</span></header>
   $body
