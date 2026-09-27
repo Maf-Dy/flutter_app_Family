@@ -125,6 +125,7 @@ class _ConnectionSummary extends StatelessWidget {
         'Connected',
         'Friends join the same Wi-Fi, or your hotspot, and scan the code.',
       ),
+      ConnectionStartingHotspot() => (Icons.wifi_tethering_rounded, false, 'Starting hotspot…', 'One moment.'),
       ConnectionAppHotspot() => (
         Icons.wifi_tethering_rounded,
         true,

@@ -8,12 +8,16 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../domain/network_access.dart';
 
-/// Real networking: interface scan for the address, connectivity events, and the
-/// Android local-only hotspot through `LocalHotspot.kt`.
+/// Real networking: the Wi-Fi address from Android itself, an interface scan for
+/// hotspots, connectivity events, and the Android local-only hotspot through
+/// `LocalHotspot.kt`.
 class DeviceNetwork implements NetworkAccess {
   DeviceNetwork({Connectivity? connectivity}) : _connectivity = connectivity ?? Connectivity() {
     _channel.setMethodCallHandler((call) async {
-      if (call.method == 'stopped') _hotspotStopped.add(null);
+      if (call.method == 'stopped') {
+        _appHotspotAddress = null;
+        _hotspotStopped.add(null);
+      }
     });
   }
 
@@ -23,6 +27,9 @@ class DeviceNetwork implements NetworkAccess {
   final _hotspotStopped = StreamController<void>.broadcast();
   int? _sdkInt;
 
+  /// This phone's address on the app's own hotspot, while it runs.
+  String? _appHotspotAddress;
+
   @override
   Stream<void> get changes => _connectivity.onConnectivityChanged.map((_) {});
 
@@ -31,11 +38,19 @@ class DeviceNetwork implements NetworkAccess {
 
   @override
   Future<String?> findLanAddress() async {
-    final interfaces = await NetworkInterface.list(type: InternetAddressType.IPv4);
-    return pickLanAddress([
-      for (final interface in interfaces)
-        for (final address in interface.addresses) (interface: interface.name, address: address.address),
-    ]);
+    // Android knows which address belongs to the Wi-Fi network; guessing from
+    // interface names picked the wrong one on some phones.
+    final wifi = await _androidWifiAddress();
+    if (wifi != null) return wifi;
+    // A hotspot turned on in Settings, or iOS (en0 is Wi-Fi, bridge100 its hotspot).
+    return pickLanAddress(await _interfaceAddresses(), exclude: {?_appHotspotAddress});
+  }
+
+  @override
+  Future<bool> isOnWifi() async {
+    if (Platform.isAndroid) return await _androidWifiAddress() != null;
+    final results = await _connectivity.checkConnectivity();
+    return results.contains(ConnectivityResult.wifi) || results.contains(ConnectivityResult.ethernet);
   }
 
   @override
@@ -51,12 +66,10 @@ class DeviceNetwork implements NetworkAccess {
     if (status.isPermanentlyDenied || status.isRestricted) return const HotspotFailed(HotspotFailure.permissionBlocked);
     if (!status.isGranted && !status.isLimited) return const HotspotFailed(HotspotFailure.permissionDenied);
 
+    final before = {for (final c in await _interfaceAddresses()) c.address};
+    final Map<String, String?>? result;
     try {
-      final result = await _channel.invokeMapMethod<String, String?>('start');
-      final ssid = result?['ssid'];
-      final password = result?['password'];
-      if (ssid == null || password == null) return const HotspotFailed(HotspotFailure.failed);
-      return HotspotStarted(HotspotCredentials(ssid: ssid, password: password));
+      result = await _channel.invokeMapMethod<String, String?>('start');
     } on PlatformException catch (error) {
       return HotspotFailed(switch (error.code) {
         'unsupported' => HotspotFailure.unsupported,
@@ -66,10 +79,44 @@ class DeviceNetwork implements NetworkAccess {
         _ => HotspotFailure.failed,
       });
     }
+    final ssid = result?['ssid'];
+    final password = result?['password'] ?? '';
+    if (ssid == null) {
+      await stopHotspot();
+      return const HotspotFailed(HotspotFailure.failed);
+    }
+
+    // The hotspot's own address is the new one that appears after it starts.
+    final address = await _waitForNewAddress(before);
+    if (address == null) {
+      await stopHotspot();
+      return const HotspotFailed(HotspotFailure.noAddress);
+    }
+    _appHotspotAddress = address;
+    final security = switch (result?['security']) {
+      'open' => HotspotSecurity.open,
+      'wpa3' => HotspotSecurity.wpa3,
+      _ => HotspotSecurity.wpa,
+    };
+    return HotspotStarted(HotspotCredentials(ssid: ssid, password: password, security: security), address);
+  }
+
+  Future<String?> _waitForNewAddress(Set<String> before) async {
+    for (var attempt = 0; attempt < 20; attempt++) {
+      final fresh = [
+        for (final c in await _interfaceAddresses())
+          if (!before.contains(c.address)) c,
+      ];
+      final address = pickLanAddress(fresh);
+      if (address != null) return address;
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+    }
+    return null;
   }
 
   @override
   Future<void> stopHotspot() async {
+    _appHotspotAddress = null;
     if (!Platform.isAndroid) return;
     try {
       await _channel.invokeMethod<void>('stop');
@@ -79,7 +126,41 @@ class DeviceNetwork implements NetworkAccess {
   }
 
   @override
+  Future<bool> canReach(String address, int port) async {
+    final client = HttpClient()..connectionTimeout = const Duration(seconds: 3);
+    try {
+      final request = await client.getUrl(Uri.parse('http://$address:$port/status'));
+      final response = await request.close().timeout(const Duration(seconds: 3));
+      await response.drain<void>();
+      return response.statusCode == HttpStatus.ok;
+    } on Object catch (error) {
+      debugPrint('DeviceNetwork: self-check of $address:$port failed ($error)');
+      return false;
+    } finally {
+      client.close(force: true);
+    }
+  }
+
+  @override
   Future<void> openPermissionSettings() => openAppSettings();
+
+  Future<List<({String interface, String address})>> _interfaceAddresses() async {
+    final interfaces = await NetworkInterface.list(type: InternetAddressType.IPv4);
+    return [
+      for (final interface in interfaces)
+        for (final address in interface.addresses) (interface: interface.name, address: address.address),
+    ];
+  }
+
+  Future<String?> _androidWifiAddress() async {
+    if (!Platform.isAndroid) return null;
+    try {
+      return await _channel.invokeMethod<String>('wifiAddress');
+    } on PlatformException catch (error) {
+      debugPrint('DeviceNetwork: no Wi-Fi address from Android ($error)');
+      return null;
+    }
+  }
 
   Future<int?> _androidSdk() async {
     if (!Platform.isAndroid) return null;
@@ -91,13 +172,14 @@ class DeviceNetwork implements NetworkAccess {
   }
 }
 
-/// Picks the address friends should connect to from this phone's IPv4 interfaces.
+/// Picks the address friends should connect to from this phone's IPv4 interfaces,
+/// skipping [exclude].
 ///
 /// Only private LAN ranges count (mobile data is never reachable by friends).
 /// Hotspot interfaces win over Wi-Fi: when the phone runs a hotspot, friends are
 /// on it. Interface names differ by vendor, hence the prefix list.
 @visibleForTesting
-String? pickLanAddress(List<({String interface, String address})> candidates) {
+String? pickLanAddress(List<({String interface, String address})> candidates, {Set<String> exclude = const {}}) {
   const preference = ['ap', 'swlan', 'softap', 'wlan', 'bridge', 'en', 'eth'];
   int rank(String name) {
     final i = preference.indexWhere(name.toLowerCase().startsWith);
@@ -106,7 +188,7 @@ String? pickLanAddress(List<({String interface, String address})> candidates) {
 
   final usable = [
     for (final c in candidates)
-      if (_isPrivate(c.address) && rank(c.interface) < preference.length) c,
+      if (_isPrivate(c.address) && !exclude.contains(c.address) && rank(c.interface) < preference.length) c,
   ]..sort((a, b) => rank(a.interface).compareTo(rank(b.interface)));
   return usable.isEmpty ? null : usable.first.address;
 }

@@ -16,25 +16,35 @@ class RoomCubit extends Cubit<RoomState> {
     required this._network,
     required this._createHost,
     Random? random,
-    @visibleForTesting this._addressPollInterval = const Duration(milliseconds: 300),
+    @visibleForTesting this._pollInterval = const Duration(seconds: 3),
   }) : _random = random ?? Random(),
        super(const RoomState());
 
   final NetworkAccess _network;
   final RoomHostFactory _createHost;
   final Random _random;
-  final Duration _addressPollInterval;
+
+  /// How often the network is re-checked, in case a change event never arrives
+  /// (joining Wi-Fi, or turning a hotspot on in Settings, does not always send one).
+  final Duration _pollInterval;
 
   RoomHost? _host;
   StreamSubscription<Room>? _roomSub;
   final _networkSubs = <StreamSubscription<void>>[];
+  Timer? _poll;
   bool _checking = false;
+  bool _checkAgain = false;
+
+  /// The host started the app's hotspot although Wi-Fi was available (for
+  /// example, the Wi-Fi keeps phones apart), so being on Wi-Fi must not end it.
+  bool _hotspotChosenOverWifi = false;
 
   /// Starts watching the network. Call once after creation.
   Future<void> start() async {
     _networkSubs
       ..add(_network.changes.listen((_) => refreshConnection()))
       ..add(_network.hotspotStopped.listen((_) => _onHotspotStopped()));
+    _poll = Timer.periodic(_pollInterval, (_) => refreshConnection());
     await refreshConnection();
   }
 
@@ -42,75 +52,121 @@ class RoomCubit extends Cubit<RoomState> {
 
   void setNamesPerPlayer(int count) => emit(state.copyWith(namesPerPlayer: count.clamp(1, Room.maxNamesPerPlayer)));
 
-  /// Re-scans for a local address, e.g. after returning from Settings.
+  /// Re-checks how friends can reach this phone. Safe to call often: a call that
+  /// arrives mid-check runs one more check afterwards instead of being dropped.
   Future<void> refreshConnection() async {
-    if (_checking || isClosed) return;
-    final current = state.connection;
-    if (current is ConnectionMissing && current.starting) return;
+    if (isClosed) return;
+    if (_checking) {
+      _checkAgain = true;
+      return;
+    }
     _checking = true;
     try {
-      final address = await _network.findLanAddress();
-      // The connection may have moved on while scanning (e.g. a hotspot is starting).
-      final latest = state.connection;
-      if (isClosed || (latest is ConnectionMissing && latest.starting)) return;
-      if (latest is ConnectionAppHotspot && address != null) {
-        emit(state.copyWith(connection: ConnectionAppHotspot(address, latest.credentials)));
-      } else if (address != null) {
-        emit(state.copyWith(connection: ConnectionReady(address)));
-      } else {
-        final canCreate = await _network.canCreateHotspot();
-        if (isClosed) return;
-        final failure = latest is ConnectionMissing ? latest.failure : null;
-        emit(
-          state.copyWith(
-            connection: ConnectionMissing(canCreateHotspot: canCreate, failure: failure),
-          ),
-        );
-      }
+      do {
+        _checkAgain = false;
+        await _checkConnection();
+      } while (_checkAgain && !isClosed);
     } finally {
       _checking = false;
     }
   }
 
-  Future<void> createHotspot() async {
+  Future<void> _checkConnection() async {
     final current = state.connection;
-    if (current is! ConnectionMissing || current.starting) return;
-    emit(state.copyWith(connection: ConnectionMissing(canCreateHotspot: true, starting: true)));
+    if (current is ConnectionStartingHotspot) return;
+    if (current is ConnectionAppHotspot) {
+      if (_hotspotChosenOverWifi || !await _network.isOnWifi()) return;
+      if (isClosed) return;
+      // The host joined Wi-Fi. Friends already on the hotspot would be cut off,
+      // so only switch by ourselves while nobody depends on it.
+      if (_friendsJoined) {
+        if (!current.wifiAvailable) {
+          _setConnection(ConnectionAppHotspot(current.address, current.credentials, wifiAvailable: true));
+        }
+        return;
+      }
+      await _network.stopHotspot();
+      if (isClosed) return;
+      _setConnection(const ConnectionChecking());
+    }
+
+    final address = await _network.findLanAddress();
+    final latest = state.connection;
+    if (isClosed || latest is ConnectionStartingHotspot || latest is ConnectionAppHotspot) return;
+    if (address != null) {
+      if (latest is ConnectionReady && latest.address == address) return;
+      _setConnection(ConnectionReady(address));
+    } else {
+      final canCreate = await _network.canCreateHotspot();
+      if (isClosed || state.connection is ConnectionStartingHotspot || state.connection is ConnectionAppHotspot) return;
+      final failure = switch (latest) {
+        ConnectionMissing(:final failure) => failure,
+        ConnectionReady(:final hotspotFailure) => hotspotFailure,
+        _ => null,
+      };
+      if (latest is ConnectionMissing && latest.canCreateHotspot == canCreate && latest.failure == failure) return;
+      _setConnection(ConnectionMissing(canCreateHotspot: canCreate, failure: failure));
+    }
+  }
+
+  bool get _friendsJoined => state.room?.players.any((p) => !p.isHost) ?? false;
+
+  /// Starts the app's own hotspot: when there is no Wi-Fi, or when the Wi-Fi
+  /// keeps phones from reaching each other.
+  Future<void> createHotspot() async {
+    final previous = state.connection;
+    if (previous is! ConnectionMissing && previous is! ConnectionReady) return;
+    _hotspotChosenOverWifi = previous is ConnectionReady;
+    _setConnection(const ConnectionStartingHotspot());
 
     final result = await _network.startHotspot();
     if (isClosed) return;
     switch (result) {
+      case HotspotStarted(:final credentials, :final address):
+        _setConnection(ConnectionAppHotspot(address, credentials));
       case HotspotFailed(:final failure):
-        emit(state.copyWith(connection: ConnectionMissing(canCreateHotspot: true, failure: failure)));
-      case HotspotStarted(:final credentials):
-        final address = await _waitForAddress();
-        if (isClosed) return;
-        emit(
-          state.copyWith(
-            connection: address == null
-                ? const ConnectionMissing(canCreateHotspot: true, failure: HotspotFailure.noAddress)
-                : ConnectionAppHotspot(address, credentials),
-          ),
-        );
+        _hotspotChosenOverWifi = false;
+        _setConnection(switch (previous) {
+          ConnectionReady(:final address) => ConnectionReady(address, hotspotFailure: failure),
+          _ => ConnectionMissing(canCreateHotspot: true, failure: failure),
+        });
+        await refreshConnection();
     }
   }
 
-  /// The hotspot interface appears a moment after Android reports it started.
-  Future<String?> _waitForAddress() async {
-    for (var attempt = 0; attempt < 20; attempt++) {
-      final address = await _network.findLanAddress();
-      if (address != null || isClosed) return address;
-      await Future<void>.delayed(_addressPollInterval);
-    }
-    return null;
+  /// Ends the app's hotspot and serves the room on Wi-Fi instead.
+  Future<void> switchToWifi() async {
+    if (state.connection is! ConnectionAppHotspot) return;
+    _hotspotChosenOverWifi = false;
+    await _network.stopHotspot();
+    if (isClosed) return;
+    _setConnection(const ConnectionChecking());
+    await refreshConnection();
   }
 
   Future<void> openPermissionSettings() => _network.openPermissionSettings();
 
   Future<void> _onHotspotStopped() async {
     if (isClosed || state.connection is! ConnectionAppHotspot) return;
-    emit(state.copyWith(connection: const ConnectionChecking()));
+    _hotspotChosenOverWifi = false;
+    _setConnection(const ConnectionChecking());
     await refreshConnection();
+  }
+
+  void _setConnection(Connection connection) {
+    if (isClosed) return;
+    emit(state.copyWith(connection: connection, linkCheck: LinkCheck.unknown));
+    unawaited(_checkLink());
+  }
+
+  /// Opens the join link from this phone, to catch a wrong address early.
+  Future<void> _checkLink() async {
+    final address = state.address;
+    final port = state.port;
+    if (address == null || port == null) return;
+    final works = await _network.canReach(address, port);
+    if (isClosed || state.address != address || state.port != port) return;
+    emit(state.copyWith(linkCheck: works ? LinkCheck.works : LinkCheck.broken));
   }
 
   Future<void> openRoom() async {
@@ -129,6 +185,7 @@ class RoomCubit extends Cubit<RoomState> {
         if (!isClosed) emit(state.copyWith(room: room));
       });
       emit(state.copyWith(stage: RoomStage.lobby, room: host.room, port: port, opening: false));
+      unawaited(_checkLink());
     } on RoomHostException catch (error) {
       debugPrint('RoomCubit: $error');
       await host.close();
@@ -173,6 +230,7 @@ class RoomCubit extends Cubit<RoomState> {
 
   @override
   Future<void> close() async {
+    _poll?.cancel();
     for (final sub in _networkSubs) {
       await sub.cancel();
     }

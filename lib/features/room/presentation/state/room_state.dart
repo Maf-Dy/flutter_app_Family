@@ -13,27 +13,41 @@ final class ConnectionChecking extends Connection {
 
 /// On Wi-Fi, or on a hotspot the user turned on themselves.
 final class ConnectionReady extends Connection {
-  const ConnectionReady(this.address);
+  const ConnectionReady(this.address, {this.hotspotFailure});
 
   final String address;
+
+  /// Set when the host tried the app's hotspot instead and it did not start.
+  final HotspotFailure? hotspotFailure;
+}
+
+/// The app is starting its own hotspot.
+final class ConnectionStartingHotspot extends Connection {
+  const ConnectionStartingHotspot();
 }
 
 /// On the hotspot the app created: friends need its Wi-Fi code first.
 final class ConnectionAppHotspot extends Connection {
-  const ConnectionAppHotspot(this.address, this.credentials);
+  const ConnectionAppHotspot(this.address, this.credentials, {this.wifiAvailable = false});
 
   final String address;
   final HotspotCredentials credentials;
+
+  /// The host has since joined Wi-Fi, but friends are already on the hotspot,
+  /// so the room waits for the host to choose.
+  final bool wifiAvailable;
 }
 
 /// No local network. The app may be able to create one.
 final class ConnectionMissing extends Connection {
-  const ConnectionMissing({required this.canCreateHotspot, this.starting = false, this.failure});
+  const ConnectionMissing({required this.canCreateHotspot, this.failure});
 
   final bool canCreateHotspot;
-  final bool starting;
   final HotspotFailure? failure;
 }
+
+/// Whether this phone could open its own join link.
+enum LinkCheck { unknown, works, broken }
 
 @immutable
 final class RoomState {
@@ -46,6 +60,7 @@ final class RoomState {
     this.port,
     this.opening = false,
     this.openFailed = false,
+    this.linkCheck = LinkCheck.unknown,
   });
 
   static const categories = ['Famous people', 'Movies', 'Animals', 'Countries', 'Footballers', 'Anything'];
@@ -57,6 +72,9 @@ final class RoomState {
   final Room? room;
   final int? port;
   final bool opening;
+
+  /// Result of the phone opening its own join link; see [NetworkAccess.canReach].
+  final LinkCheck linkCheck;
 
   /// One-shot flag the screen turns into a message.
   final bool openFailed;
@@ -78,6 +96,7 @@ final class RoomState {
     int? port,
     bool? opening,
     bool? openFailed,
+    LinkCheck? linkCheck,
     bool clearRoom = false,
   }) => RoomState(
     stage: stage ?? this.stage,
@@ -88,5 +107,6 @@ final class RoomState {
     port: clearRoom ? null : port ?? this.port,
     opening: opening ?? this.opening,
     openFailed: openFailed ?? false,
+    linkCheck: clearRoom ? LinkCheck.unknown : linkCheck ?? this.linkCheck,
   );
 }

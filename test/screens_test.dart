@@ -154,6 +154,22 @@ void main() {
     expect(network.settingsCalls, 1);
   });
 
+  testWidgets('a link that does not open explains why and offers the hotspot', (tester) async {
+    network = FakeNetwork(address: '192.168.1.23', onWifi: true, reachable: false);
+    await pumpApp(tester, size: sizes['portrait']!, direction: TextDirection.ltr);
+    await tapVisible(tester, find.text('Host a room'));
+    await tapVisible(tester, find.text('Open room'));
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('couldn\'t open its own link'), findsOneWidget);
+
+    await tapVisible(tester, find.text('Link not opening?'));
+    expect(find.textContaining('guest Wi-Fi'), findsOneWidget);
+    await tapVisible(tester, find.text('Use a hotspot instead'));
+    expect(find.text('Join the Wi-Fi'), findsOneWidget);
+    expect(find.textContaining('doesn\'t show in your phone\'s Hotspot settings'), findsOneWidget);
+  });
+
   testWidgets('closing a room with players asks first', (tester) async {
     await pumpApp(tester, size: sizes['portrait']!, direction: TextDirection.ltr);
     await tapVisible(tester, find.text('Host a room'));

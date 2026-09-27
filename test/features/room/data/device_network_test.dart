@@ -26,11 +26,32 @@ void main() {
       );
     });
 
+    test('skips excluded addresses, such as the app\'s own hotspot', () {
+      expect(
+        pickLanAddress(
+          [(interface: 'ap0', address: '192.168.49.1'), (interface: 'wlan0', address: '192.168.1.23')],
+          exclude: {'192.168.49.1'},
+        ),
+        '192.168.1.23',
+      );
+    });
+
     test('accepts every private range, including iPhone hotspot bridges', () {
       expect(pickLanAddress([(interface: 'bridge100', address: '172.20.10.1')]), '172.20.10.1');
       expect(pickLanAddress([(interface: 'en0', address: '10.0.0.8')]), '10.0.0.8');
       expect(pickLanAddress([(interface: 'eth0', address: '172.32.0.1')]), isNull);
     });
+  });
+
+  test('Wi-Fi QR payload matches the hotspot security', () {
+    expect(
+      const HotspotCredentials(ssid: 'Fam', password: 'pw12', security: HotspotSecurity.wpa3).qrPayload,
+      'WIFI:T:SAE;S:Fam;P:pw12;;',
+    );
+    expect(
+      const HotspotCredentials(ssid: 'Fam', password: '', security: HotspotSecurity.open).qrPayload,
+      'WIFI:T:nopass;S:Fam;;',
+    );
   });
 
   test('Wi-Fi QR payload escapes special characters', () {

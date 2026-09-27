@@ -2,15 +2,20 @@ package com.mafdy.familygame
 
 import android.annotation.TargetApi
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.wifi.SoftApConfiguration
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import java.net.Inet4Address
 
 /**
- * Starts Android's local-only hotspot so friends can join the room without a router.
+ * Starts Android's local-only hotspot so friends can join the room without a router,
+ * and reports the phone's Wi-Fi address.
  *
  * Marshalling only: permission decisions and error wording live in Dart
  * (lib/features/room/data/device_network.dart). Error codes sent back:
@@ -24,11 +29,14 @@ class LocalHotspot(context: Context, private val channel: MethodChannel) :
     }
 
     private val wifi = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+    private val connectivity =
+        context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     private var reservation: WifiManager.LocalOnlyHotspotReservation? = null
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "sdkInt" -> result.success(Build.VERSION.SDK_INT)
+            "wifiAddress" -> result.success(wifiAddress())
             "start" -> start(result)
             "stop" -> {
                 stop()
@@ -103,12 +111,37 @@ class LocalHotspot(context: Context, private val channel: MethodChannel) :
             } else {
                 config.ssid
             }
-            mapOf("ssid" to ssid, "password" to config.passphrase)
+            // Newer phones may run the hotspot as WPA3-only, which needs "SAE" in the Wi-Fi QR code.
+            val security = when (config.securityType) {
+                SoftApConfiguration.SECURITY_TYPE_OPEN -> "open"
+                SoftApConfiguration.SECURITY_TYPE_WPA3_SAE -> "wpa3"
+                else -> "wpa"
+            }
+            mapOf("ssid" to ssid, "password" to config.passphrase, "security" to security)
         } else {
             val config = started.wifiConfiguration
             mapOf(
                 "ssid" to config?.SSID?.removeSurrounding("\""),
                 "password" to config?.preSharedKey?.removeSurrounding("\""),
+                "security" to "wpa",
             )
         }
+
+    /**
+     * This phone's IPv4 address on the Wi-Fi (or Ethernet) network it is connected
+     * to, straight from Android, or null when it is not connected to one.
+     */
+    @Suppress("DEPRECATION")
+    private fun wifiAddress(): String? {
+        for (network in connectivity.allNetworks) {
+            val capabilities = connectivity.getNetworkCapabilities(network) ?: continue
+            val onWifi = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+            if (!onWifi) continue
+            val link = connectivity.getLinkProperties(network) ?: continue
+            val address = link.linkAddresses.firstOrNull { it.address is Inet4Address } ?: continue
+            return address.address.hostAddress
+        }
+        return null
+    }
 }

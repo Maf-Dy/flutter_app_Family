@@ -15,6 +15,7 @@ import '../widgets/arrival_banner.dart';
 import '../widgets/bowl_count.dart';
 import '../widgets/host_secret_field.dart';
 import '../widgets/join_codes.dart';
+import '../widgets/link_help_sheet.dart';
 import '../widgets/no_network_card.dart';
 import '../widgets/players_list.dart';
 
@@ -109,6 +110,31 @@ class LobbyScreen extends StatelessWidget {
   Widget _connectionSection(BuildContext context, RoomState state, Room room) {
     final cubit = context.read<RoomCubit>();
     final url = state.joinUrl;
+    final theme = Theme.of(context);
+    Widget note(String text, {bool error = false}) => Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: error ? theme.colorScheme.errorContainer.withValues(alpha: 0.6) : theme.colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          text,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: error ? theme.colorScheme.onErrorContainer : theme.colorScheme.onSecondaryContainer,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+    final brokenLink = state.linkCheck == LinkCheck.broken
+        ? note(
+            'This phone couldn\'t open its own link, so friends won\'t either. Tap Check again, or use a hotspot.',
+            error: true,
+          )
+        : null;
+
     return switch (state.connection) {
       ConnectionChecking() => const Card(
         child: Padding(
@@ -116,11 +142,43 @@ class LobbyScreen extends StatelessWidget {
           child: Center(child: CircularProgressIndicator()),
         ),
       ),
-      ConnectionReady() when url != null => JoinCard(url: url, code: room.code),
-      ConnectionAppHotspot(:final credentials) when url != null => HotspotCodes(
-        credentials: credentials,
-        url: url,
-        code: room.code,
+      ConnectionStartingHotspot() => const Card(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: Column(children: [CircularProgressIndicator(), SizedBox(height: 14), Text('Starting hotspot…')]),
+        ),
+      ),
+      ConnectionReady(:final hotspotFailure) when url != null => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          JoinCard(url: url, code: room.code),
+          ?brokenLink,
+          if (hotspotFailure != null) note(hotspotFailureText(hotspotFailure), error: true),
+          Wrap(
+            alignment: WrapAlignment.end,
+            children: [
+              if (brokenLink != null) TextButton(onPressed: cubit.refreshConnection, child: const Text('Check again')),
+              TextButton(
+                onPressed: () => showLinkHelp(context, url: url, onUseHotspot: cubit.createHotspot),
+                child: const Text('Link not opening?'),
+              ),
+            ],
+          ),
+        ],
+      ),
+      ConnectionAppHotspot(:final credentials, :final wifiAvailable) when url != null => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (wifiAvailable) ...[
+            note('You\'re on Wi-Fi now. Friends on the hotspot stay connected until you switch.'),
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: TextButton(onPressed: cubit.switchToWifi, child: const Text('Switch to Wi-Fi')),
+            ),
+          ],
+          HotspotCodes(credentials: credentials, url: url, code: room.code),
+          ?brokenLink,
+        ],
       ),
       final ConnectionMissing missing => NoNetworkCard(
         connection: missing,
@@ -307,6 +365,7 @@ class _LiveChipState extends State<_LiveChip> with SingleTickerProviderStateMixi
     final label = switch (widget.connection) {
       ConnectionReady() => 'Room open',
       ConnectionAppHotspot() => 'Hotspot on',
+      ConnectionStartingHotspot() => 'Starting hotspot',
       _ => 'Waiting for a network',
     };
     return Container(

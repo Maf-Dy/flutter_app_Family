@@ -5,10 +5,20 @@ import 'package:family_game/features/room/domain/room.dart';
 import 'package:family_game/features/room/domain/room_host.dart';
 
 class FakeNetwork implements NetworkAccess {
-  FakeNetwork({this.address, this.canCreate = true, this.hotspotResult, this.hotspotAddress = '192.168.49.1'});
+  FakeNetwork({
+    this.address,
+    this.onWifi = false,
+    this.canCreate = true,
+    this.reachable = true,
+    this.hotspotResult,
+    this.hotspotAddress = '192.168.49.1',
+  });
 
+  /// What [findLanAddress] returns: the Wi-Fi address, or a Settings hotspot's.
   String? address;
+  bool onWifi;
   bool canCreate;
+  bool reachable;
   HotspotResult? hotspotResult;
 
   /// Address that appears once the app hotspot starts (null: it never shows up).
@@ -30,15 +40,22 @@ class FakeNetwork implements NetworkAccess {
   Stream<void> get hotspotStopped => stoppedController.stream;
 
   @override
+  Future<bool> isOnWifi() async => onWifi;
+
+  @override
+  Future<bool> canReach(String address, int port) async => reachable;
+
+  @override
   Future<bool> canCreateHotspot() async => canCreate;
 
   @override
   Future<HotspotResult> startHotspot() async {
     startCalls++;
-    final result =
-        hotspotResult ?? const HotspotStarted(HotspotCredentials(ssid: 'AndroidShare_1234', password: 'secret12'));
-    if (result is HotspotStarted) address = hotspotAddress;
-    return result;
+    final address = hotspotAddress;
+    return hotspotResult ??
+        (address == null
+            ? const HotspotFailed(HotspotFailure.noAddress)
+            : HotspotStarted(const HotspotCredentials(ssid: 'AndroidShare_1234', password: 'secret12'), address));
   }
 
   @override

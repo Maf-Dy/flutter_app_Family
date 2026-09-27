@@ -9,16 +9,16 @@ void main() {
   late FakeNetwork network;
   late FakeRoomHost host;
 
-  RoomCubit build({bool failOpen = false}) {
+  RoomCubit build({bool failOpen = false, Duration poll = const Duration(hours: 1)}) {
     host = FakeRoomHost(failOpen: failOpen);
-    return RoomCubit(network: network, createHost: () => host, addressPollInterval: Duration.zero);
+    return RoomCubit(network: network, createHost: () => host, pollInterval: poll);
   }
 
   tearDown(() => network.dispose());
 
   group('connection', () {
     test('is ready on Wi-Fi', () async {
-      network = FakeNetwork(address: '192.168.1.23');
+      network = FakeNetwork(address: '192.168.1.23', onWifi: true);
       final cubit = build();
       await cubit.start();
       expect(cubit.state.connection, isA<ConnectionReady>().having((c) => c.address, 'address', '192.168.1.23'));
@@ -81,10 +81,104 @@ void main() {
       expect(cubit.state.address, '192.168.1.50');
       await cubit.close();
     });
+
+    test('notices Wi-Fi even when no change event arrives', () async {
+      network = FakeNetwork();
+      final cubit = build(poll: const Duration(milliseconds: 5));
+      await cubit.start();
+      network.address = '192.168.1.50';
+      await Future<void>.delayed(const Duration(milliseconds: 40));
+      expect(cubit.state.address, '192.168.1.50');
+      await cubit.close();
+    });
+
+    test('a change during a check is not lost', () async {
+      network = FakeNetwork();
+      final cubit = build();
+      await cubit.start();
+      final first = cubit.refreshConnection();
+      network.address = '192.168.1.50';
+      final second = cubit.refreshConnection(); // arrives while the first is still checking
+      await Future.wait([first, second]);
+      expect(cubit.state.address, '192.168.1.50');
+      await cubit.close();
+    });
+
+    test('leaves the app hotspot for Wi-Fi when nobody has joined yet', () async {
+      network = FakeNetwork();
+      final cubit = build();
+      await cubit.start();
+      await cubit.createHotspot();
+      network
+        ..address = '192.168.1.50'
+        ..onWifi = true;
+      await cubit.refreshConnection();
+      expect(cubit.state.connection, isA<ConnectionReady>().having((c) => c.address, 'address', '192.168.1.50'));
+      expect(network.stopCalls, 1);
+      await cubit.close();
+    });
+
+    test('keeps friends on the hotspot until the host switches to Wi-Fi', () async {
+      network = FakeNetwork();
+      final cubit = build();
+      await cubit.start();
+      await cubit.openRoom();
+      await cubit.createHotspot();
+      host.join('a', 'Omar', ['Messi']);
+      await pumpEventQueue();
+      network
+        ..address = '192.168.1.50'
+        ..onWifi = true;
+      await cubit.refreshConnection();
+      expect(cubit.state.connection, isA<ConnectionAppHotspot>().having((c) => c.wifiAvailable, 'wifi', isTrue));
+      expect(network.stopCalls, 0);
+
+      await cubit.switchToWifi();
+      expect(cubit.state.connection, isA<ConnectionReady>());
+      expect(network.stopCalls, 1);
+      await cubit.close();
+    });
+
+    test('a hotspot chosen over Wi-Fi stays on, and a failed one keeps the Wi-Fi link', () async {
+      network = FakeNetwork(address: '192.168.1.23', onWifi: true);
+      final cubit = build();
+      await cubit.start();
+      await cubit.createHotspot();
+      await cubit.refreshConnection();
+      expect(cubit.state.connection, isA<ConnectionAppHotspot>(), reason: 'the host picked it on purpose');
+      await cubit.switchToWifi();
+
+      network.hotspotResult = const HotspotFailed(HotspotFailure.incompatibleMode);
+      await cubit.createHotspot();
+      expect(
+        cubit.state.connection,
+        isA<ConnectionReady>()
+            .having((c) => c.address, 'address', '192.168.1.23')
+            .having((c) => c.hotspotFailure, 'failure', HotspotFailure.incompatibleMode),
+      );
+      await cubit.close();
+    });
+
+    test('checks that the join link opens on this phone', () async {
+      network = FakeNetwork(address: '192.168.1.23', onWifi: true, reachable: false);
+      final cubit = build();
+      await cubit.start();
+      await cubit.openRoom();
+      await pumpEventQueue();
+      expect(cubit.state.linkCheck, LinkCheck.broken);
+
+      network
+        ..reachable = true
+        ..address = '192.168.1.24';
+      await cubit.refreshConnection();
+      await pumpEventQueue();
+      expect(cubit.state.linkCheck, LinkCheck.works);
+      await cubit.close();
+    });
   });
 
   group('room', () {
-    setUp(() => network = FakeNetwork(address: '192.168.1.23'));
+    setUp(() => network = FakeNetwork(address: '192.168.1.23', onWifi: true));
 
     test('opens with the chosen settings and a join link', () async {
       final cubit = build();

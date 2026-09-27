@@ -192,7 +192,8 @@ class _HotspotCodesState extends State<HotspotCodes> {
                               ),
                               const SizedBox(height: 6),
                               _Credential(label: 'Wi-Fi', value: widget.credentials.ssid),
-                              _Credential(label: 'Password', value: widget.credentials.password),
+                              if (widget.credentials.security != HotspotSecurity.open)
+                                _Credential(label: 'Password', value: widget.credentials.password),
                               const SizedBox(height: 6),
                               FilledButton.tonal(
                                 onPressed: () => setState(() => _step = 2),
@@ -207,6 +208,12 @@ class _HotspotCodesState extends State<HotspotCodes> {
                   ),
                 )
               : JoinCard(key: const ValueKey(2), url: widget.url, code: widget.code, caption: 'Then scan this'),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'This is a private hotspot made by the app, so it doesn\'t show in your phone\'s Hotspot settings. '
+          'Friends see “${widget.credentials.ssid}” in their Wi-Fi list.',
+          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
       ],
     );
