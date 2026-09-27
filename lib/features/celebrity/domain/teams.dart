@@ -5,7 +5,8 @@ import 'dart:math';
 /// [chosen] holds the team each player picked, if any. Picks are kept, then
 /// everyone else is shuffled into the smallest teams. Picks that would leave a
 /// team more than one player larger than another are kept anyway: a friend's
-/// own choice wins over perfect balance.
+/// own choice wins over perfect balance, except that no team is left empty
+/// while there are players to go round: the host has no other way to fix it.
 List<List<String>> splitTeams({
   required List<String> playerIds,
   required int count,
@@ -26,6 +27,13 @@ List<List<String>> splitTeams({
   for (final id in free) {
     final smallest = teams.reduce((a, b) => b.length < a.length ? b : a);
     smallest.add(id);
+  }
+  // Every friend picked the same team: move the latest picks along.
+  for (final empty in teams) {
+    if (empty.isNotEmpty) continue;
+    final largest = teams.reduce((a, b) => b.length > a.length ? b : a);
+    if (largest.length < 2) break;
+    empty.add(largest.removeLast());
   }
   return [for (final team in teams) List.unmodifiable(team)];
 }
