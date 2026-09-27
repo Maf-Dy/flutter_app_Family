@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/router/safe_pop.dart';
 import '../../../../core/theme/game_colors.dart';
 import '../../../settings/domain/app_settings.dart';
 import '../../../settings/presentation/state/settings_cubit.dart';
@@ -36,27 +37,10 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
   }
 
   Future<void> _pickCustomCategory(GameCategory current) async {
-    final l10n = context.l10n;
-    final controller = TextEditingController(text: current.custom ?? '');
     final text = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.customCategoryTitle),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          maxLength: GameCategory.maxCustomLength,
-          textCapitalization: TextCapitalization.sentences,
-          decoration: InputDecoration(hintText: l10n.customCategoryHint, counterText: ''),
-          onSubmitted: (value) => Navigator.pop(context, value),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel)),
-          TextButton(onPressed: () => Navigator.pop(context, controller.text), child: Text(l10n.use)),
-        ],
-      ),
+      builder: (context) => _CustomCategoryDialog(initial: current.custom ?? ''),
     );
-    controller.dispose();
     final clean = Room.tidy(text ?? '');
     if (clean.isNotEmpty && mounted) context.read<RoomCubit>().selectCategory(GameCategory.custom(clean));
   }
@@ -222,6 +206,47 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Owns its text controller, so the field can still draw while the dialog
+/// fades out after it has been closed.
+class _CustomCategoryDialog extends StatefulWidget {
+  const _CustomCategoryDialog({required this.initial});
+
+  final String initial;
+
+  @override
+  State<_CustomCategoryDialog> createState() => _CustomCategoryDialogState();
+}
+
+class _CustomCategoryDialogState extends State<_CustomCategoryDialog> {
+  late final _controller = TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return AlertDialog(
+      title: Text(l10n.customCategoryTitle),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        maxLength: GameCategory.maxCustomLength,
+        textCapitalization: TextCapitalization.sentences,
+        decoration: InputDecoration(hintText: l10n.customCategoryHint, counterText: ''),
+        onSubmitted: (value) => context.popRoute(value),
+      ),
+      actions: [
+        TextButton(onPressed: () => context.popRoute(), child: Text(l10n.cancel)),
+        TextButton(onPressed: () => context.popRoute(_controller.text), child: Text(l10n.use)),
+      ],
     );
   }
 }
