@@ -8,7 +8,6 @@ import 'support/harness.dart';
 /// dialogs dismissed without an answer, back pressed mid-transition.
 void main() {
   late FakeNetwork network;
-  late FakeRoomHost host;
 
   Future<void> pumpApp(WidgetTester tester, {bool reducedMotion = true}) async {
     tester.view
@@ -16,7 +15,7 @@ void main() {
       ..devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      testApp(network: network, createHost: () => host = FakeRoomHost(), reducedMotion: reducedMotion),
+      testApp(network: network, createHost: FakeRoomHost.new, reducedMotion: reducedMotion),
     );
     await tester.pumpAndSettle();
   }
@@ -61,7 +60,7 @@ void main() {
     network = FakeNetwork();
     // Motion on, as on a real phone. Looping animations never settle, so step frames.
     await tester.pumpWidget(
-      testApp(network: network, createHost: () => host = FakeRoomHost(), reducedMotion: false),
+      testApp(network: network, createHost: FakeRoomHost.new, reducedMotion: false),
     );
     Future<void> frames(int count) async {
       for (var i = 0; i < count; i++) {
