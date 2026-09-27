@@ -1,5 +1,6 @@
 import 'package:family_game/features/room/domain/network_access.dart';
 import 'package:family_game/features/room/domain/room.dart';
+import 'package:family_game/features/room/domain/room_beacon.dart';
 import 'package:family_game/features/room/presentation/state/room_cubit.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -8,10 +9,12 @@ import '../../../support/fakes.dart';
 void main() {
   late FakeNetwork network;
   late FakeRoomHost host;
+  late FakeRoomBeacon beacon;
 
   RoomCubit build({bool failOpen = false, Duration poll = const Duration(hours: 1)}) {
     host = FakeRoomHost(failOpen: failOpen);
-    return RoomCubit(network: network, createHost: () => host, pollInterval: poll);
+    beacon = FakeRoomBeacon();
+    return RoomCubit(network: network, createHost: () => host, beacon: beacon, pollInterval: poll);
   }
 
   tearDown(() => network.dispose());
@@ -104,7 +107,7 @@ void main() {
       await cubit.close();
     });
 
-    test('leaves the app hotspot for Wi-Fi when nobody has joined yet', () async {
+    test('keeps the hotspot the host asked for when Wi-Fi shows up, and offers the switch', () async {
       network = FakeNetwork();
       final cubit = build();
       await cubit.start();
@@ -113,8 +116,36 @@ void main() {
         ..address = '192.168.1.50'
         ..onWifi = true;
       await cubit.refreshConnection();
+      await cubit.refreshConnection();
+      expect(
+        cubit.state.connection,
+        isA<ConnectionAppHotspot>()
+            .having((c) => c.address, 'address', '192.168.49.1')
+            .having((c) => c.wifiAvailable, 'wifi', isTrue),
+      );
+      expect(network.stopCalls, 0, reason: 'turning it off by ourselves looked like a silent failure');
+
+      await cubit.switchToWifi();
       expect(cubit.state.connection, isA<ConnectionReady>().having((c) => c.address, 'address', '192.168.1.50'));
-      expect(network.stopCalls, 1);
+      await cubit.close();
+    });
+
+    test('says so when Android turns the hotspot off', () async {
+      network = FakeNetwork();
+      final cubit = build();
+      await cubit.start();
+      await cubit.createHotspot();
+      network.stoppedController.add(null);
+      await pumpEventQueue();
+      expect(
+        cubit.state.connection,
+        isA<ConnectionMissing>()
+            .having((c) => c.failure, 'failure', HotspotFailure.stopped)
+            .having((c) => c.canCreateHotspot, 'canCreate', isTrue),
+      );
+
+      await cubit.createHotspot();
+      expect(cubit.state.connection, isA<ConnectionAppHotspot>());
       await cubit.close();
     });
 
@@ -231,6 +262,30 @@ void main() {
       await pumpEventQueue();
       expect(cubit.state.room!.round, 2);
       expect(cubit.state.room!.slipCount, 0);
+      await cubit.close();
+    });
+
+    test('announces the room to nearby phones while it is open', () async {
+      final cubit = build();
+      await cubit.start();
+      await cubit.openRoom(hostName: 'Mafdy');
+      expect(
+        beacon.announcing,
+        isA<RoomAnnouncement>()
+            .having((a) => a.code, 'code', cubit.state.room!.code)
+            .having((a) => a.hostName, 'host', 'Mafdy')
+            .having((a) => a.port, 'port', 8182)
+            .having((a) => a.players, 'players', 0)
+            .having((a) => a.open, 'open', isTrue),
+      );
+
+      host.join('a', 'Omar', ['Messi']);
+      await pumpEventQueue();
+      expect(beacon.announcing?.players, 1);
+
+      await cubit.closeRoom();
+      expect(beacon.announcing, isNull);
+      expect(beacon.stopCalls, 1);
       await cubit.close();
     });
 

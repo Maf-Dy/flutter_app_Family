@@ -871,4 +871,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get familyErrorEmptyMessage => 'Write something first.';
+
+  @override
+  String get hotspotStopped =>
+      'The phone turned the hotspot off. This happens when you leave the app. Tap Create hotspot to turn it back on, then friends scan the new Wi-Fi code.';
+
+  @override
+  String get joinGame => 'Join a game';
+
+  @override
+  String get joinGameDetail => 'Find a room on this Wi-Fi and hop in.';
+
+  @override
+  String get lookingForGames => 'Looking for games on this Wi-Fi…';
+
+  @override
+  String get lookingForGamesHelp =>
+      'Be on the same Wi-Fi or hotspot as the host, with their room open. You can also scan the host\'s QR code with your camera.';
+
+  @override
+  String get cannotLookForGames =>
+      'This phone can\'t look for games right now. Scan the host\'s QR code with your camera instead.';
+
+  @override
+  String nearbyRoomTitle(String host) {
+    return '$host\'s room';
+  }
+
+  @override
+  String nearbyRoomPlayers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count players in',
+      one: '1 player in',
+      zero: 'Nobody in yet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nearbyRoomPlaying => 'Already playing';
+
+  @override
+  String get joinRoomButton => 'Join';
+
+  @override
+  String cannotOpenRoom(String url) {
+    return 'Couldn\'t open the browser. Open $url yourself.';
+  }
 }

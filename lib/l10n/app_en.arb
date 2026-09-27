@@ -528,5 +528,37 @@
   "familyErrorInvalidSlip": "That name is already out.",
   "familyErrorGameOver": "The game is over.",
   "familyErrorChatOff": "Chat is off in this room.",
-  "familyErrorEmptyMessage": "Write something first."
+  "familyErrorEmptyMessage": "Write something first.",
+  "hotspotStopped": "The phone turned the hotspot off. This happens when you leave the app. Tap Create hotspot to turn it back on, then friends scan the new Wi-Fi code.",
+  "joinGame": "Join a game",
+  "joinGameDetail": "Find a room on this Wi-Fi and hop in.",
+  "lookingForGames": "Looking for games on this Wi-Fi…",
+  "lookingForGamesHelp": "Be on the same Wi-Fi or hotspot as the host, with their room open. You can also scan the host's QR code with your camera.",
+  "cannotLookForGames": "This phone can't look for games right now. Scan the host's QR code with your camera instead.",
+  "nearbyRoomTitle": "{host}'s room",
+  "@nearbyRoomTitle": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "nearbyRoomPlayers": "{count, plural, =0{Nobody in yet} =1{1 player in} other{{count} players in}}",
+  "@nearbyRoomPlayers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "nearbyRoomPlaying": "Already playing",
+  "joinRoomButton": "Join",
+  "cannotOpenRoom": "Couldn't open the browser. Open {url} yourself.",
+  "@cannotOpenRoom": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  }
 }

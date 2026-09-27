@@ -6,7 +6,9 @@ import 'core/l10n/l10n.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/room/domain/network_access.dart';
+import 'features/room/domain/room_beacon.dart';
 import 'features/room/domain/room_host.dart';
+import 'features/room/presentation/state/nearby_rooms_cubit.dart';
 import 'features/settings/domain/app_settings.dart';
 import 'features/settings/presentation/state/settings_cubit.dart';
 
@@ -15,12 +17,18 @@ class FamilyApp extends StatelessWidget {
     super.key,
     required this.network,
     required this.createHost,
+    required this.beacon,
+    required this.finder,
+    required this.openRoomLink,
     required this.settingsStore,
     required this.settings,
   });
 
   final NetworkAccess network;
   final RoomHostFactory createHost;
+  final RoomBeacon beacon;
+  final RoomFinder finder;
+  final OpenRoomLink openRoomLink;
   final SettingsStore settingsStore;
 
   /// Loaded before the first frame, so the right language shows from the start.
@@ -32,6 +40,9 @@ class FamilyApp extends StatelessWidget {
       providers: [
         RepositoryProvider<NetworkAccess>.value(value: network),
         RepositoryProvider<RoomHostFactory>.value(value: createHost),
+        RepositoryProvider<RoomBeacon>.value(value: beacon),
+        RepositoryProvider<RoomFinder>.value(value: finder),
+        RepositoryProvider<OpenRoomLink>.value(value: openRoomLink),
       ],
       child: BlocProvider(
         create: (_) => SettingsCubit(settingsStore, settings),

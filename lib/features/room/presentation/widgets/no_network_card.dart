@@ -76,4 +76,5 @@ String hotspotFailureText(AppLocalizations l10n, HotspotFailure failure) => swit
   HotspotFailure.unsupported => l10n.hotspotUnsupported,
   HotspotFailure.noAddress => l10n.hotspotNoAddress,
   HotspotFailure.failed => l10n.hotspotFailed,
+  HotspotFailure.stopped => l10n.hotspotStopped,
 };

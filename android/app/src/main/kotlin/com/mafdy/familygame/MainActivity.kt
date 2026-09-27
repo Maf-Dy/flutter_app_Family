@@ -14,7 +14,7 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onDestroy() {
-        hotspot?.stop()
+        hotspot?.dispose()
         super.onDestroy()
     }
 }

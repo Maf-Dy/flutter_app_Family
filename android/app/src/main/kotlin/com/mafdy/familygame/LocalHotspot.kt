@@ -15,7 +15,8 @@ import java.net.Inet4Address
 
 /**
  * Starts Android's local-only hotspot so friends can join the room without a router,
- * and reports the phone's Wi-Fi address.
+ * reports the phone's Wi-Fi address, and holds the multicast lock while the app
+ * listens for rooms (without it many phones drop Wi-Fi broadcasts to save power).
  *
  * Marshalling only: permission decisions and error wording live in Dart
  * (lib/features/room/data/device_network.dart). Error codes sent back:
@@ -32,18 +33,33 @@ class LocalHotspot(context: Context, private val channel: MethodChannel) :
     private val connectivity =
         context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     private var reservation: WifiManager.LocalOnlyHotspotReservation? = null
+    private val multicast = wifi.createMulticastLock("family_game_rooms").apply { setReferenceCounted(false) }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "sdkInt" -> result.success(Build.VERSION.SDK_INT)
             "wifiAddress" -> result.success(wifiAddress())
             "start" -> start(result)
+            "lockMulticast" -> {
+                multicast.acquire()
+                result.success(null)
+            }
+            "unlockMulticast" -> {
+                if (multicast.isHeld) multicast.release()
+                result.success(null)
+            }
             "stop" -> {
                 stop()
                 result.success(null)
             }
             else -> result.notImplemented()
         }
+    }
+
+    /** The activity is going away: end the hotspot and stop listening for rooms. */
+    fun dispose() {
+        stop()
+        if (multicast.isHeld) multicast.release()
     }
 
     fun stop() {
@@ -79,6 +95,8 @@ class LocalHotspot(context: Context, private val channel: MethodChannel) :
 
                 override fun onStopped() {
                     reservation = null
+                    // Stopped before it ever started: answer, or Dart waits forever.
+                    reply { result.error("generic", null, null) }
                     channel.invokeMethod("stopped", null)
                 }
 

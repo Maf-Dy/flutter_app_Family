@@ -49,6 +49,10 @@ enum HotspotFailure {
 
   /// The hotspot started but no address showed up to serve the room on.
   noAddress,
+
+  /// The hotspot was running and Android turned it off, usually because the
+  /// app went to the background.
+  stopped,
 }
 
 sealed class HotspotResult {

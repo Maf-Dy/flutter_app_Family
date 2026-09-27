@@ -885,4 +885,53 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get familyErrorEmptyMessage => 'اكتب حاجة الأول.';
+
+  @override
+  String get hotspotStopped =>
+      'الموبايل قفل الهوت سبوت. ده بيحصل لما تخرج من التطبيق. دوس اعمل هوت سبوت تاني، وصحابك يسكانوا كود الواي فاي الجديد.';
+
+  @override
+  String get joinGame => 'ادخل لعبة';
+
+  @override
+  String get joinGameDetail => 'دور على قعدة على نفس الواي فاي وادخل على طول.';
+
+  @override
+  String get lookingForGames => 'بندور على ألعاب على الواي فاي ده…';
+
+  @override
+  String get lookingForGamesHelp =>
+      'خليك على نفس الواي فاي أو الهوت سبوت بتاع اللي فاتح القعدة. أو سكان الكود بتاعه بالكاميرا.';
+
+  @override
+  String get cannotLookForGames => 'الموبايل ده مش قادر يدور على ألعاب دلوقتي. سكان كود صاحب القعدة بالكاميرا.';
+
+  @override
+  String nearbyRoomTitle(String host) {
+    return 'قعدة $host';
+  }
+
+  @override
+  String nearbyRoomPlayers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count لاعبين جوه',
+      two: 'لاعبين جوه',
+      one: 'لاعب واحد جوه',
+      zero: 'لسه محدش دخل',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get nearbyRoomPlaying => 'اللعب بدأ';
+
+  @override
+  String get joinRoomButton => 'ادخل';
+
+  @override
+  String cannotOpenRoom(String url) {
+    return 'المتصفح مفتحش. افتح $url بنفسك.';
+  }
 }

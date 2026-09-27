@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/network_access.dart';
 import '../../domain/room.dart';
+import '../../domain/room_beacon.dart';
 import '../../domain/room_host.dart';
 import '../../../family/domain/family_table.dart';
 import '../../data/host_family_table.dart';
@@ -17,6 +18,7 @@ class RoomCubit extends Cubit<RoomState> {
   RoomCubit({
     required this._network,
     required this._createHost,
+    this._beacon,
     Random? random,
     @visibleForTesting this._pollInterval = const Duration(seconds: 3),
   }) : _random = random ?? Random(),
@@ -24,6 +26,9 @@ class RoomCubit extends Cubit<RoomState> {
 
   final NetworkAccess _network;
   final RoomHostFactory _createHost;
+
+  /// Lets phones with the app find the open room under "Join a game".
+  final RoomBeacon? _beacon;
   final Random _random;
 
   /// How often the network is re-checked, in case a change event never arrives
@@ -86,19 +91,13 @@ class RoomCubit extends Cubit<RoomState> {
     final current = state.connection;
     if (current is ConnectionStartingHotspot) return;
     if (current is ConnectionAppHotspot) {
-      if (_hotspotChosenOverWifi || !await _network.isOnWifi()) return;
-      if (isClosed) return;
-      // The host joined Wi-Fi. Friends already on the hotspot would be cut off,
-      // so only switch by ourselves while nobody depends on it.
-      if (_friendsJoined) {
-        if (!current.wifiAvailable) {
-          _setConnection(ConnectionAppHotspot(current.address, current.credentials, wifiAvailable: true));
-        }
-        return;
-      }
-      await _network.stopHotspot();
-      if (isClosed) return;
-      _setConnection(const ConnectionChecking());
+      // The host asked for this hotspot, so it stays on until they switch. When
+      // the phone joins Wi-Fi, offer the switch instead of making it: turning the
+      // hotspot off by ourselves looked like the button had silently failed.
+      if (_hotspotChosenOverWifi || current.wifiAvailable || !await _network.isOnWifi()) return;
+      if (isClosed || state.connection != current) return;
+      _setConnection(ConnectionAppHotspot(current.address, current.credentials, wifiAvailable: true));
+      return;
     }
 
     final address = await _network.findLanAddress();
@@ -119,8 +118,6 @@ class RoomCubit extends Cubit<RoomState> {
       _setConnection(ConnectionMissing(canCreateHotspot: canCreate, failure: failure));
     }
   }
-
-  bool get _friendsJoined => state.room?.players.any((p) => !p.isHost) ?? false;
 
   /// Starts the app's own hotspot: when there is no Wi-Fi, or when the Wi-Fi
   /// keeps phones from reaching each other.
@@ -157,10 +154,12 @@ class RoomCubit extends Cubit<RoomState> {
 
   Future<void> openPermissionSettings() => _network.openPermissionSettings();
 
+  /// Android turned the hotspot off, most often because the app left the
+  /// screen. Say so, rather than quietly showing "Create hotspot" again.
   Future<void> _onHotspotStopped() async {
     if (isClosed || state.connection is! ConnectionAppHotspot) return;
     _hotspotChosenOverWifi = false;
-    _setConnection(const ConnectionChecking());
+    _setConnection(ConnectionMissing(canCreateHotspot: true, failure: HotspotFailure.stopped));
     await refreshConnection();
   }
 
@@ -203,10 +202,13 @@ class RoomCubit extends Cubit<RoomState> {
       }
       _host = host;
       _roomSub = host.changes.listen((room) {
-        if (!isClosed) emit(state.copyWith(room: room));
+        if (isClosed) return;
+        emit(state.copyWith(room: room));
+        unawaited(_beacon?.announce(RoomAnnouncement.of(room, port)));
       });
       emit(state.copyWith(stage: RoomStage.lobby, room: host.room, port: port, opening: false));
       unawaited(_checkLink());
+      unawaited(_beacon?.announce(RoomAnnouncement.of(host.room, port)));
     } on RoomHostException catch (error) {
       debugPrint('RoomCubit: $error');
       await host.close();
@@ -260,6 +262,7 @@ class RoomCubit extends Cubit<RoomState> {
   Future<void> _shutDownHost() async {
     await _roomSub?.cancel();
     _roomSub = null;
+    await _beacon?.stop();
     final host = _host;
     _host = null;
     await host?.close();

@@ -1579,6 +1579,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Write something first.'**
   String get familyErrorEmptyMessage;
+
+  /// No description provided for @hotspotStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'The phone turned the hotspot off. This happens when you leave the app. Tap Create hotspot to turn it back on, then friends scan the new Wi-Fi code.'**
+  String get hotspotStopped;
+
+  /// No description provided for @joinGame.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a game'**
+  String get joinGame;
+
+  /// No description provided for @joinGameDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a room on this Wi-Fi and hop in.'**
+  String get joinGameDetail;
+
+  /// No description provided for @lookingForGames.
+  ///
+  /// In en, this message translates to:
+  /// **'Looking for games on this Wi-Fi…'**
+  String get lookingForGames;
+
+  /// No description provided for @lookingForGamesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Be on the same Wi-Fi or hotspot as the host, with their room open. You can also scan the host\'s QR code with your camera.'**
+  String get lookingForGamesHelp;
+
+  /// No description provided for @cannotLookForGames.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone can\'t look for games right now. Scan the host\'s QR code with your camera instead.'**
+  String get cannotLookForGames;
+
+  /// No description provided for @nearbyRoomTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{host}\'s room'**
+  String nearbyRoomTitle(String host);
+
+  /// No description provided for @nearbyRoomPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Nobody in yet} =1{1 player in} other{{count} players in}}'**
+  String nearbyRoomPlayers(int count);
+
+  /// No description provided for @nearbyRoomPlaying.
+  ///
+  /// In en, this message translates to:
+  /// **'Already playing'**
+  String get nearbyRoomPlaying;
+
+  /// No description provided for @joinRoomButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get joinRoomButton;
+
+  /// No description provided for @cannotOpenRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the browser. Open {url} yourself.'**
+  String cannotOpenRoom(String url);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

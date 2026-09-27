@@ -247,5 +247,16 @@
   "familyErrorInvalidSlip": "الاسم ده اتكشف خلاص.",
   "familyErrorGameOver": "اللعبة خلصت.",
   "familyErrorChatOff": "الدردشة مقفولة في القعدة دي.",
-  "familyErrorEmptyMessage": "اكتب حاجة الأول."
+  "familyErrorEmptyMessage": "اكتب حاجة الأول.",
+  "hotspotStopped": "الموبايل قفل الهوت سبوت. ده بيحصل لما تخرج من التطبيق. دوس اعمل هوت سبوت تاني، وصحابك يسكانوا كود الواي فاي الجديد.",
+  "joinGame": "ادخل لعبة",
+  "joinGameDetail": "دور على قعدة على نفس الواي فاي وادخل على طول.",
+  "lookingForGames": "بندور على ألعاب على الواي فاي ده…",
+  "lookingForGamesHelp": "خليك على نفس الواي فاي أو الهوت سبوت بتاع اللي فاتح القعدة. أو سكان الكود بتاعه بالكاميرا.",
+  "cannotLookForGames": "الموبايل ده مش قادر يدور على ألعاب دلوقتي. سكان كود صاحب القعدة بالكاميرا.",
+  "nearbyRoomTitle": "قعدة {host}",
+  "nearbyRoomPlayers": "{count, plural, =0{لسه محدش دخل} =1{لاعب واحد جوه} =2{لاعبين جوه} other{{count} لاعبين جوه}}",
+  "nearbyRoomPlaying": "اللعب بدأ",
+  "joinRoomButton": "ادخل",
+  "cannotOpenRoom": "المتصفح مفتحش. افتح {url} بنفسك."
 }

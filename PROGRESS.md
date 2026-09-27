@@ -1,6 +1,6 @@
 # Progress: expansion work
 
-Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 107 tests pass on this commit.
+Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 125 tests pass on this commit.
 
 ## Done
 
@@ -44,8 +44,21 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 107 te
   - The watcher and member flows.
 - **Browser check:** three headless Chromium phones played a whole game against the real server, with no page errors. Covered: a wrong guess, a catch, chat following the family, a suggestion used by the head, the win, and a late arrival who only watches.
 
+### Join a game, and the hotspot fix (branch `claude/fix-game-detection-a62gmc`)
+- **Why games weren't detected:** the app never had a way to find rooms; joining was only by QR code or link.
+- **Join a game** (home screen): lists rooms open on the same Wi-Fi or hotspot and opens one in the browser, the same page the QR code opens.
+  - The host announces the room with a small UDP broadcast every second on port 8183 (`udp_room_beacon.dart`), to every local network, not only the default one.
+  - The list shows the host, category, mode, room code, players in, or "Already playing". A room drops off 4 s after it goes quiet.
+  - Android holds a multicast lock only while the list is open.
+- **Hotspot bug:** after "Create hotspot", the app turned the hotspot off by itself as soon as the phone looked like it was on Wi-Fi (some phones report the app's own hotspot as Wi-Fi), briefly showed the dead address, then "Create hotspot" again with no message.
+  - The hotspot now stays on until the host taps "Switch to Wi-Fi", which is offered when Wi-Fi appears.
+  - The app's own hotspot address, and for 15 s after it stops, is never mistaken for Wi-Fi.
+  - When Android turns the hotspot off (usually on leaving the app), the lobby says so.
+  - A hotspot that stopped before it started no longer leaves "Starting hotspot" spinning forever.
+
 ## Remaining
 1. **On a real device:** play the browser family page on 3+ phones over Wi-Fi and on the app's hotspot (polling, chat, voting, the vibration on your turn).
+2. **On a real device:** "Join a game" on a second phone, on home Wi-Fi and on the app's hotspot; and "Create hotspot" staying on. The Kotlin changes (multicast lock, hotspot stop) were not compiled in the cloud session.
 
 ## Deferred by you
 - Paid app vs in-app purchase: decide later. No code yet.

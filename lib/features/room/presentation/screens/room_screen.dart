@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/motion/shared_axis.dart';
 import '../../../../core/widgets/keep_screen_on.dart';
 import '../../domain/network_access.dart';
+import '../../domain/room_beacon.dart';
 import '../../domain/room_host.dart';
 import '../state/room_cubit.dart';
 import 'lobby_screen.dart';
@@ -17,8 +18,11 @@ class RoomScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          RoomCubit(network: context.read<NetworkAccess>(), createHost: context.read<RoomHostFactory>())..start(),
+      create: (context) => RoomCubit(
+        network: context.read<NetworkAccess>(),
+        createHost: context.read<RoomHostFactory>(),
+        beacon: context.read<RoomBeacon>(),
+      )..start(),
       child: const _RoomFlow(),
     );
   }

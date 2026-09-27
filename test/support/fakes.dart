@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:family_game/features/room/domain/network_access.dart';
 import 'package:family_game/features/room/domain/room.dart';
+import 'package:family_game/features/room/domain/room_beacon.dart';
 import 'package:family_game/features/room/domain/room_host.dart';
 
 class FakeNetwork implements NetworkAccess {
@@ -108,4 +109,27 @@ class FakeRoomHost implements RoomHost {
     closed = true;
     unawaited(_changes.close());
   }
+}
+
+class FakeRoomBeacon implements RoomBeacon {
+  RoomAnnouncement? announcing;
+  int stopCalls = 0;
+
+  @override
+  Future<void> announce(RoomAnnouncement announcement) async => announcing = announcement;
+
+  @override
+  Future<void> stop() async {
+    announcing = null;
+    stopCalls++;
+  }
+}
+
+class FakeRoomFinder implements RoomFinder {
+  final controller = StreamController<List<NearbyRoom>>.broadcast();
+
+  @override
+  Stream<List<NearbyRoom>> watch() => controller.stream;
+
+  Future<void> dispose() => controller.close();
 }

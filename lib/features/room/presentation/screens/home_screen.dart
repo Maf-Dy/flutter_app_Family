@@ -55,6 +55,8 @@ class HomeScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 24),
                         const _HostButton(),
+                        const SizedBox(height: 12),
+                        const _JoinButton(),
                       ],
                     ),
                   ),
@@ -134,6 +136,53 @@ class _HostButton extends StatelessWidget {
                 ),
               ),
               Icon(Icons.chevron_right_rounded, color: scheme.onPrimary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// For guests who have the app: find a room on this Wi-Fi instead of scanning.
+class _JoinButton extends StatelessWidget {
+  const _JoinButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Material(
+      color: scheme.surfaceContainerHigh,
+      borderRadius: BorderRadius.circular(22),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: () => Navigator.of(context).pushNamed(AppRoutes.join),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(color: scheme.primaryContainer, borderRadius: BorderRadius.circular(14)),
+                child: Icon(Icons.wifi_find_rounded, color: scheme.onPrimaryContainer),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(context.l10n.joinGame, style: theme.textTheme.titleLarge),
+                    const SizedBox(height: 2),
+                    Text(
+                      context.l10n.joinGameDetail,
+                      style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant, height: 1.3),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: scheme.onSurfaceVariant),
             ],
           ),
         ),

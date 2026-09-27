@@ -2,10 +2,14 @@ import 'package:family_game/core/l10n/l10n.dart';
 import 'package:family_game/core/router/app_router.dart';
 import 'package:family_game/core/theme/app_theme.dart';
 import 'package:family_game/features/room/domain/network_access.dart';
+import 'package:family_game/features/room/domain/room_beacon.dart';
 import 'package:family_game/features/room/domain/room_host.dart';
+import 'package:family_game/features/room/presentation/state/nearby_rooms_cubit.dart';
 import 'package:family_game/features/settings/domain/app_settings.dart';
 import 'package:family_game/features/settings/presentation/state/settings_cubit.dart';
 import 'package:flutter/material.dart';
+
+import 'fakes.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -26,6 +30,9 @@ class FakeSettingsStore implements SettingsStore {
 Widget testApp({
   required NetworkAccess network,
   required RoomHostFactory createHost,
+  RoomBeacon? beacon,
+  RoomFinder? finder,
+  OpenRoomLink? openRoomLink,
   SettingsStore? settingsStore,
   AppSettings settings = const AppSettings(hostName: 'Mafdy'),
   Locale locale = const Locale('en'),
@@ -38,6 +45,9 @@ Widget testApp({
     providers: [
       RepositoryProvider<NetworkAccess>.value(value: network),
       RepositoryProvider<RoomHostFactory>.value(value: createHost),
+      RepositoryProvider<RoomBeacon>.value(value: beacon ?? FakeRoomBeacon()),
+      RepositoryProvider<RoomFinder>.value(value: finder ?? FakeRoomFinder()),
+      RepositoryProvider<OpenRoomLink>.value(value: openRoomLink ?? (_) async => true),
     ],
     child: BlocProvider(
       create: (_) => SettingsCubit(settingsStore ?? FakeSettingsStore(), settings),

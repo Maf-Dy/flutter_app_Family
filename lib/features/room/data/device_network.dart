@@ -15,7 +15,7 @@ class DeviceNetwork implements NetworkAccess {
   DeviceNetwork({Connectivity? connectivity}) : _connectivity = connectivity ?? Connectivity() {
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'stopped') {
-        _appHotspotAddress = null;
+        _forgetHotspot();
         _hotspotStopped.add(null);
       }
     });
@@ -30,6 +30,12 @@ class DeviceNetwork implements NetworkAccess {
   /// This phone's address on the app's own hotspot, while it runs.
   String? _appHotspotAddress;
 
+  /// Addresses the app's hotspot had, and when it stopped. Just after it stops,
+  /// its interface can linger for a moment, and serving the room there showed a
+  /// dead link.
+  final _formerHotspotAddresses = <String, DateTime>{};
+  static const _lingerFor = Duration(seconds: 15);
+
   @override
   Stream<void> get changes => _connectivity.onConnectivityChanged.map((_) {});
 
@@ -43,7 +49,13 @@ class DeviceNetwork implements NetworkAccess {
     final wifi = await _androidWifiAddress();
     if (wifi != null) return wifi;
     // A hotspot turned on in Settings, or iOS (en0 is Wi-Fi, bridge100 its hotspot).
-    return pickLanAddress(await _interfaceAddresses(), exclude: {?_appHotspotAddress});
+    return pickLanAddress(await _interfaceAddresses(), exclude: _ownHotspot);
+  }
+
+  Set<String> get _ownHotspot {
+    final cutoff = DateTime.now().subtract(_lingerFor);
+    _formerHotspotAddresses.removeWhere((_, stoppedAt) => stoppedAt.isBefore(cutoff));
+    return {?_appHotspotAddress, ..._formerHotspotAddresses.keys};
   }
 
   @override
@@ -93,6 +105,7 @@ class DeviceNetwork implements NetworkAccess {
       return const HotspotFailed(HotspotFailure.noAddress);
     }
     _appHotspotAddress = address;
+    _formerHotspotAddresses.remove(address);
     final security = switch (result?['security']) {
       'open' => HotspotSecurity.open,
       'wpa3' => HotspotSecurity.wpa3,
@@ -114,9 +127,15 @@ class DeviceNetwork implements NetworkAccess {
     return null;
   }
 
+  void _forgetHotspot() {
+    final address = _appHotspotAddress;
+    if (address != null) _formerHotspotAddresses[address] = DateTime.now();
+    _appHotspotAddress = null;
+  }
+
   @override
   Future<void> stopHotspot() async {
-    _appHotspotAddress = null;
+    _forgetHotspot();
     if (!Platform.isAndroid) return;
     try {
       await _channel.invokeMethod<void>('stop');
@@ -144,6 +163,20 @@ class DeviceNetwork implements NetworkAccess {
   @override
   Future<void> openPermissionSettings() => openAppSettings();
 
+  /// Keeps Android's Wi-Fi from dropping broadcasts while the app listens for rooms.
+  static Future<void> holdMulticastLock() => _multicast('lockMulticast');
+
+  static Future<void> releaseMulticastLock() => _multicast('unlockMulticast');
+
+  static Future<void> _multicast(String method) async {
+    if (!Platform.isAndroid) return;
+    try {
+      await _channel.invokeMethod<void>(method);
+    } on PlatformException catch (error) {
+      debugPrint('DeviceNetwork: $method failed ($error)');
+    }
+  }
+
   Future<List<({String interface, String address})>> _interfaceAddresses() async {
     final interfaces = await NetworkInterface.list(type: InternetAddressType.IPv4);
     return [
@@ -152,10 +185,14 @@ class DeviceNetwork implements NetworkAccess {
     ];
   }
 
+  /// The Wi-Fi address Android reports, unless it is the app's own hotspot:
+  /// some phones list that as a Wi-Fi network too, which made the app think it
+  /// had joined Wi-Fi and turn the hotspot off.
   Future<String?> _androidWifiAddress() async {
     if (!Platform.isAndroid) return null;
     try {
-      return await _channel.invokeMethod<String>('wifiAddress');
+      final address = await _channel.invokeMethod<String>('wifiAddress');
+      return _ownHotspot.contains(address) ? null : address;
     } on PlatformException catch (error) {
       debugPrint('DeviceNetwork: no Wi-Fi address from Android ($error)');
       return null;
