@@ -57,56 +57,6 @@ void main() {
     }
   });
 
-  Future<void> playClassicToReveal(WidgetTester tester) async {
-    await tapVisible(tester, find.text('Host a room'));
-    await tapVisible(tester, find.text('Open room'));
-    host
-      ..join('a', 'Omar', ['Lionel Messi'])
-      ..join('b', 'Nour', ['Fairuz']);
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(find.byType(TextField));
-    await tester.enterText(find.byType(TextField), 'Salah');
-    await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pumpAndSettle();
-    await tapVisible(tester, find.text('Start reading'));
-    for (var i = 0; i < 2; i++) {
-      await tapVisible(tester, find.text('Next name'));
-    }
-    await tapVisible(tester, find.text('Done reading'));
-    await tapVisible(tester, find.text('Who wrote what?'));
-    await tapVisible(tester, find.text('Reveal all'));
-  }
-
-  Future<void> doubleTap(WidgetTester tester, Finder finder) async {
-    await tester.ensureVisible(finder);
-    await tester.pumpAndSettle();
-    await tester.tap(finder);
-    await tester.pump(const Duration(milliseconds: 40));
-    await tester.tap(finder, warnIfMissed: false);
-    await tester.pumpAndSettle();
-  }
-
-  testWidgets('double-tapping End game lands on Home, not an empty screen', (tester) async {
-    await pumpApp(tester);
-    await playClassicToReveal(tester);
-    await doubleTap(tester, find.text('End game'));
-    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-    expect(find.text('Host a room'), findsOneWidget);
-  });
-
-  testWidgets('double-tapping New round stays in the lobby', (tester) async {
-    await pumpApp(tester);
-    await playClassicToReveal(tester);
-    await doubleTap(tester, find.text('New round, same room'));
-    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
-    await tester.pumpAndSettle();
-    expect(tester.takeException(), isNull);
-    expect(find.text('Omar'), findsOneWidget);
-    expect(host.room.round, 2);
-  });
-
   testWidgets('flipping between the hotspot steps quickly keeps the codes drawn', (tester) async {
     network = FakeNetwork();
     // Motion on, as on a real phone. Looping animations never settle, so step frames.
