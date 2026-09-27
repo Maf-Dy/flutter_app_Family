@@ -96,4 +96,21 @@ void main() {
     expect(cubit.state.secondsLeft, 0);
     cubit.close();
   });
+
+  test('friends who all pick the same team still get a game the host can start', () {
+    final cubit = CelebrityCubit(
+      CelebrityArgs(
+        category: const GameCategory.preset(PresetCategory.famousPeople),
+        slips: slips,
+        players: [for (final id in teams.expand((t) => t)) (id: id, name: id.toUpperCase(), team: 0)],
+        setup: const TeamSetup(pick: TeamPick.players),
+      ),
+      random: Random(7),
+      runClock: false,
+    );
+    expect(cubit.state.game.teamsPlayable, isTrue);
+    cubit.begin();
+    expect(cubit.state.game.phase, CelebrityPhase.roundIntro);
+    cubit.close();
+  });
 }

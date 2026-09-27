@@ -42,8 +42,17 @@ class ShareCard extends StatelessWidget {
               Text(l10n.wordmark, style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
               const SizedBox(width: 3),
               CircleAvatar(radius: 3.5, backgroundColor: scheme.tertiary),
-              const Spacer(),
-              Text(subtitle, style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant)),
+              const SizedBox(width: 12),
+              // A custom category can be long; it gives way to the wordmark.
+              Expanded(
+                child: Text(
+                  subtitle,
+                  textAlign: TextAlign.end,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelMedium?.copyWith(color: scheme.onSurfaceVariant),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 14),
@@ -57,6 +66,7 @@ class ShareCard extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
+                    flex: 3,
                     child: Text(
                       row.label,
                       style: TextStyle(color: game.slipInk, fontWeight: FontWeight.w800, fontSize: 16),
@@ -66,9 +76,16 @@ class ShareCard extends StatelessWidget {
                     CircleAvatar(radius: 5, backgroundColor: row.color),
                     const SizedBox(width: 6),
                   ],
-                  Text(
-                    row.value,
-                    style: TextStyle(color: game.slipInk, fontWeight: FontWeight.w700),
+                  // Shares the row with the label instead of squeezing it to nothing.
+                  Flexible(
+                    flex: 2,
+                    child: Text(
+                      row.value,
+                      textAlign: TextAlign.end,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: game.slipInk, fontWeight: FontWeight.w700),
+                    ),
                   ),
                 ],
               ),

@@ -148,5 +148,18 @@ void main() {
       expect(room.validateHostSecret('MESSI'), SubmissionError.duplicate);
       expect(room.withHostSecret('MESSI').host, isNull);
     });
+
+    test('the host can add a second, different name', () {
+      final room = Room(
+        code: 'K7Q4',
+        category: const GameCategory.preset(PresetCategory.footballers),
+        namesPerPlayer: 2,
+        hostName: 'Mafdy',
+        allowDuplicates: false,
+      ).withHostSecret('Messi');
+      expect(room.validateHostSecret('Salah'), isNull);
+      expect(room.withHostSecret('Salah').host?.secrets, ['Messi', 'Salah']);
+      expect(room.validateHostSecret('messi'), SubmissionError.duplicate);
+    });
   });
 }

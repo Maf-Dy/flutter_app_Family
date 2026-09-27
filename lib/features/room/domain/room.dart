@@ -222,7 +222,9 @@ final class Room {
     if (!isCollecting) return SubmissionError.roomClosed;
     if (clean.isEmpty) return SubmissionError.missingSecret;
     if (clean.length > maxSecretLength) return SubmissionError.tooLong;
-    if (!allowDuplicates && _clashes([...?host?.secrets, clean])) return SubmissionError.duplicate;
+    if (!allowDuplicates && _clashes([...?host?.secrets, clean], exceptPlayer: Player.hostId)) {
+      return SubmissionError.duplicate;
+    }
     return null;
   }
 
