@@ -292,4 +292,47 @@ void main() {
       expect(find.text('دور جديد، نفس القعدة'), findsOneWidget);
     });
   }
+
+  for (final MapEntry(key: sizeName, value: size) in sizes.entries) {
+    for (final direction in directions) {
+      testWidgets('team race plays to the end: $sizeName, ${direction.name}', (tester) async {
+        await pumpApp(tester, size: size, direction: direction);
+        await tapVisible(tester, find.text('Host a room'));
+        await tapVisible(tester, find.text('Team race'));
+        await tapVisible(tester, find.text('I arrange'));
+        await tapVisible(tester, find.text('Open room'));
+        host
+          ..join('a', 'Omar', ['Messi'])
+          ..join('b', 'Nour', ['Fairuz'])
+          ..join('c', 'Yara', ['Adele'])
+          ..join('d', 'Sami', ['Mr. Bean']);
+        await tester.pumpAndSettle();
+        await tapVisible(tester, find.text("Let's play"));
+
+        // Teams: the host moves Omar along, then plays.
+        expect(find.text('Purple team'), findsOneWidget);
+        await tapVisible(tester, find.widgetWithText(ActionChip, 'Omar'));
+        await tapVisible(tester, find.text("Let's play"));
+
+        for (var round = 0; round < 3; round++) {
+          expect(find.text('Round ${round + 1} of 3'), findsOneWidget);
+          await tapVisible(tester, find.text('Start'));
+          expect(find.text('Pass the phone to'), findsOneWidget);
+          await tapVisible(tester, find.text("I'm ready"));
+          for (var i = 0; i < 4; i++) {
+            await tapVisible(tester, find.text('Got it!'));
+          }
+          expect(find.text('The bowl is empty!'), findsOneWidget);
+          await tapVisible(tester, find.text(round == 2 ? 'See results' : 'Next round'));
+        }
+        expect(find.textContaining('wins!'), findsOneWidget);
+        await tapVisible(tester, find.byTooltip('Share this night'));
+        expect(find.text('Share'), findsWidgets);
+        await tester.tapAt(const Offset(4, 4));
+        await tester.pumpAndSettle();
+        await tapVisible(tester, find.text('New round, same room'));
+        expect(find.text("Bowl's empty"), findsOneWidget);
+      });
+    }
+  }
 }

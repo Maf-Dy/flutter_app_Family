@@ -11,8 +11,9 @@ import 'names_board_screen.dart';
 import 'read_aloud_screen.dart';
 import 'who_wrote_screen.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/router/game_exit.dart';
 
-/// One round at the table. Pops with a [RoundExit], or null to go back to the lobby.
+/// One round at the table. Pops with a [GameExit], or null to go back to the lobby.
 class RoundScreen extends StatelessWidget {
   const RoundScreen({super.key, required this.args});
 
@@ -68,7 +69,11 @@ class _RoundFlowState extends State<_RoundFlow> {
                 child: switch (stage) {
                   RoundStage.reading => const ReadAloudScreen(key: ValueKey(RoundStage.reading)),
                   RoundStage.board => const NamesBoardScreen(key: ValueKey(RoundStage.board)),
-                  RoundStage.reveal => WhoWroteScreen(key: const ValueKey(RoundStage.reveal), players: args.players),
+                  RoundStage.reveal => WhoWroteScreen(
+                    key: const ValueKey(RoundStage.reveal),
+                    players: args.players,
+                    category: args.category,
+                  ),
                 },
               ),
       ),

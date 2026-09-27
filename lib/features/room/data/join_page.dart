@@ -19,8 +19,17 @@ abstract final class JoinPage {
     String? name,
     List<String>? secrets,
     SubmissionError? error,
+    int? team,
   }) {
     final values = secrets ?? player?.secrets ?? const [];
+    final chosenTeam = team ?? player?.team;
+    final teamPicker = !room.playersPickTeams
+        ? ''
+        : '''
+      <fieldset class="teams">
+        <legend>${_esc(s.pickTeam)}</legend>
+        ${[for (var i = 0; i < room.teamSetup.count; i++) '<label class="team" style="--c:var(--p$i)"><input type="radio" name="team" value="$i"${chosenTeam == i ? ' checked' : ''} required><span>${_esc(s.teamName(i))}</span></label>'].join()}
+      </fieldset>''';
     final isNewRound = player != null && !player.hasSubmitted && room.round > 1;
     final fields = [
       for (var i = 0; i < room.namesPerPlayer; i++)
@@ -50,6 +59,7 @@ abstract final class JoinPage {
           value="${_esc(name ?? player?.name ?? '')}">
       </div>
       $fields
+      $teamPicker
       <p class="help">${_esc(s.privacyNote)}</p>
       <button type="submit">${_esc(s.submit)}</button>
     </form>''',
@@ -65,6 +75,7 @@ abstract final class JoinPage {
     <div class="center stack">
       <div class="drop" aria-hidden="true"><span class="fly"></span><span class="bowl"></span><span class="check">✓</span></div>
       <h1>${_esc(s.youreIn)}</h1>
+      ${player.team == null ? '' : '<p class="team-badge" style="--c:var(--p${player.team})">${_esc(s.teamName(player.team!))}</p>'}
       <p class="muted">${s.inTheBowl(player.secrets.length, '<span id="count">${room.slipCount}</span>')}</p>
       <a class="ghost" href="/?edit=1">${_esc(s.changeMine(player.secrets.length))}</a>
     </div>
@@ -148,6 +159,14 @@ button:active{transform:scale(.98)}
 .help,.muted{color:var(--muted);font-size:14px;margin:0}
 .note{margin:8px 0 0;font-weight:700;color:var(--accent)}
 .error{margin:0;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--error) 14%,transparent);color:var(--error);font-weight:700}
+.teams{border:0;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.teams legend{font-weight:800;font-size:13px;margin-bottom:6px;padding:0}
+.team{position:relative;display:block}
+.team input{position:absolute;opacity:0;width:1px;height:1px}
+.team span{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:14px;border:2px solid var(--c);color:var(--c);font-weight:800;padding:6px;text-align:center}
+.team input:checked+span{background:var(--c);color:var(--card)}
+.team input:focus-visible+span{outline:3px solid var(--ink);outline-offset:2px}
+.team-badge{margin:0;padding:6px 14px;border-radius:99px;background:var(--c);color:var(--card);font-weight:800}
 .center{flex:1;justify-content:center;align-items:center;text-align:center}
 .drop{position:relative;width:130px;height:110px}
 .drop .bowl{position:absolute;left:12px;right:12px;bottom:0;height:56px;background:var(--primary);border-radius:8px 8px 64px 64px}

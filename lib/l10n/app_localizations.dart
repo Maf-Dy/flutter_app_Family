@@ -991,6 +991,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{slip}. Tap to reveal who wrote it'**
   String tapToReveal(String slip);
+
+  /// No description provided for @gameMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Game'**
+  String get gameMode;
+
+  /// No description provided for @modeClassic.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic'**
+  String get modeClassic;
+
+  /// No description provided for @modeClassicDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Read the names aloud, then play at the table.'**
+  String get modeClassicDetail;
+
+  /// No description provided for @modeCelebrity.
+  ///
+  /// In en, this message translates to:
+  /// **'Team race'**
+  String get modeCelebrity;
+
+  /// No description provided for @modeCelebrityDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams race the clock to guess the names: describe, one word, then act it out.'**
+  String get modeCelebrityDetail;
+
+  /// No description provided for @teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get teams;
+
+  /// No description provided for @teamCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Number of teams'**
+  String get teamCount;
+
+  /// No description provided for @teamPickLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Making teams'**
+  String get teamPickLabel;
+
+  /// No description provided for @teamPickRandom.
+  ///
+  /// In en, this message translates to:
+  /// **'App shuffles'**
+  String get teamPickRandom;
+
+  /// No description provided for @teamPickPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Players choose'**
+  String get teamPickPlayers;
+
+  /// No description provided for @teamPickHost.
+  ///
+  /// In en, this message translates to:
+  /// **'I arrange'**
+  String get teamPickHost;
+
+  /// No description provided for @turnLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn length'**
+  String get turnLength;
+
+  /// No description provided for @secondsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}s'**
+  String secondsShort(int count);
+
+  /// No description provided for @teamName0.
+  ///
+  /// In en, this message translates to:
+  /// **'Purple team'**
+  String get teamName0;
+
+  /// No description provided for @teamName1.
+  ///
+  /// In en, this message translates to:
+  /// **'Orange team'**
+  String get teamName1;
+
+  /// No description provided for @teamName2.
+  ///
+  /// In en, this message translates to:
+  /// **'Green team'**
+  String get teamName2;
+
+  /// No description provided for @teamName3.
+  ///
+  /// In en, this message translates to:
+  /// **'Pink team'**
+  String get teamName3;
+
+  /// No description provided for @reshuffle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reshuffle'**
+  String get reshuffle;
+
+  /// No description provided for @tapToMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a player to move them to the next team.'**
+  String get tapToMove;
+
+  /// No description provided for @teamsChosenNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Friends picked their teams; anyone who didn\'t was balanced in.'**
+  String get teamsChosenNote;
+
+  /// No description provided for @teamNeedsPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Every team needs at least one player.'**
+  String get teamNeedsPlayers;
+
+  /// No description provided for @letsPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s play'**
+  String get letsPlay;
+
+  /// No description provided for @roundOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Round {round} of 3'**
+  String roundOf(int round);
+
+  /// No description provided for @roundDescribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe it'**
+  String get roundDescribe;
+
+  /// No description provided for @roundDescribeDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Say anything except the name itself.'**
+  String get roundDescribeDetail;
+
+  /// No description provided for @roundOneWord.
+  ///
+  /// In en, this message translates to:
+  /// **'One word'**
+  String get roundOneWord;
+
+  /// No description provided for @roundOneWordDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Just one word per name. Choose it well!'**
+  String get roundOneWordDetail;
+
+  /// No description provided for @roundActOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Act it out'**
+  String get roundActOut;
+
+  /// No description provided for @roundActOutDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'No words at all. Only acting and sounds.'**
+  String get roundActOutDetail;
+
+  /// No description provided for @startRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get startRound;
+
+  /// No description provided for @teamTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'{team}\'s turn'**
+  String teamTurn(String team);
+
+  /// No description provided for @passPhoneTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass the phone to'**
+  String get passPhoneTo;
+
+  /// No description provided for @giverHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The rest of the team guesses. Other teams, no peeking!'**
+  String get giverHint;
+
+  /// No description provided for @imReady.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m ready'**
+  String get imReady;
+
+  /// No description provided for @gotItGuess.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it!'**
+  String get gotItGuess;
+
+  /// No description provided for @skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
+
+  /// No description provided for @namesLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Bowl\'s empty} =1{1 name left} other{{count} names left}}'**
+  String namesLeft(int count);
+
+  /// No description provided for @secondsLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 second left} other{{count} seconds left}}'**
+  String secondsLeft(int count);
+
+  /// No description provided for @timesUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Time\'s up!'**
+  String get timesUp;
+
+  /// No description provided for @bowlEmptied.
+  ///
+  /// In en, this message translates to:
+  /// **'The bowl is empty!'**
+  String get bowlEmptied;
+
+  /// No description provided for @turnScore.
+  ///
+  /// In en, this message translates to:
+  /// **'+{points} for {team}'**
+  String turnScore(int points, String team);
+
+  /// No description provided for @nextTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Next team'**
+  String get nextTeam;
+
+  /// No description provided for @nextRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Next round'**
+  String get nextRound;
+
+  /// No description provided for @seeResults.
+  ///
+  /// In en, this message translates to:
+  /// **'See results'**
+  String get seeResults;
+
+  /// No description provided for @winnerIs.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} wins!'**
+  String winnerIs(String team);
+
+  /// No description provided for @itsADraw.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s a draw!'**
+  String get itsADraw;
+
+  /// No description provided for @total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get total;
+
+  /// No description provided for @leaveGameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave this game?'**
+  String get leaveGameTitle;
+
+  /// No description provided for @leaveGameBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The scores will be lost, but the names stay in the bowl.'**
+  String get leaveGameBody;
+
+  /// No description provided for @shareCardText.
+  ///
+  /// In en, this message translates to:
+  /// **'From our Family game night'**
+  String get shareCardText;
+
+  /// No description provided for @shareFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t share the card.'**
+  String get shareFailed;
+
+  /// No description provided for @moreOnCard.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count} more'**
+  String moreOnCard(int count);
+
+  /// No description provided for @shareThisNight.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this night'**
+  String get shareThisNight;
+
+  /// No description provided for @fewerTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer teams'**
+  String get fewerTeams;
+
+  /// No description provided for @moreTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'More teams'**
+  String get moreTeams;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

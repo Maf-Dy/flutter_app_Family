@@ -55,6 +55,8 @@ final class RoomState {
     this.stage = RoomStage.setup,
     this.category = const GameCategory.preset(PresetCategory.famousPeople),
     this.allowDuplicates = true,
+    this.mode = GameMode.classic,
+    this.teamSetup = const TeamSetup(),
     this.namesPerPlayer = 1,
     this.connection = const ConnectionChecking(),
     this.room,
@@ -67,6 +69,8 @@ final class RoomState {
   final RoomStage stage;
   final GameCategory category;
   final bool allowDuplicates;
+  final GameMode mode;
+  final TeamSetup teamSetup;
   final int namesPerPlayer;
   final Connection connection;
   final Room? room;
@@ -91,6 +95,8 @@ final class RoomState {
     RoomStage? stage,
     GameCategory? category,
     bool? allowDuplicates,
+    GameMode? mode,
+    TeamSetup? teamSetup,
     int? namesPerPlayer,
     Connection? connection,
     Room? room,
@@ -103,6 +109,8 @@ final class RoomState {
     stage: stage ?? this.stage,
     category: category ?? this.category,
     allowDuplicates: allowDuplicates ?? this.allowDuplicates,
+    mode: mode ?? this.mode,
+    teamSetup: teamSetup ?? this.teamSetup,
     namesPerPlayer: namesPerPlayer ?? this.namesPerPlayer,
     connection: connection ?? this.connection,
     room: clearRoom ? null : room ?? this.room,

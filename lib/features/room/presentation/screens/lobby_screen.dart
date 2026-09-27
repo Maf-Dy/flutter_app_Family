@@ -20,6 +20,8 @@ import '../widgets/no_network_card.dart';
 import '../widgets/players_list.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../category_label.dart';
+import '../../../../core/router/game_exit.dart';
+import '../../../celebrity/celebrity_route.dart';
 
 class LobbyScreen extends StatelessWidget {
   const LobbyScreen({super.key});
@@ -118,7 +120,10 @@ class LobbyScreen extends StatelessWidget {
         bottomNavigationBar: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-            child: _StartButton(onPressed: room.canStart ? () => _startReading(context) : null),
+            child: _StartButton(
+              label: room.mode == GameMode.celebrity ? context.l10n.letsPlay : context.l10n.startReading,
+              onPressed: room.canStart ? () => _startReading(context) : null,
+            ),
           ),
         ),
       ),
@@ -218,15 +223,27 @@ class LobbyScreen extends StatelessWidget {
     unawaited(Haptics.start());
     // A leftover lobby message would cover the reading screen's buttons.
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    final exit = await Navigator.of(context).pushNamed<RoundExit>(
-      AppRoutes.round,
-      arguments: RoundArgs(category: room.category, slips: slips, players: [for (final p in room.players) p.id]),
+    final exit = await Navigator.of(context).pushNamed<GameExit>(
+      room.mode == GameMode.celebrity ? AppRoutes.celebrity : AppRoutes.round,
+      arguments: switch (room.mode) {
+        GameMode.classic => RoundArgs(
+          category: room.category,
+          slips: slips,
+          players: [for (final p in room.players) p.id],
+        ),
+        GameMode.celebrity => CelebrityArgs(
+          category: room.category,
+          slips: slips,
+          players: [for (final p in room.playersIn) (id: p.id, name: p.name, team: p.team)],
+          setup: room.teamSetup,
+        ),
+      },
     );
     if (!context.mounted) return;
     switch (exit) {
-      case RoundExit.newRound:
+      case GameExit.newRound:
         cubit.nextRound();
-      case RoundExit.endGame:
+      case GameExit.endGame:
         Navigator.of(context).pop();
       case null:
         cubit.reopen();
@@ -236,8 +253,9 @@ class LobbyScreen extends StatelessWidget {
 
 /// "Start reading", which pulses twice the moment the room becomes ready.
 class _StartButton extends StatefulWidget {
-  const _StartButton({required this.onPressed});
+  const _StartButton({required this.label, required this.onPressed});
 
+  final String label;
   final VoidCallback? onPressed;
 
   @override
@@ -266,7 +284,7 @@ class _StartButtonState extends State<_StartButton> with SingleTickerProviderSta
       animation: _pulse,
       builder: (context, child) =>
           Transform.scale(scale: 1 + 0.05 * math.sin(_pulse.value * math.pi * 2).abs(), child: child),
-      child: FilledButton(onPressed: widget.onPressed, child: Text(context.l10n.startReading)),
+      child: FilledButton(onPressed: widget.onPressed, child: Text(widget.label)),
     );
   }
 }

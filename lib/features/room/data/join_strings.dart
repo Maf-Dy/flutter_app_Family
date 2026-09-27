@@ -35,6 +35,8 @@ sealed class JoinStrings {
   String error(SubmissionError error, int namesPerPlayer);
   String get hostYourOwn;
   String get getOnPlay;
+  String get pickTeam;
+  String teamName(int index);
 }
 
 final class EnglishJoinStrings extends JoinStrings {
@@ -108,11 +110,16 @@ final class EnglishJoinStrings extends JoinStrings {
       namesPerPlayer == 1 ? 'Write a secret name first.' : 'Fill in all $namesPerPlayer secret names.',
     SubmissionError.tooLong => 'That is a bit long. Names can be up to ${Room.maxSecretLength} letters.',
     SubmissionError.duplicate => 'Someone already put that name in the bowl. Pick someone else!',
+    SubmissionError.invalidTeam => 'Pick one of the teams.',
   };
   @override
   String get hostYourOwn => 'Want to host your own game?';
   @override
   String get getOnPlay => 'Get Family on Google Play';
+  @override
+  String get pickTeam => 'Your team';
+  @override
+  String teamName(int index) => const ['Purple team', 'Orange team', 'Green team', 'Pink team'][index % 4];
 }
 
 /// Egyptian Arabic, playful on purpose.
@@ -187,9 +194,15 @@ final class ArabicJoinStrings extends JoinStrings {
       namesPerPlayer == 1 ? 'اكتب اسمك السري الأول.' : 'املى الـ $namesPerPlayer أسامي كلهم.',
     SubmissionError.tooLong => 'طولت شوية! الاسم آخره ${Room.maxSecretLength} حرف.',
     SubmissionError.duplicate => 'حد سبقك بالاسم ده 😅 اكتب حد تاني!',
+    SubmissionError.invalidTeam => 'اختار فريق من دول.',
   };
   @override
   String get hostYourOwn => 'عايز تعمل قعدتك؟';
   @override
   String get getOnPlay => 'نزّل لعبة العيلة من جوجل بلاي';
+  @override
+  String get pickTeam => 'فريقك';
+  @override
+  String teamName(int index) =>
+      const ['الفريق البنفسجي', 'الفريق البرتقاني', 'الفريق الأخضر', 'الفريق البمبي'][index % 4];
 }

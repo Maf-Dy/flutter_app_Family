@@ -10,4 +10,13 @@ abstract final class Haptics {
 
   /// A slip turned over: next name, or a reveal.
   static Future<void> tick() => HapticFeedback.selectionClick();
+
+  /// A team guessed a name.
+  static Future<void> point() => HapticFeedback.lightImpact();
+
+  /// The last seconds of a turn.
+  static Future<void> countdown() => HapticFeedback.selectionClick();
+
+  /// The turn's clock ran out.
+  static Future<void> timeUp() => HapticFeedback.heavyImpact();
 }

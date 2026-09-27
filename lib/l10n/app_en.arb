@@ -1,12 +1,16 @@
 {
   "@@locale": "en",
-
   "appTitle": "Family Game",
   "wordmark": "family",
   "you": "You",
   "youSuffix": "{name} (you)",
-  "@youSuffix": { "placeholders": { "name": { "type": "String" } } },
-
+  "@youSuffix": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "homeHeadline": "Who wrote\nwhat?",
   "homeTagline": "Everyone secretly drops a name in the bowl. Then put the phone down and play.",
   "hostRoom": "Host a room",
@@ -17,7 +21,6 @@
   "howToPlayStep3": "Put the phone down. Take turns asking someone \"Did you write …?\" Guess right and they join your family. The last family standing wins.",
   "howToPlayStep4": "Afterwards, tap \"Who wrote what?\" to see them all.",
   "gotIt": "Got it",
-
   "settings": "Settings",
   "yourName": "Your name",
   "yourNameHint": "What friends call you",
@@ -26,7 +29,6 @@
   "languageEnglish": "English",
   "languageArabic": "العربي المصري",
   "done": "Done",
-
   "newRoom": "New room",
   "category": "Category",
   "categoryFamousPeople": "Famous people",
@@ -53,7 +55,13 @@
   "fewerNames": "Fewer names",
   "moreNames": "More names",
   "namesPerPlayerValue": "{count, plural, =1{1 name per player} other{{count} names per player}}",
-  "@namesPerPlayerValue": { "placeholders": { "count": { "type": "int" } } },
+  "@namesPerPlayerValue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "rules": "Rules",
   "sameNameTwice": "Same name twice",
   "sameNameTwiceOn": "Allowed. Two people writing the same person makes for a funny round.",
@@ -72,7 +80,6 @@
   "connectionNote": "Checked automatically. Nothing goes over the internet; the room lives on this phone.",
   "openRoom": "Open room",
   "openRoomFailed": "Couldn't open the room. Close other apps that share on Wi-Fi and try again.",
-
   "closeRoom": "Close room",
   "closeRoomTitle": "Close the room?",
   "closeRoomBody": "Friends' pages stop working and the names in the bowl are cleared.",
@@ -81,21 +88,51 @@
   "hotspotOn": "Hotspot on",
   "waitingForNetwork": "Waiting for a network",
   "playersInChip": "{label} · {count} in",
-  "@playersInChip": { "placeholders": { "label": { "type": "String" }, "count": { "type": "int" } } },
+  "@playersInChip": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "linkBroken": "This phone couldn't open its own link, so friends won't either. Tap Check again, or use a hotspot.",
   "checkAgain": "Check again",
   "linkNotOpening": "Link not opening?",
   "onWifiNow": "You're on Wi-Fi now. Friends on the hotspot stay connected until you switch.",
   "switchToWifi": "Switch to Wi-Fi",
   "inTheBowl": "{count, plural, =0{Bowl's empty} =1{1 in the bowl} other{{count} in the bowl}}",
-  "@inTheBowl": { "placeholders": { "count": { "type": "int" } } },
+  "@inTheBowl": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "readyWhenYouAre": "Ready when you are",
   "morePlayersToStart": "{count, plural, =1{1 more player to start} other{{count} more players to start}}",
-  "@morePlayersToStart": { "placeholders": { "count": { "type": "int" } } },
+  "@morePlayersToStart": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "startReading": "Start reading",
   "yourSecretName": "Your secret name",
   "yourSecretNameOf": "Your secret name ({index} of {total})",
-  "@yourSecretNameOf": { "placeholders": { "index": { "type": "int" }, "total": { "type": "int" } } },
+  "@yourSecretNameOf": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "show": "Show",
   "hide": "Hide",
   "dropInBowl": "Drop in the bowl",
@@ -103,34 +140,86 @@
   "nameIn": "Name in",
   "waiting": "Waiting",
   "secretsOf": "{done} of {total}",
-  "@secretsOf": { "placeholders": { "done": { "type": "int" }, "total": { "type": "int" } } },
+  "@secretsOf": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "arrival": "{name}'s name is in",
-  "@arrival": { "placeholders": { "name": { "type": "String" } } },
-
+  "@arrival": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "scanToJoin": "Scan to join",
   "thenScanThis": "Then scan this",
   "share": "Share",
   "copy": "Copy",
   "shareText": "Join our Family game: {url}",
-  "@shareText": { "placeholders": { "url": { "type": "String" } } },
+  "@shareText": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
   "linkCopied": "Link copied",
   "roomCodeLabel": "Room {code}",
-  "@roomCodeLabel": { "placeholders": { "code": { "type": "String" } } },
+  "@roomCodeLabel": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
   "qrForLink": "QR code for {url}",
-  "@qrForLink": { "placeholders": { "url": { "type": "String" } } },
+  "@qrForLink": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
   "qrForWifi": "QR code to join the Wi-Fi {ssid}",
-  "@qrForWifi": { "placeholders": { "ssid": { "type": "String" } } },
+  "@qrForWifi": {
+    "placeholders": {
+      "ssid": {
+        "type": "String"
+      }
+    }
+  },
   "stepJoinWifi": "Join the Wi-Fi",
   "stepOpenGame": "Open the game",
   "stepLabel": "Step {step}, {label}",
-  "@stepLabel": { "placeholders": { "step": { "type": "int" }, "label": { "type": "String" } } },
+  "@stepLabel": {
+    "placeholders": {
+      "step": {
+        "type": "int"
+      },
+      "label": {
+        "type": "String"
+      }
+    }
+  },
   "scanWithCamera": "Scan with camera",
   "wifi": "Wi-Fi",
   "password": "Password",
   "next": "Next",
   "privateHotspotNote": "This is a private hotspot made by the app, so it doesn't show in your phone's Hotspot settings. Friends see \"{ssid}\" in their Wi-Fi list.",
-  "@privateHotspotNote": { "placeholders": { "ssid": { "type": "String" } } },
-
+  "@privateHotspotNote": {
+    "placeholders": {
+      "ssid": {
+        "type": "String"
+      }
+    }
+  },
   "noWifiAround": "No Wi-Fi around",
   "noWifiAroundCanCreate": "The app can make a private hotspot. Friends join it by scanning a code. They lose mobile data while connected, which the game doesn't need.",
   "noWifiAroundCannotCreate": "Turn on your phone's hotspot in Settings, then come back here. Friends join the hotspot and scan the code.",
@@ -143,13 +232,17 @@
   "hotspotUnsupported": "This phone can't create a hotspot from an app. Turn on your hotspot in Settings instead.",
   "hotspotNoAddress": "The hotspot started, but the room couldn't find it. Tap Check again.",
   "hotspotFailed": "Android couldn't start the hotspot. Make sure Wi-Fi and Location are on, then try again.",
-
   "linkHelpSameWifi": "Friends must be on the same Wi-Fi as this phone, with mobile data not taking over.",
   "linkHelpTypeExactly": "Type the link exactly, including the number after the colon: {url}",
-  "@linkHelpTypeExactly": { "placeholders": { "url": { "type": "String" } } },
+  "@linkHelpTypeExactly": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
   "linkHelpIsolation": "Office, hotel, café and guest Wi-Fi often stop phones from seeing each other. The link then never opens, whatever you try. Use this phone's hotspot instead.",
   "useHotspotInstead": "Use a hotspot instead",
-
   "leaveRoundTitle": "Leave this round?",
   "leaveRoundBody": "The names stay in the bowl, and friends can change them again.",
   "stay": "Stay",
@@ -162,9 +255,24 @@
   "nextName": "Next name",
   "doneReading": "Done reading",
   "nameXofY": "Name {index} of {total}",
-  "@nameXofY": { "placeholders": { "index": { "type": "int" }, "total": { "type": "int" } } },
+  "@nameXofY": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "shuffling": "{count, plural, =1{Shuffling 1 name…} other{Shuffling {count} names…}}",
-  "@shuffling": { "placeholders": { "count": { "type": "int" } } },
+  "@shuffling": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "tapToSkip": "Tap to skip",
   "namesOnTheTable": "Names on the table",
   "boardHint": "Put the phone down and play. The screen stays on in case anyone forgets a name.",
@@ -175,7 +283,136 @@
   "newRoundSameRoom": "New round, same room",
   "endGame": "End game",
   "writtenBy": "{slip}, written by {name}",
-  "@writtenBy": { "placeholders": { "slip": { "type": "String" }, "name": { "type": "String" } } },
+  "@writtenBy": {
+    "placeholders": {
+      "slip": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "tapToReveal": "{slip}. Tap to reveal who wrote it",
-  "@tapToReveal": { "placeholders": { "slip": { "type": "String" } } }
+  "@tapToReveal": {
+    "placeholders": {
+      "slip": {
+        "type": "String"
+      }
+    }
+  },
+  "gameMode": "Game",
+  "modeClassic": "Classic",
+  "modeClassicDetail": "Read the names aloud, then play at the table.",
+  "modeCelebrity": "Team race",
+  "modeCelebrityDetail": "Teams race the clock to guess the names: describe, one word, then act it out.",
+  "teams": "Teams",
+  "teamCount": "Number of teams",
+  "teamPickLabel": "Making teams",
+  "teamPickRandom": "App shuffles",
+  "teamPickPlayers": "Players choose",
+  "teamPickHost": "I arrange",
+  "turnLength": "Turn length",
+  "secondsShort": "{count}s",
+  "@secondsShort": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "teamName0": "Purple team",
+  "teamName1": "Orange team",
+  "teamName2": "Green team",
+  "teamName3": "Pink team",
+  "reshuffle": "Reshuffle",
+  "tapToMove": "Tap a player to move them to the next team.",
+  "teamsChosenNote": "Friends picked their teams; anyone who didn't was balanced in.",
+  "teamNeedsPlayers": "Every team needs at least one player.",
+  "letsPlay": "Let's play",
+  "roundOf": "Round {round} of 3",
+  "@roundOf": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      }
+    }
+  },
+  "roundDescribe": "Describe it",
+  "roundDescribeDetail": "Say anything except the name itself.",
+  "roundOneWord": "One word",
+  "roundOneWordDetail": "Just one word per name. Choose it well!",
+  "roundActOut": "Act it out",
+  "roundActOutDetail": "No words at all. Only acting and sounds.",
+  "startRound": "Start",
+  "teamTurn": "{team}'s turn",
+  "@teamTurn": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "passPhoneTo": "Pass the phone to",
+  "giverHint": "The rest of the team guesses. Other teams, no peeking!",
+  "imReady": "I'm ready",
+  "gotItGuess": "Got it!",
+  "skip": "Skip",
+  "namesLeft": "{count, plural, =0{Bowl's empty} =1{1 name left} other{{count} names left}}",
+  "@namesLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "secondsLeft": "{count, plural, =1{1 second left} other{{count} seconds left}}",
+  "@secondsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "timesUp": "Time's up!",
+  "bowlEmptied": "The bowl is empty!",
+  "turnScore": "+{points} for {team}",
+  "@turnScore": {
+    "placeholders": {
+      "points": {
+        "type": "int"
+      },
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "nextTeam": "Next team",
+  "nextRound": "Next round",
+  "seeResults": "See results",
+  "winnerIs": "{team} wins!",
+  "@winnerIs": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "itsADraw": "It's a draw!",
+  "total": "Total",
+  "leaveGameTitle": "Leave this game?",
+  "leaveGameBody": "The scores will be lost, but the names stay in the bowl.",
+  "shareCardText": "From our Family game night",
+  "shareFailed": "Couldn't share the card.",
+  "moreOnCard": "+{count} more",
+  "@moreOnCard": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shareThisNight": "Share this night",
+  "fewerTeams": "Fewer teams",
+  "moreTeams": "More teams"
 }

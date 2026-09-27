@@ -10,6 +10,3 @@ final class RoundArgs {
   /// Player ids in join order, so avatars keep the colours they had in the lobby.
   final List<String> players;
 }
-
-/// How the host left the round. Null (system back) means "back to the lobby".
-enum RoundExit { newRound, endGame }

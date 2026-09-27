@@ -90,6 +90,29 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
                 ),
               ),
               const SizedBox(height: 24),
+              SectionLabel(l10n.gameMode),
+              const SizedBox(height: 10),
+              for (final (mode, title, detail, icon) in [
+                (GameMode.classic, l10n.modeClassic, l10n.modeClassicDetail, Icons.local_dining_rounded),
+                (GameMode.celebrity, l10n.modeCelebrity, l10n.modeCelebrityDetail, Icons.timer_rounded),
+              ])
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _ModeOption(
+                    title: title,
+                    detail: detail,
+                    icon: icon,
+                    selected: state.mode == mode,
+                    onTap: () => cubit.setMode(mode),
+                  ),
+                ),
+              if (state.mode == GameMode.celebrity) ...[
+                const SizedBox(height: 16),
+                SectionLabel(l10n.teams),
+                const SizedBox(height: 10),
+                _TeamSettings(setup: state.teamSetup, onChanged: cubit.setTeamSetup),
+              ],
+              const SizedBox(height: 24),
               SectionLabel(l10n.category),
               const SizedBox(height: 10),
               Wrap(
@@ -184,6 +207,141 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
                 ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
                 : Text(l10n.openRoom),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ModeOption extends StatelessWidget {
+  const _ModeOption({
+    required this.title,
+    required this.detail,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String title;
+  final String detail;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: Material(
+        color: selected ? scheme.primaryContainer : scheme.surfaceContainerLowest,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: BorderSide(color: selected ? scheme.primary : scheme.outlineVariant, width: selected ? 2 : 1),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                Icon(icon, color: selected ? scheme.onPrimaryContainer : scheme.onSurfaceVariant),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: theme.textTheme.titleMedium),
+                      Text(detail, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TeamSettings extends StatelessWidget {
+  const _TeamSettings({required this.setup, required this.onChanged});
+
+  final TeamSetup setup;
+  final ValueChanged<TeamSetup> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(child: Text(l10n.teamCount, style: theme.textTheme.titleMedium)),
+                IconButton.filledTonal(
+                  tooltip: l10n.fewerTeams,
+                  onPressed: setup.count > TeamSetup.minTeams
+                      ? () => onChanged(setup.copyWith(count: setup.count - 1))
+                      : null,
+                  icon: const Icon(Icons.remove_rounded),
+                ),
+                SizedBox(
+                  width: 36,
+                  child: Text('${setup.count}', textAlign: TextAlign.center, style: theme.textTheme.headlineSmall),
+                ),
+                IconButton.filledTonal(
+                  tooltip: l10n.moreTeams,
+                  onPressed: setup.count < TeamSetup.maxTeams
+                      ? () => onChanged(setup.copyWith(count: setup.count + 1))
+                      : null,
+                  icon: const Icon(Icons.add_rounded),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Text(l10n.teamPickLabel, style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final (pick, label) in [
+                  (TeamPick.random, l10n.teamPickRandom),
+                  (TeamPick.players, l10n.teamPickPlayers),
+                  (TeamPick.host, l10n.teamPickHost),
+                ])
+                  SelectChip(
+                    label: label,
+                    selected: setup.pick == pick,
+                    onTap: () => onChanged(setup.copyWith(pick: pick)),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            Text(l10n.turnLength, style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final seconds in TeamSetup.turnChoices)
+                  SelectChip(
+                    label: l10n.secondsShort(seconds),
+                    selected: setup.turnSeconds == seconds,
+                    onTap: () => onChanged(setup.copyWith(turnSeconds: seconds)),
+                  ),
+              ],
+            ),
+          ],
         ),
       ),
     );

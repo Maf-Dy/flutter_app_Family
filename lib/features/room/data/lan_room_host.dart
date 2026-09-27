@@ -127,7 +127,10 @@ class LanRoomHost implements RoomHost {
     }
     final name = form['name'] ?? '';
     final secrets = [for (var i = 0; i < _room.namesPerPlayer; i++) form['s$i'] ?? ''];
-    final error = _room.validate(name: name, secrets: secrets, playerId: clientId);
+    final team = int.tryParse(form['team'] ?? '');
+    final error = _room.playersPickTeams && team == null
+        ? SubmissionError.invalidTeam
+        : _room.validate(name: name, secrets: secrets, playerId: clientId, team: team);
     // Without a cookie there is no stable identity yet; the cookie set on this
     // response makes the next attempt stick.
     if (error != null || clientId == null) {
@@ -136,11 +139,11 @@ class LanRoomHost implements RoomHost {
         response,
         error == SubmissionError.roomClosed
             ? JoinPage.reading(_room, strings, player)
-            : JoinPage.form(_room, strings, player: player, name: name, secrets: secrets, error: error),
+            : JoinPage.form(_room, strings, player: player, name: name, secrets: secrets, error: error, team: team),
       );
       return;
     }
-    _set(_room.withSubmission(playerId: clientId, name: name, secrets: secrets));
+    _set(_room.withSubmission(playerId: clientId, name: name, secrets: secrets, team: team));
     response
       ..statusCode = HttpStatus.seeOther
       ..headers.set(HttpHeaders.locationHeader, '/');

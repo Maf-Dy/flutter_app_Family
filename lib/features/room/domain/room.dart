@@ -4,6 +4,51 @@ import 'category.dart';
 
 export 'category.dart';
 
+/// How the room plays once the names are in.
+enum GameMode {
+  /// Read the names aloud, then play at the table.
+  classic,
+
+  /// Teams take turns getting their team to guess the names: describe, one word, act it out.
+  celebrity,
+}
+
+/// How players end up in teams in [GameMode.celebrity].
+enum TeamPick {
+  /// The app shuffles players into balanced teams.
+  random,
+
+  /// Friends choose on the join page; anyone who doesn't is balanced in.
+  players,
+
+  /// The host moves players between teams.
+  host,
+}
+
+/// Team settings for [GameMode.celebrity].
+@immutable
+final class TeamSetup {
+  const TeamSetup({this.count = 2, this.pick = TeamPick.random, this.turnSeconds = 60});
+
+  static const minTeams = 2;
+  static const maxTeams = 4;
+  static const turnChoices = [30, 45, 60, 90];
+
+  final int count;
+  final TeamPick pick;
+  final int turnSeconds;
+
+  TeamSetup copyWith({int? count, TeamPick? pick, int? turnSeconds}) =>
+      TeamSetup(count: count ?? this.count, pick: pick ?? this.pick, turnSeconds: turnSeconds ?? this.turnSeconds);
+
+  @override
+  bool operator ==(Object other) =>
+      other is TeamSetup && other.count == count && other.pick == pick && other.turnSeconds == turnSeconds;
+
+  @override
+  int get hashCode => Object.hash(count, pick, turnSeconds);
+}
+
 enum RoomPhase {
   /// Friends can join and change their names.
   collecting,
@@ -21,6 +66,9 @@ enum SubmissionError {
 
   /// Someone already put this name in the bowl, and the room asks for different names.
   duplicate,
+
+  /// A team was chosen that the room doesn't have.
+  invalidTeam,
 }
 
 /// One name in the bowl.
@@ -35,7 +83,7 @@ final class Slip {
 
 @immutable
 final class Player {
-  const Player({required this.id, required this.name, this.secrets = const [], this.isHost = false});
+  const Player({required this.id, required this.name, this.secrets = const [], this.isHost = false, this.team});
 
   static const hostId = 'host';
 
@@ -44,10 +92,13 @@ final class Player {
   final List<String> secrets;
   final bool isHost;
 
+  /// The team the player chose on the join page (0-based), if the room lets them choose.
+  final int? team;
+
   bool get hasSubmitted => secrets.isNotEmpty;
 
   Player withSecrets(List<String> secrets) =>
-      Player(id: id, name: name, secrets: List.unmodifiable(secrets), isHost: isHost);
+      Player(id: id, name: name, secrets: List.unmodifiable(secrets), isHost: isHost, team: team);
 }
 
 /// A game room: who joined, what they wrote, and whether the bowl is open.
@@ -62,6 +113,8 @@ final class Room {
     required this.namesPerPlayer,
     required this.hostName,
     this.allowDuplicates = true,
+    this.mode = GameMode.classic,
+    this.teamSetup = const TeamSetup(),
     this.phase = RoomPhase.collecting,
     this.round = 1,
     this.players = const [],
@@ -83,6 +136,10 @@ final class Room {
   /// Whether two slips may carry the same name. Different spellings of one
   /// person always get through; that is part of the fun.
   final bool allowDuplicates;
+  final GameMode mode;
+
+  /// Only used in [GameMode.celebrity].
+  final TeamSetup teamSetup;
   final RoomPhase phase;
   final int round;
 
@@ -95,8 +152,17 @@ final class Room {
       if (p.hasSubmitted) p,
   ];
   int get slipCount => players.fold(0, (sum, p) => sum + p.secrets.length);
-  bool get canStart => playersIn.length >= minPlayers;
-  int get playersNeeded => (minPlayers - playersIn.length).clamp(0, minPlayers);
+
+  /// Players needed before the game can start: every team needs a clue-giver and a guesser.
+  int get requiredPlayers => switch (mode) {
+    GameMode.classic => minPlayers,
+    GameMode.celebrity => teamSetup.count * 2,
+  };
+  bool get canStart => playersIn.length >= requiredPlayers;
+  int get playersNeeded => (requiredPlayers - playersIn.length).clamp(0, requiredPlayers);
+
+  /// Whether friends pick their team on the join page.
+  bool get playersPickTeams => mode == GameMode.celebrity && teamSetup.pick == TeamPick.players;
 
   Player? playerById(String id) {
     for (final p in players) {
@@ -117,8 +183,9 @@ final class Room {
 
   /// Checks a friend's form before it is accepted. Returns null when valid.
   /// [playerId] lets a friend resubmit their own names without clashing with themselves.
-  SubmissionError? validate({required String name, required List<String> secrets, String? playerId}) {
+  SubmissionError? validate({required String name, required List<String> secrets, String? playerId, int? team}) {
     if (!isCollecting) return SubmissionError.roomClosed;
+    if (team != null && (!playersPickTeams || team < 0 || team >= teamSetup.count)) return SubmissionError.invalidTeam;
     final cleanName = tidy(name);
     final cleanSecrets = secrets.map(tidy).toList();
     if (cleanName.isEmpty) return SubmissionError.missingName;
@@ -157,9 +224,12 @@ final class Room {
   }
 
   /// Adds a friend, or replaces what they sent before. Call [validate] first.
-  Room withSubmission({required String playerId, required String name, required List<String> secrets}) {
-    assert(validate(name: name, secrets: secrets, playerId: playerId) == null, 'Submission must be validated first');
-    final player = Player(id: playerId, name: tidy(name), secrets: List.unmodifiable(secrets.map(tidy)));
+  Room withSubmission({required String playerId, required String name, required List<String> secrets, int? team}) {
+    assert(
+      validate(name: name, secrets: secrets, playerId: playerId, team: team) == null,
+      'Submission must be validated first',
+    );
+    final player = Player(id: playerId, name: tidy(name), secrets: List.unmodifiable(secrets.map(tidy)), team: team);
     final index = joinIndexOf(playerId);
     if (index < 0 && players.length >= maxPlayers) return this;
     return _copy(
@@ -204,6 +274,8 @@ final class Room {
     namesPerPlayer: namesPerPlayer,
     hostName: hostName,
     allowDuplicates: allowDuplicates,
+    mode: mode,
+    teamSetup: teamSetup,
     phase: phase ?? this.phase,
     round: round ?? this.round,
     players: players == null ? this.players : List.unmodifiable(players),

@@ -29,6 +29,15 @@ The app speaks English and Egyptian Arabic (right to left). It follows the phone
 4. **Names on the table.** The list stays on screen (the screen stays awake) in case anyone forgets a name. Play at the table.
 5. **Who wrote what?** Optional, after the game: each slip flips to show who wrote it. Then start a new round in the same room.
 
+## Team race mode
+
+Pick **Team race** when opening a room. Everyone writes names as usual, then:
+
+1. **Teams.** 2–4 teams, made one of three ways: the app shuffles (with Reshuffle), friends pick on the join page, or the host taps players to move them.
+2. **Three rounds** with the same names: *describe it* (anything but the name), *one word*, then *act it out*.
+3. **Turns.** The phone goes to each team's next clue-giver. Tap *Got it!* for every name the team guesses, or *Skip* to put it back, before the clock (30–90 s) runs out.
+4. **Results** with confetti. *Share this night* makes a picture of the scores for the family group; the classic mode's *Who wrote what?* has one too.
+
 ## Running it
 
 Requires Flutter 3.44 (Dart 3.12).
@@ -72,13 +81,15 @@ lib/
 │   ├── motion/                    # durations, curves, shared-axis transitions
 │   ├── platform/haptics.dart
 │   ├── router/app_router.dart
-│   └── widgets/                   # Bowl, KeepScreenOn, PlayerAvatar
+│   └── widgets/                   # Bowl, KeepScreenOn, PlayerAvatar, ShareCard
 └── features/
     ├── room/                      # hosting: new room + lobby
     │   ├── domain/                # Room rules, RoomHost and NetworkAccess contracts
     │   ├── data/                  # LanRoomHost (HTTP server), JoinPage (HTML), DeviceNetwork
     │   └── presentation/          # RoomCubit, home / new room / lobby screens
-    └── round/                     # read aloud, names on the table, who wrote what
+    ├── round/                     # classic: read aloud, names on the table, who wrote what
+    ├── celebrity/                 # team race: teams, rounds, turn clock, results
+    └── settings/                  # host name and language, saved on the phone
         ├── round_route.dart       # RoundArgs / RoundExit: what the lobby hands over
         └── presentation/          # RoundCubit and screens
 android/app/src/main/kotlin/…/LocalHotspot.kt   # Android local-only hotspot bridge

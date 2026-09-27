@@ -119,4 +119,30 @@ void main() {
     final english = await send('GET', '/', language: 'en-US');
     expect(english.body, contains('dir="ltr"'));
   });
+
+  test('lets friends pick a team when the room allows it', () async {
+    await host.close();
+    host = LanRoomHost(preferredPort: 0);
+    port = await host.open(
+      const Room(
+        code: 'K7Q4',
+        category: GameCategory.preset(PresetCategory.movies),
+        namesPerPlayer: 1,
+        hostName: 'Mafdy',
+        mode: GameMode.celebrity,
+        teamSetup: TeamSetup(count: 3, pick: TeamPick.players),
+      ),
+    );
+    final form = await send('GET', '/');
+    expect(form.body, contains('name="team" value="2"'));
+    expect(form.body, contains('Green team'));
+
+    final missing = await send('POST', '/', form: 'name=Omar&s0=Up');
+    expect(missing.status, HttpStatus.badRequest);
+    expect(missing.body, contains('Pick one of the teams'));
+
+    await send('POST', '/', form: 'name=Omar&s0=Up&team=2');
+    expect(host.room.players.single.team, 2);
+    expect((await send('GET', '/')).body, contains('team-badge'));
+  });
 }

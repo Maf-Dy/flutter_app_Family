@@ -5,6 +5,7 @@ import '../../../../core/theme/game_colors.dart';
 import '../../../../core/widgets/player_avatar.dart';
 import '../../domain/room.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../team_style.dart';
 
 /// Who has joined, and whether their names are in. Never shows what they wrote.
 class PlayersList extends StatelessWidget {
@@ -22,6 +23,7 @@ class PlayersList extends StatelessWidget {
             key: ValueKey(player.id),
             child: _PlayerRow(
               name: player.isHost ? context.l10n.youSuffix(player.name) : player.name,
+              team: room.playersPickTeams ? player.team : null,
               joinIndex: i,
               status: _status(context.l10n, player),
             ),
@@ -46,9 +48,12 @@ class PlayersList extends StatelessWidget {
 }
 
 class _PlayerRow extends StatelessWidget {
-  const _PlayerRow({required this.name, required this.joinIndex, required this.status});
+  const _PlayerRow({required this.name, required this.joinIndex, required this.status, this.team});
 
   final String name;
+
+  /// The team the player picked, shown when players choose their teams.
+  final int? team;
   final int joinIndex;
   final ({String label, bool done}) status;
 
@@ -67,7 +72,17 @@ class _PlayerRow extends StatelessWidget {
             PlayerAvatar(name: name, joinIndex: joinIndex),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(name, style: theme.textTheme.titleMedium, overflow: TextOverflow.ellipsis),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(name, style: theme.textTheme.titleMedium, overflow: TextOverflow.ellipsis),
+                  if (team case final team?)
+                    Text(
+                      teamName(context.l10n, team),
+                      style: theme.textTheme.labelMedium?.copyWith(color: teamColor(context, team)),
+                    ),
+                ],
+              ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

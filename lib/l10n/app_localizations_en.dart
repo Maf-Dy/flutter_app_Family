@@ -531,4 +531,198 @@ class AppLocalizationsEn extends AppLocalizations {
   String tapToReveal(String slip) {
     return '$slip. Tap to reveal who wrote it';
   }
+
+  @override
+  String get gameMode => 'Game';
+
+  @override
+  String get modeClassic => 'Classic';
+
+  @override
+  String get modeClassicDetail => 'Read the names aloud, then play at the table.';
+
+  @override
+  String get modeCelebrity => 'Team race';
+
+  @override
+  String get modeCelebrityDetail => 'Teams race the clock to guess the names: describe, one word, then act it out.';
+
+  @override
+  String get teams => 'Teams';
+
+  @override
+  String get teamCount => 'Number of teams';
+
+  @override
+  String get teamPickLabel => 'Making teams';
+
+  @override
+  String get teamPickRandom => 'App shuffles';
+
+  @override
+  String get teamPickPlayers => 'Players choose';
+
+  @override
+  String get teamPickHost => 'I arrange';
+
+  @override
+  String get turnLength => 'Turn length';
+
+  @override
+  String secondsShort(int count) {
+    return '${count}s';
+  }
+
+  @override
+  String get teamName0 => 'Purple team';
+
+  @override
+  String get teamName1 => 'Orange team';
+
+  @override
+  String get teamName2 => 'Green team';
+
+  @override
+  String get teamName3 => 'Pink team';
+
+  @override
+  String get reshuffle => 'Reshuffle';
+
+  @override
+  String get tapToMove => 'Tap a player to move them to the next team.';
+
+  @override
+  String get teamsChosenNote => 'Friends picked their teams; anyone who didn\'t was balanced in.';
+
+  @override
+  String get teamNeedsPlayers => 'Every team needs at least one player.';
+
+  @override
+  String get letsPlay => 'Let\'s play';
+
+  @override
+  String roundOf(int round) {
+    return 'Round $round of 3';
+  }
+
+  @override
+  String get roundDescribe => 'Describe it';
+
+  @override
+  String get roundDescribeDetail => 'Say anything except the name itself.';
+
+  @override
+  String get roundOneWord => 'One word';
+
+  @override
+  String get roundOneWordDetail => 'Just one word per name. Choose it well!';
+
+  @override
+  String get roundActOut => 'Act it out';
+
+  @override
+  String get roundActOutDetail => 'No words at all. Only acting and sounds.';
+
+  @override
+  String get startRound => 'Start';
+
+  @override
+  String teamTurn(String team) {
+    return '$team\'s turn';
+  }
+
+  @override
+  String get passPhoneTo => 'Pass the phone to';
+
+  @override
+  String get giverHint => 'The rest of the team guesses. Other teams, no peeking!';
+
+  @override
+  String get imReady => 'I\'m ready';
+
+  @override
+  String get gotItGuess => 'Got it!';
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String namesLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count names left',
+      one: '1 name left',
+      zero: 'Bowl\'s empty',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String secondsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seconds left',
+      one: '1 second left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get timesUp => 'Time\'s up!';
+
+  @override
+  String get bowlEmptied => 'The bowl is empty!';
+
+  @override
+  String turnScore(int points, String team) {
+    return '+$points for $team';
+  }
+
+  @override
+  String get nextTeam => 'Next team';
+
+  @override
+  String get nextRound => 'Next round';
+
+  @override
+  String get seeResults => 'See results';
+
+  @override
+  String winnerIs(String team) {
+    return '$team wins!';
+  }
+
+  @override
+  String get itsADraw => 'It\'s a draw!';
+
+  @override
+  String get total => 'Total';
+
+  @override
+  String get leaveGameTitle => 'Leave this game?';
+
+  @override
+  String get leaveGameBody => 'The scores will be lost, but the names stay in the bowl.';
+
+  @override
+  String get shareCardText => 'From our Family game night';
+
+  @override
+  String get shareFailed => 'Couldn\'t share the card.';
+
+  @override
+  String moreOnCard(int count) {
+    return '+$count more';
+  }
+
+  @override
+  String get shareThisNight => 'Share this night';
+
+  @override
+  String get fewerTeams => 'Fewer teams';
+
+  @override
+  String get moreTeams => 'More teams';
 }

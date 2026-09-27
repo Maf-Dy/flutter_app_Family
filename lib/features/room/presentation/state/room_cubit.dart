@@ -52,6 +52,11 @@ class RoomCubit extends Cubit<RoomState> {
 
   void setAllowDuplicates(bool allow) => emit(state.copyWith(allowDuplicates: allow));
 
+  void setMode(GameMode mode) => emit(state.copyWith(mode: mode));
+
+  void setTeamSetup(TeamSetup setup) =>
+      emit(state.copyWith(teamSetup: setup.copyWith(count: setup.count.clamp(TeamSetup.minTeams, TeamSetup.maxTeams))));
+
   void setNamesPerPlayer(int count) => emit(state.copyWith(namesPerPlayer: count.clamp(1, Room.maxNamesPerPlayer)));
 
   /// Re-checks how friends can reach this phone. Safe to call often: a call that
@@ -182,6 +187,8 @@ class RoomCubit extends Cubit<RoomState> {
       namesPerPlayer: state.namesPerPlayer,
       hostName: hostName,
       allowDuplicates: state.allowDuplicates,
+      mode: state.mode,
+      teamSetup: state.teamSetup,
     );
     try {
       final port = await host.open(room);

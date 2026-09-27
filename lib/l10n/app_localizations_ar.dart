@@ -534,4 +534,202 @@ class AppLocalizationsAr extends AppLocalizations {
   String tapToReveal(String slip) {
     return '$slip. دوس عشان تعرف مين كاتبه';
   }
+
+  @override
+  String get gameMode => 'اللعبة';
+
+  @override
+  String get modeClassic => 'الكلاسيك';
+
+  @override
+  String get modeClassicDetail => 'نقرا الأسامي بصوت عالي، وبعدين نلعب على الترابيزة.';
+
+  @override
+  String get modeCelebrity => 'سباق الفرق';
+
+  @override
+  String get modeCelebrityDetail => 'الفرق بتسابق الوقت وتخمّن الأسامي: وصف، كلمة واحدة، وبعدين تمثيل.';
+
+  @override
+  String get teams => 'الفرق';
+
+  @override
+  String get teamCount => 'عدد الفرق';
+
+  @override
+  String get teamPickLabel => 'تقسيم الفرق';
+
+  @override
+  String get teamPickRandom => 'التطبيق يقسّم';
+
+  @override
+  String get teamPickPlayers => 'كل واحد يختار';
+
+  @override
+  String get teamPickHost => 'أنا أقسّم';
+
+  @override
+  String get turnLength => 'وقت الدور';
+
+  @override
+  String secondsShort(int count) {
+    return '$count ث';
+  }
+
+  @override
+  String get teamName0 => 'الفريق البنفسجي';
+
+  @override
+  String get teamName1 => 'الفريق البرتقاني';
+
+  @override
+  String get teamName2 => 'الفريق الأخضر';
+
+  @override
+  String get teamName3 => 'الفريق البمبي';
+
+  @override
+  String get reshuffle => 'قلّب تاني';
+
+  @override
+  String get tapToMove => 'دوس على أي حد عشان تنقله للفريق اللي بعده.';
+
+  @override
+  String get teamsChosenNote => 'كل واحد اختار فريقه، واللي ماختارش حطيناه في الفريق الأقل.';
+
+  @override
+  String get teamNeedsPlayers => 'كل فريق لازم يبقى فيه حد على الأقل.';
+
+  @override
+  String get letsPlay => 'يلا بينا';
+
+  @override
+  String roundOf(int round) {
+    return 'الجولة $round من 3';
+  }
+
+  @override
+  String get roundDescribe => 'اوصف';
+
+  @override
+  String get roundDescribeDetail => 'قول أي حاجة إلا الاسم نفسه… ولا تتلكك!';
+
+  @override
+  String get roundOneWord => 'كلمة واحدة';
+
+  @override
+  String get roundOneWordDetail => 'كلمة واحدة بس لكل اسم. اختارها صح!';
+
+  @override
+  String get roundActOut => 'مثّلها';
+
+  @override
+  String get roundActOutDetail => 'ولا كلمة! تمثيل وأصوات وبس.';
+
+  @override
+  String get startRound => 'يلا';
+
+  @override
+  String teamTurn(String team) {
+    return 'دور $team';
+  }
+
+  @override
+  String get passPhoneTo => 'ادّي الموبايل لـ';
+
+  @override
+  String get giverHint => 'باقي الفريق يخمّن. الفرق التانية ممنوع تبص!';
+
+  @override
+  String get imReady => 'أنا جاهز';
+
+  @override
+  String get gotItGuess => 'صح!';
+
+  @override
+  String get skip => 'عدّي';
+
+  @override
+  String namesLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'فاضل $count اسم',
+      few: 'فاضل $count أسامي',
+      two: 'فاضل اسمين',
+      one: 'فاضل اسم واحد',
+      zero: 'الطبق فضي',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String secondsLeft(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'فاضل $count ثانية',
+      few: 'فاضل $count ثواني',
+      two: 'فاضل ثانيتين',
+      one: 'فاضل ثانية',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get timesUp => 'الوقت خلص!';
+
+  @override
+  String get bowlEmptied => 'الطبق فضي!';
+
+  @override
+  String turnScore(int points, String team) {
+    return '$team جاب $points 🔥';
+  }
+
+  @override
+  String get nextTeam => 'الفريق اللي بعده';
+
+  @override
+  String get nextRound => 'الجولة اللي بعدها';
+
+  @override
+  String get seeResults => 'النتيجة';
+
+  @override
+  String winnerIs(String team) {
+    return '$team كسب! 🏆';
+  }
+
+  @override
+  String get itsADraw => 'تعادل! محدش كسب';
+
+  @override
+  String get total => 'المجموع';
+
+  @override
+  String get leaveGameTitle => 'تسيب اللعبة؟';
+
+  @override
+  String get leaveGameBody => 'النتيجة هتضيع، بس الأسامي هتفضل في الطبق.';
+
+  @override
+  String get shareCardText => 'من سهرة لعبة العيلة 😂';
+
+  @override
+  String get shareFailed => 'معرفناش نشارك الكارت.';
+
+  @override
+  String moreOnCard(int count) {
+    return 'و$count كمان';
+  }
+
+  @override
+  String get shareThisNight => 'شارك السهرة';
+
+  @override
+  String get fewerTeams => 'فرق أقل';
+
+  @override
+  String get moreTeams => 'فرق أكتر';
 }
