@@ -64,4 +64,9 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 125 te
 - Paid app vs in-app purchase: decide later. No code yet.
 
 ## Bugs you mentioned
-Please list the bugs you saw (screen, what you did, what happened), so they can be fixed first next session.
+- **Fixed:** closing the custom category dialog without a name threw an error (its text box was thrown away while the dialog was still fading out).
+- **Fixed:** screens that showed an error or drew nothing when moving between them:
+  - Leaving the room while a message (like "Link copied") was up during the new room/lobby switch.
+  - Flipping quickly between the hotspot's "Join the Wi-Fi" and "Open the game" steps, or the lobby's network card changing and changing back.
+  - Found by a random-tapping test (80 sessions of 400 taps, with and without animations); `test/navigation_test.dart` and `test/core/motion/stage_motion_test.dart` cover each one.
+- Hotspot "fails silently" is handled in its own thread.
