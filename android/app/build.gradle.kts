@@ -15,7 +15,9 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace = "com.mafdy.familygame"
-    compileSdk = flutter.compileSdkVersion
+    // permission_handler_android compiles against SDK 37, one above Flutter 3.44's
+    // default; compileSdk is backward compatible and does not change targetSdk.
+    compileSdk = maxOf(flutter.compileSdkVersion, 37)
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
