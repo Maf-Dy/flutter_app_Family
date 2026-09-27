@@ -48,6 +48,7 @@ String familyBody(JoinStrings s, String Function(String) esc) {
 
 /// Extra styles for the family page, added to the join page's own.
 const familyCss = '''
+[hidden]{display:none!important}
 .fam h2{margin:0 0 10px;font-size:15px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px}
 .banner{padding:14px 16px;border-radius:18px;background:var(--card);border:1px solid var(--line);font-weight:800;font-size:18px;text-align:center}
@@ -70,7 +71,7 @@ select{width:100%;height:50px;border-radius:14px;border:1.5px solid var(--line);
 .msg.me{background:color-mix(in srgb,var(--primary) 16%,var(--card))}
 .row{display:flex;gap:8px}
 .row input{flex:1;height:44px}
-.event{font-size:14px;color:var(--muted)}
+.event{margin:0;font-size:14px;color:var(--muted)}
 .event.ok{color:var(--good);font-weight:700}
 .fam-line{font-size:14px}
 .fam-line b{font-size:15px}
@@ -84,6 +85,8 @@ const _script = r'''
   function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function nameOf(id){ for (var i = 0; i < st.players.length; i++) if (st.players[i].id === id) return st.players[i].name; return ''; }
   function slipOf(id){ for (var i = 0; i < st.slips.length; i++) if (st.slips[i].id === id) return st.slips[i]; return null; }
+  // Caught people's names are out, so asking them again can't be right.
+  function caught(id){ for (var i = 0; i < st.slips.length; i++) if (st.slips[i].writer === id) return true; return false; }
   function clear(e){ while (e.firstChild) e.removeChild(e.firstChild); }
   function show(e, on){ e.hidden = !on; }
 
@@ -132,7 +135,7 @@ const _script = r'''
       var box = $('mine'); clear(box);
       st.players.forEach(function(p){ if (p.head === mine) box.appendChild(el('span', 'chip' + (p.id === mine ? ' head' : ''), (p.id === mine ? '👑 ' : '') + p.name + (p.id === me ? ' ' + S.youTag : ''))); });
 
-      fill($('who'), st.players.filter(function(p){ return p.head !== mine; }).map(function(p){ return { value: p.id, label: p.name }; }));
+      fill($('who'), st.players.filter(function(p){ return p.head !== mine && !caught(p.id); }).map(function(p){ return { value: p.id, label: p.name }; }));
       fill($('which'), st.slips.filter(function(x){ return x.writer == null; }).map(function(x){ return { value: String(x.id), label: x.text }; }));
       var go = $('go');
       go.textContent = me === mine && myTurn ? S.ask : S.suggest;

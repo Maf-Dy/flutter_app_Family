@@ -108,6 +108,31 @@ void main() {
     expect(start().checkMessage('a', '   '), FamilyActionError.emptyMessage);
   });
 
+  test('caught people drop out of who is worth asking', () {
+    var game = omarsTurn();
+    expect(game.askableFor('a').map((p) => p.id), ['b', 'c']);
+    game = game.guess('a', 'b', slipBy(game, 'b'));
+    expect(game.isCaught('b'), isTrue);
+    expect(game.isCaught('a'), isFalse);
+    expect(game.askableFor('a').map((p) => p.id), ['c']);
+    expect(game.askableFor('c').map((p) => p.id), ['a'], reason: 'Nour is in the family, but her name is out');
+  });
+
+  test('a repeated name counts for either person who wrote it', () {
+    var game = FamilyGame.start(
+      players: players,
+      slips: const [(text: 'Messi', writerId: 'a'), (text: 'messi', writerId: 'b'), (text: 'Adele', writerId: 'c')],
+      chatEnabled: true,
+      random: Random(1),
+    );
+    if (game.turn != 'c') game = game.guess(game.turn, 'c', slipBy(game, game.turn));
+    expect(game.turn, 'c');
+    // Yara asks Nour about Omar's copy: Nour wrote the same name, so it counts.
+    game = game.guess('c', 'b', slipBy(game, 'a'));
+    expect(game.events.last.correct, isTrue);
+    expect(game.revealed, {slipBy(game, 'b')}, reason: 'only Nour\'s own slip is out');
+  });
+
   test('every change bumps the version', () {
     final game = start();
     expect(game.say('a', 'hi').version, greaterThan(game.version));

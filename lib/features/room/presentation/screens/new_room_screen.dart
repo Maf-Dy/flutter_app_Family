@@ -95,6 +95,7 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
               for (final (mode, title, detail, icon) in [
                 (GameMode.classic, l10n.modeClassic, l10n.modeClassicDetail, Icons.local_dining_rounded),
                 (GameMode.celebrity, l10n.modeCelebrity, l10n.modeCelebrityDetail, Icons.timer_rounded),
+                (GameMode.family, l10n.modeFamily, l10n.modeFamilyDetail, Icons.diversity_3_rounded),
               ])
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
@@ -111,6 +112,18 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
                 SectionLabel(l10n.teams),
                 const SizedBox(height: 10),
                 _TeamSettings(setup: state.teamSetup, onChanged: cubit.setTeamSetup),
+              ],
+              if (state.mode == GameMode.family) ...[
+                const SizedBox(height: 8),
+                Card(
+                  clipBehavior: Clip.antiAlias,
+                  child: SwitchListTile(
+                    value: state.familyChat,
+                    onChanged: cubit.setFamilyChat,
+                    title: Text(l10n.familyChatSwitch, style: theme.textTheme.titleMedium),
+                    subtitle: Text(state.familyChat ? l10n.familyChatOn : l10n.familyChatOff),
+                  ),
+                ),
               ],
               const SizedBox(height: 24),
               SectionLabel(l10n.category),

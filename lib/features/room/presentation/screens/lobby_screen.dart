@@ -22,6 +22,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../category_label.dart';
 import '../../../../core/router/game_exit.dart';
 import '../../../celebrity/celebrity_route.dart';
+import '../../../family/family_route.dart';
 
 class LobbyScreen extends StatelessWidget {
   const LobbyScreen({super.key});
@@ -121,7 +122,7 @@ class LobbyScreen extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
             child: _StartButton(
-              label: room.mode == GameMode.celebrity ? context.l10n.letsPlay : context.l10n.startReading,
+              label: room.mode == GameMode.classic ? context.l10n.startReading : context.l10n.letsPlay,
               onPressed: room.canStart ? () => _startReading(context) : null,
             ),
           ),
@@ -218,29 +219,46 @@ class LobbyScreen extends StatelessWidget {
   Future<void> _startReading(BuildContext context) async {
     final cubit = context.read<RoomCubit>();
     final room = cubit.state.room;
-    // Family online has no host screen yet and can't be picked on New room; see PROGRESS.md.
-    if (room == null || room.mode == GameMode.family) return;
-    final slips = cubit.startReading();
-    if (slips == null) return;
-    unawaited(Haptics.start());
-    // A leftover lobby message would cover the reading screen's buttons.
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    final exit = await Navigator.of(context).pushNamed<GameExit>(
-      room.mode == GameMode.celebrity ? AppRoutes.celebrity : AppRoutes.round,
-      arguments: switch (room.mode) {
-        GameMode.classic => RoundArgs(
-          category: room.category,
-          slips: slips,
-          players: [for (final p in room.players) p.id],
+    if (room == null) return;
+    final (String route, Object args)? start = switch (room.mode) {
+      GameMode.family => switch (cubit.startFamily()) {
+        final table? => (
+          AppRoutes.family,
+          FamilyArgs(
+            category: room.category,
+            table: table,
+            // The host plays only if their own name went in.
+            me: (room.host?.hasSubmitted ?? false) ? Player.hostId : null,
+            joinOrder: [for (final p in room.players) p.id],
+          ),
         ),
-        GameMode.celebrity || GameMode.family => CelebrityArgs(
-          category: room.category,
-          slips: slips,
-          players: [for (final p in room.playersIn) (id: p.id, name: p.name, team: p.team)],
-          setup: room.teamSetup,
-        ),
+        null => null,
       },
-    );
+      GameMode.classic => switch (cubit.startReading()) {
+        final slips? => (
+          AppRoutes.round,
+          RoundArgs(category: room.category, slips: slips, players: [for (final p in room.players) p.id]),
+        ),
+        null => null,
+      },
+      GameMode.celebrity => switch (cubit.startReading()) {
+        final slips? => (
+          AppRoutes.celebrity,
+          CelebrityArgs(
+            category: room.category,
+            slips: slips,
+            players: [for (final p in room.playersIn) (id: p.id, name: p.name, team: p.team)],
+            setup: room.teamSetup,
+          ),
+        ),
+        null => null,
+      },
+    };
+    if (start == null) return;
+    unawaited(Haptics.start());
+    // A leftover lobby message would cover the game screen's buttons.
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    final exit = await Navigator.of(context).pushNamed<GameExit>(start.$1, arguments: start.$2);
     if (!context.mounted) return;
     switch (exit) {
       case GameExit.newRound:

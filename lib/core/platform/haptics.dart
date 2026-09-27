@@ -17,6 +17,9 @@ abstract final class Haptics {
   /// The last seconds of a turn.
   static Future<void> countdown() => HapticFeedback.selectionClick();
 
+  /// The family game came round to the host's family.
+  static Future<void> yourTurn() => HapticFeedback.mediumImpact();
+
   /// The turn's clock ran out.
   static Future<void> timeUp() => HapticFeedback.heavyImpact();
 }

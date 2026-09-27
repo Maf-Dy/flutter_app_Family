@@ -725,4 +725,150 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moreTeams => 'More teams';
+
+  @override
+  String get modeFamily => 'Family online';
+
+  @override
+  String get modeFamilyDetail => 'The classic game on everyone\'s phone: guess who wrote what, and your family grows.';
+
+  @override
+  String get familyChatSwitch => 'Family chat';
+
+  @override
+  String get familyChatOn => 'Each family gets a private chat to plot in.';
+
+  @override
+  String get familyChatOff => 'No chat: families whisper at the table.';
+
+  @override
+  String get familyTurnYours => 'Your family\'s turn!';
+
+  @override
+  String get familyYouAsk => 'You make the guess.';
+
+  @override
+  String familyHeadAsks(String name) {
+    return '$name makes the guess.';
+  }
+
+  @override
+  String familyTurnOther(String name) {
+    return '$name\'s family is guessing';
+  }
+
+  @override
+  String get yourFamily => 'Your family';
+
+  @override
+  String familyOf(String name) {
+    return '$name\'s family';
+  }
+
+  @override
+  String get familyHead => 'Head of the family';
+
+  @override
+  String get familyWho => 'Who wrote it?';
+
+  @override
+  String get familyWhich => 'Which name?';
+
+  @override
+  String get familyAsk => 'Ask!';
+
+  @override
+  String get familySuggest => 'Suggest to the family';
+
+  @override
+  String get familyPickBoth => 'Pick a person and a name first.';
+
+  @override
+  String get familyIdeas => 'Family ideas';
+
+  @override
+  String get familyNoIdeas => 'No ideas yet. Pick a person and a name to suggest one.';
+
+  @override
+  String familyIdea(String name, String slip) {
+    return '$name wrote “$slip”?';
+  }
+
+  @override
+  String familyBackers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count votes', one: '1 vote');
+    return '$_temp0';
+  }
+
+  @override
+  String get familyBackIt => 'Back it';
+
+  @override
+  String get familyBacked => 'Backed';
+
+  @override
+  String get familyUseIdea => 'Use';
+
+  @override
+  String get familyChatHint => 'Only your family sees this';
+
+  @override
+  String get familySend => 'Send';
+
+  @override
+  String get familyNoMessages => 'No messages yet.';
+
+  @override
+  String get familyFamilies => 'Families';
+
+  @override
+  String get familyNames => 'The names';
+
+  @override
+  String get familyLastGuesses => 'Last guesses';
+
+  @override
+  String familyEventCorrect(String asker, String target, String slip) {
+    return '$asker caught $target: “$slip”';
+  }
+
+  @override
+  String familyEventWrong(String asker, String target, String slip) {
+    return '$asker asked $target about “$slip”. Nope!';
+  }
+
+  @override
+  String get familyYouWon => 'Your family won!';
+
+  @override
+  String familyWon(String name) {
+    return '$name\'s family won!';
+  }
+
+  @override
+  String get familyWatching => 'You\'re watching this one: you didn\'t put a name in.';
+
+  @override
+  String get familyLeaveBody => 'The game ends on everyone\'s phone, but the names stay in the bowl.';
+
+  @override
+  String get familyErrorNotYourTurn => 'Hold on, it\'s not your family\'s turn.';
+
+  @override
+  String get familyErrorNotHead => 'Only the head of your family makes the guess.';
+
+  @override
+  String get familyErrorInvalidTarget => 'That person is already in your family.';
+
+  @override
+  String get familyErrorInvalidSlip => 'That name is already out.';
+
+  @override
+  String get familyErrorGameOver => 'The game is over.';
+
+  @override
+  String get familyErrorChatOff => 'Chat is off in this room.';
+
+  @override
+  String get familyErrorEmptyMessage => 'Write something first.';
 }

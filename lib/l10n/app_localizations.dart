@@ -1321,6 +1321,264 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More teams'**
   String get moreTeams;
+
+  /// No description provided for @modeFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family online'**
+  String get modeFamily;
+
+  /// No description provided for @modeFamilyDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The classic game on everyone\'s phone: guess who wrote what, and your family grows.'**
+  String get modeFamilyDetail;
+
+  /// No description provided for @familyChatSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Family chat'**
+  String get familyChatSwitch;
+
+  /// No description provided for @familyChatOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Each family gets a private chat to plot in.'**
+  String get familyChatOn;
+
+  /// No description provided for @familyChatOff.
+  ///
+  /// In en, this message translates to:
+  /// **'No chat: families whisper at the table.'**
+  String get familyChatOff;
+
+  /// No description provided for @familyTurnYours.
+  ///
+  /// In en, this message translates to:
+  /// **'Your family\'s turn!'**
+  String get familyTurnYours;
+
+  /// No description provided for @familyYouAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'You make the guess.'**
+  String get familyYouAsk;
+
+  /// No description provided for @familyHeadAsks.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} makes the guess.'**
+  String familyHeadAsks(String name);
+
+  /// No description provided for @familyTurnOther.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s family is guessing'**
+  String familyTurnOther(String name);
+
+  /// No description provided for @yourFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Your family'**
+  String get yourFamily;
+
+  /// No description provided for @familyOf.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s family'**
+  String familyOf(String name);
+
+  /// No description provided for @familyHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Head of the family'**
+  String get familyHead;
+
+  /// No description provided for @familyWho.
+  ///
+  /// In en, this message translates to:
+  /// **'Who wrote it?'**
+  String get familyWho;
+
+  /// No description provided for @familyWhich.
+  ///
+  /// In en, this message translates to:
+  /// **'Which name?'**
+  String get familyWhich;
+
+  /// No description provided for @familyAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask!'**
+  String get familyAsk;
+
+  /// No description provided for @familySuggest.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest to the family'**
+  String get familySuggest;
+
+  /// No description provided for @familyPickBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a person and a name first.'**
+  String get familyPickBoth;
+
+  /// No description provided for @familyIdeas.
+  ///
+  /// In en, this message translates to:
+  /// **'Family ideas'**
+  String get familyIdeas;
+
+  /// No description provided for @familyNoIdeas.
+  ///
+  /// In en, this message translates to:
+  /// **'No ideas yet. Pick a person and a name to suggest one.'**
+  String get familyNoIdeas;
+
+  /// No description provided for @familyIdea.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wrote “{slip}”?'**
+  String familyIdea(String name, String slip);
+
+  /// No description provided for @familyBackers.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 vote} other{{count} votes}}'**
+  String familyBackers(int count);
+
+  /// No description provided for @familyBackIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Back it'**
+  String get familyBackIt;
+
+  /// No description provided for @familyBacked.
+  ///
+  /// In en, this message translates to:
+  /// **'Backed'**
+  String get familyBacked;
+
+  /// No description provided for @familyUseIdea.
+  ///
+  /// In en, this message translates to:
+  /// **'Use'**
+  String get familyUseIdea;
+
+  /// No description provided for @familyChatHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only your family sees this'**
+  String get familyChatHint;
+
+  /// No description provided for @familySend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get familySend;
+
+  /// No description provided for @familyNoMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet.'**
+  String get familyNoMessages;
+
+  /// No description provided for @familyFamilies.
+  ///
+  /// In en, this message translates to:
+  /// **'Families'**
+  String get familyFamilies;
+
+  /// No description provided for @familyNames.
+  ///
+  /// In en, this message translates to:
+  /// **'The names'**
+  String get familyNames;
+
+  /// No description provided for @familyLastGuesses.
+  ///
+  /// In en, this message translates to:
+  /// **'Last guesses'**
+  String get familyLastGuesses;
+
+  /// No description provided for @familyEventCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'{asker} caught {target}: “{slip}”'**
+  String familyEventCorrect(String asker, String target, String slip);
+
+  /// No description provided for @familyEventWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'{asker} asked {target} about “{slip}”. Nope!'**
+  String familyEventWrong(String asker, String target, String slip);
+
+  /// No description provided for @familyYouWon.
+  ///
+  /// In en, this message translates to:
+  /// **'Your family won!'**
+  String get familyYouWon;
+
+  /// No description provided for @familyWon.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s family won!'**
+  String familyWon(String name);
+
+  /// No description provided for @familyWatching.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re watching this one: you didn\'t put a name in.'**
+  String get familyWatching;
+
+  /// No description provided for @familyLeaveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The game ends on everyone\'s phone, but the names stay in the bowl.'**
+  String get familyLeaveBody;
+
+  /// No description provided for @familyErrorNotYourTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold on, it\'s not your family\'s turn.'**
+  String get familyErrorNotYourTurn;
+
+  /// No description provided for @familyErrorNotHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the head of your family makes the guess.'**
+  String get familyErrorNotHead;
+
+  /// No description provided for @familyErrorInvalidTarget.
+  ///
+  /// In en, this message translates to:
+  /// **'That person is already in your family.'**
+  String get familyErrorInvalidTarget;
+
+  /// No description provided for @familyErrorInvalidSlip.
+  ///
+  /// In en, this message translates to:
+  /// **'That name is already out.'**
+  String get familyErrorInvalidSlip;
+
+  /// No description provided for @familyErrorGameOver.
+  ///
+  /// In en, this message translates to:
+  /// **'The game is over.'**
+  String get familyErrorGameOver;
+
+  /// No description provided for @familyErrorChatOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat is off in this room.'**
+  String get familyErrorChatOff;
+
+  /// No description provided for @familyErrorEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Write something first.'**
+  String get familyErrorEmptyMessage;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

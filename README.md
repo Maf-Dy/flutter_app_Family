@@ -38,6 +38,16 @@ Pick **Team race** when opening a room. Everyone writes names as usual, then:
 3. **Turns.** The phone goes to each team's next clue-giver. Tap *Got it!* for every name the team guesses, or *Skip* to put it back, before the clock (30–90 s) runs out.
 4. **Results** with confetti. *Share this night* makes a picture of the scores for the family group; the classic mode's *Who wrote what?* has one too.
 
+## Family online mode
+
+Pick **Family online** when opening a room to play the classic game with the app as referee. Everyone writes names as usual, then plays on their own phone (friends in the browser, the host in the app):
+
+1. **Everyone starts as their own family.** On your family's turn, the head asks someone outside it "did you write …?".
+2. **Right**, and that person's whole family joins yours and you ask again. **Wrong**, and the turn passes to the family of the person you asked. The last family standing wins.
+3. **Family ideas.** Members suggest guesses and back them; the head can pick one with *Use*.
+4. **Family chat** (a room option, on by default) is private to each family and follows people when families merge.
+5. A host who put no name in watches the board, and so does anyone who arrives after the start.
+
 ## Running it
 
 Requires Flutter 3.44 (Dart 3.12).
@@ -89,6 +99,7 @@ lib/
     │   └── presentation/          # RoomCubit, home / new room / lobby screens
     ├── round/                     # classic: read aloud, names on the table, who wrote what
     ├── celebrity/                 # team race: teams, rounds, turn clock, results
+    ├── family/                    # family online: rules, the host's seat and board
     └── settings/                  # host name and language, saved on the phone
         ├── round_route.dart       # RoundArgs / RoundExit: what the lobby hands over
         └── presentation/          # RoundCubit and screens

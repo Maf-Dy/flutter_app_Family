@@ -414,5 +414,119 @@
   },
   "shareThisNight": "Share this night",
   "fewerTeams": "Fewer teams",
-  "moreTeams": "More teams"
+  "moreTeams": "More teams",
+  "modeFamily": "Family online",
+  "modeFamilyDetail": "The classic game on everyone's phone: guess who wrote what, and your family grows.",
+  "familyChatSwitch": "Family chat",
+  "familyChatOn": "Each family gets a private chat to plot in.",
+  "familyChatOff": "No chat: families whisper at the table.",
+  "familyTurnYours": "Your family's turn!",
+  "familyYouAsk": "You make the guess.",
+  "familyHeadAsks": "{name} makes the guess.",
+  "@familyHeadAsks": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "familyTurnOther": "{name}'s family is guessing",
+  "@familyTurnOther": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "yourFamily": "Your family",
+  "familyOf": "{name}'s family",
+  "@familyOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "familyHead": "Head of the family",
+  "familyWho": "Who wrote it?",
+  "familyWhich": "Which name?",
+  "familyAsk": "Ask!",
+  "familySuggest": "Suggest to the family",
+  "familyPickBoth": "Pick a person and a name first.",
+  "familyIdeas": "Family ideas",
+  "familyNoIdeas": "No ideas yet. Pick a person and a name to suggest one.",
+  "familyIdea": "{name} wrote “{slip}”?",
+  "@familyIdea": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "slip": {
+        "type": "String"
+      }
+    }
+  },
+  "familyBackers": "{count, plural, =1{1 vote} other{{count} votes}}",
+  "@familyBackers": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "familyBackIt": "Back it",
+  "familyBacked": "Backed",
+  "familyUseIdea": "Use",
+  "familyChatHint": "Only your family sees this",
+  "familySend": "Send",
+  "familyNoMessages": "No messages yet.",
+  "familyFamilies": "Families",
+  "familyNames": "The names",
+  "familyLastGuesses": "Last guesses",
+  "familyEventCorrect": "{asker} caught {target}: “{slip}”",
+  "@familyEventCorrect": {
+    "placeholders": {
+      "asker": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "slip": {
+        "type": "String"
+      }
+    }
+  },
+  "familyEventWrong": "{asker} asked {target} about “{slip}”. Nope!",
+  "@familyEventWrong": {
+    "placeholders": {
+      "asker": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      },
+      "slip": {
+        "type": "String"
+      }
+    }
+  },
+  "familyYouWon": "Your family won!",
+  "familyWon": "{name}'s family won!",
+  "@familyWon": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "familyWatching": "You're watching this one: you didn't put a name in.",
+  "familyLeaveBody": "The game ends on everyone's phone, but the names stay in the bowl.",
+  "familyErrorNotYourTurn": "Hold on, it's not your family's turn.",
+  "familyErrorNotHead": "Only the head of your family makes the guess.",
+  "familyErrorInvalidTarget": "That person is already in your family.",
+  "familyErrorInvalidSlip": "That name is already out.",
+  "familyErrorGameOver": "The game is over.",
+  "familyErrorChatOff": "Chat is off in this room.",
+  "familyErrorEmptyMessage": "Write something first."
 }

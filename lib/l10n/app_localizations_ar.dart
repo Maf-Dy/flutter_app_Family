@@ -732,4 +732,157 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get moreTeams => 'فرق أكتر';
+
+  @override
+  String get modeFamily => 'العيلة أونلاين';
+
+  @override
+  String get modeFamilyDetail => 'اللعبة الأصلية على موبايلات الكل: خمّن مين كتب إيه، وعيلتك تكبر.';
+
+  @override
+  String get familyChatSwitch => 'دردشة العيلة';
+
+  @override
+  String get familyChatOn => 'كل عيلة ليها دردشة سرية تتآمر فيها.';
+
+  @override
+  String get familyChatOff => 'مفيش دردشة: العيلات تتوشوش على الترابيزة.';
+
+  @override
+  String get familyTurnYours => 'دور عيلتك!';
+
+  @override
+  String get familyYouAsk => 'انت اللي هتخمّن.';
+
+  @override
+  String familyHeadAsks(String name) {
+    return 'التخمين على $name.';
+  }
+
+  @override
+  String familyTurnOther(String name) {
+    return 'عيلة $name بتخمّن دلوقتي';
+  }
+
+  @override
+  String get yourFamily => 'عيلتك';
+
+  @override
+  String familyOf(String name) {
+    return 'عيلة $name';
+  }
+
+  @override
+  String get familyHead => 'كبير العيلة';
+
+  @override
+  String get familyWho => 'مين اللي كتبه؟';
+
+  @override
+  String get familyWhich => 'أنهي اسم؟';
+
+  @override
+  String get familyAsk => 'اسأل!';
+
+  @override
+  String get familySuggest => 'اقترح على العيلة';
+
+  @override
+  String get familyPickBoth => 'اختار الشخص والاسم الأول.';
+
+  @override
+  String get familyIdeas => 'اقتراحات العيلة';
+
+  @override
+  String get familyNoIdeas => 'مفيش اقتراحات لسه. اختار شخص واسم واقترح.';
+
+  @override
+  String familyIdea(String name, String slip) {
+    return '$name كتب «$slip»؟';
+  }
+
+  @override
+  String familyBackers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count صوت',
+      few: '$count أصوات',
+      two: 'صوتين',
+      one: 'صوت واحد',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get familyBackIt => 'أنا معاك';
+
+  @override
+  String get familyBacked => 'موافق';
+
+  @override
+  String get familyUseIdea => 'خدها';
+
+  @override
+  String get familyChatHint => 'محدش هيشوفها غير عيلتك';
+
+  @override
+  String get familySend => 'ابعت';
+
+  @override
+  String get familyNoMessages => 'مفيش رسايل لسه.';
+
+  @override
+  String get familyFamilies => 'العيلات';
+
+  @override
+  String get familyNames => 'الأسامي';
+
+  @override
+  String get familyLastGuesses => 'آخر التخمينات';
+
+  @override
+  String familyEventCorrect(String asker, String target, String slip) {
+    return '$asker قفش $target: «$slip»';
+  }
+
+  @override
+  String familyEventWrong(String asker, String target, String slip) {
+    return '$asker سأل $target على «$slip». لأ خالص!';
+  }
+
+  @override
+  String get familyYouWon => 'عيلتك كسبت يا وحوش!';
+
+  @override
+  String familyWon(String name) {
+    return 'عيلة $name كسبت!';
+  }
+
+  @override
+  String get familyWatching => 'انت بتتفرج المرة دي: محطّتش اسم في الطبق.';
+
+  @override
+  String get familyLeaveBody => 'اللعبة هتقفل عند الكل، بس الأسامي هتفضل في الطبق.';
+
+  @override
+  String get familyErrorNotYourTurn => 'استنى، مش دور عيلتك.';
+
+  @override
+  String get familyErrorNotHead => 'كبير العيلة بس هو اللي يخمّن.';
+
+  @override
+  String get familyErrorInvalidTarget => 'ده أصلًا من عيلتك يا عم!';
+
+  @override
+  String get familyErrorInvalidSlip => 'الاسم ده اتكشف خلاص.';
+
+  @override
+  String get familyErrorGameOver => 'اللعبة خلصت.';
+
+  @override
+  String get familyErrorChatOff => 'الدردشة مقفولة في القعدة دي.';
+
+  @override
+  String get familyErrorEmptyMessage => 'اكتب حاجة الأول.';
 }
