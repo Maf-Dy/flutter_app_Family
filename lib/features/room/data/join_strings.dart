@@ -37,6 +37,10 @@ sealed class JoinStrings {
   String get getOnPlay;
   String get pickTeam;
   String teamName(int index);
+
+  /// Words for the in-browser family game, looked up by its script. `{name}`
+  /// style placeholders are filled in there.
+  Map<String, String> get family;
 }
 
 final class EnglishJoinStrings extends JoinStrings {
@@ -120,6 +124,47 @@ final class EnglishJoinStrings extends JoinStrings {
   String get pickTeam => 'Your team';
   @override
   String teamName(int index) => const ['Purple team', 'Orange team', 'Green team', 'Pink team'][index % 4];
+  @override
+  Map<String, String> get family => const {
+    'who': 'Who wrote it?',
+    'which': 'Which name?',
+    'ideas': 'Family ideas',
+    'chat': 'Family chat',
+    'chatHint': 'Only your family sees this',
+    'send': 'Send',
+    'families': 'Families',
+    'names': 'The names',
+    'sep': ', ',
+    'youWin': 'Your family won! 🏆',
+    'familyWins': '{name}’s family won! 🏆',
+    'turnYours': 'Your family’s turn!',
+    'youDecide': 'You make the guess.',
+    'headDecides': '{name} makes the guess.',
+    'turnOther': '{name}’s family is guessing',
+    'yourFamily': 'Your family',
+    'familyOf': '{name}’s family',
+    'youTag': '(you)',
+    'ask': 'Ask!',
+    'suggest': 'Suggest to the family',
+    'noIdeas': 'No ideas yet. Suggest one above.',
+    'ideaText': '{name} wrote “{slip}”?',
+    'votes': '👍 {count}',
+    'voted': 'Backed',
+    'vote': 'Back it',
+    'use': 'Use',
+    'eventCorrect': '{asker} caught {target}: “{slip}” ✅',
+    'eventWrong': '{asker} asked {target} about “{slip}”. Nope ❌',
+    'err_generic': 'That didn’t work. Try again.',
+    'err_pickBoth': 'Pick a person and a name first.',
+    'err_notYourTurn': 'Hold on, it’s not your family’s turn.',
+    'err_notHead': 'Only the head of your family makes the guess.',
+    'err_invalidTarget': 'That person is already in your family.',
+    'err_invalidSlip': 'That name is already out.',
+    'err_gameOver': 'The game is over.',
+    'err_chatOff': 'Chat is off in this room.',
+    'err_emptyMessage': 'Write something first.',
+    'err_notPlaying': 'You’re watching this game. Join the next round!',
+  };
 }
 
 /// Egyptian Arabic, playful on purpose.
@@ -205,4 +250,45 @@ final class ArabicJoinStrings extends JoinStrings {
   @override
   String teamName(int index) =>
       const ['الفريق البنفسجي', 'الفريق البرتقاني', 'الفريق الأخضر', 'الفريق البمبي'][index % 4];
+  @override
+  Map<String, String> get family => const {
+    'who': 'مين اللي كتبه؟',
+    'which': 'أنهي اسم؟',
+    'ideas': 'اقتراحات العيلة',
+    'chat': 'دردشة العيلة',
+    'chatHint': 'محدش هيشوفها غير عيلتك',
+    'send': 'ابعت',
+    'families': 'العيلات',
+    'names': 'الأسامي',
+    'sep': '، ',
+    'youWin': 'عيلتك كسبت يا وحوش! 🏆',
+    'familyWins': 'عيلة {name} كسبت! 🏆',
+    'turnYours': 'دور عيلتك!',
+    'youDecide': 'انت اللي هتخمّن.',
+    'headDecides': '{name} هو اللي هيخمّن.',
+    'turnOther': 'عيلة {name} بتخمّن دلوقتي',
+    'yourFamily': 'عيلتك',
+    'familyOf': 'عيلة {name}',
+    'youTag': '(انت)',
+    'ask': 'اسأل!',
+    'suggest': 'اقترح على العيلة',
+    'noIdeas': 'مفيش اقتراحات لسه. اقترح انت من فوق.',
+    'ideaText': '{name} كتب «{slip}»؟',
+    'votes': '👍 {count}',
+    'voted': 'موافق',
+    'vote': 'أنا معاك',
+    'use': 'خدها',
+    'eventCorrect': '{asker} قفش {target}: «{slip}» ✅',
+    'eventWrong': '{asker} سأل {target} على «{slip}». لأ خالص ❌',
+    'err_generic': 'حصلت حاجة غلط. جرّب تاني.',
+    'err_pickBoth': 'اختار الشخص والاسم الأول.',
+    'err_notYourTurn': 'استنى، مش دور عيلتك.',
+    'err_notHead': 'كبير العيلة بس هو اللي يخمّن.',
+    'err_invalidTarget': 'ده أصلًا من عيلتك يا عم!',
+    'err_invalidSlip': 'الاسم ده اتكشف خلاص.',
+    'err_gameOver': 'اللعبة خلصت.',
+    'err_chatOff': 'الدردشة مقفولة في القعدة دي.',
+    'err_emptyMessage': 'اكتب حاجة الأول.',
+    'err_notPlaying': 'انت بتتفرج المرة دي. ادخل الدور الجاي!',
+  };
 }

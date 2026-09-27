@@ -7,6 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/network_access.dart';
 import '../../domain/room.dart';
 import '../../domain/room_host.dart';
+import '../../../family/domain/family_table.dart';
+import '../../data/host_family_table.dart';
 
 part 'room_state.dart';
 
@@ -53,6 +55,8 @@ class RoomCubit extends Cubit<RoomState> {
   void setAllowDuplicates(bool allow) => emit(state.copyWith(allowDuplicates: allow));
 
   void setMode(GameMode mode) => emit(state.copyWith(mode: mode));
+
+  void setFamilyChat(bool on) => emit(state.copyWith(familyChat: on));
 
   void setTeamSetup(TeamSetup setup) =>
       emit(state.copyWith(teamSetup: setup.copyWith(count: setup.count.clamp(TeamSetup.minTeams, TeamSetup.maxTeams))));
@@ -189,6 +193,7 @@ class RoomCubit extends Cubit<RoomState> {
       allowDuplicates: state.allowDuplicates,
       mode: state.mode,
       teamSetup: state.teamSetup,
+      familyChat: state.familyChat,
     );
     try {
       final port = await host.open(room);
@@ -230,6 +235,15 @@ class RoomCubit extends Cubit<RoomState> {
     if (host == null || !host.room.canStart) return null;
     host.update((room) => room.startReading());
     return host.room.slips;
+  }
+
+  /// Deals the bowl into a family game everyone plays on their phone. Returns
+  /// the table the host's own screen plays on, or null when the room cannot start yet.
+  FamilyTable? startFamily() {
+    final host = _host;
+    if (host == null || !host.room.canStart || host.room.mode != GameMode.family) return null;
+    host.update((room) => room.startFamily(_random));
+    return HostFamilyTable(host);
   }
 
   /// The host left the reading early: let friends edit again, keep the bowl.

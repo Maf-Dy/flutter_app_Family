@@ -1,5 +1,6 @@
 import '../domain/room.dart';
 import 'join_strings.dart';
+import 'family_page.dart';
 
 /// The HTML friends see in their browser, in their own language ([JoinStrings]).
 /// Self-contained: no external fonts, scripts or images, because on the app's
@@ -101,6 +102,11 @@ abstract final class JoinPage {
     );
   }
 
+  /// The family game, played on every friend's phone. Friends who didn't put
+  /// names in this round watch the board.
+  static String family(Room room, JoinStrings s, Player? player) =>
+      _layout(room: room, s: s, player: player, body: familyBody(s, _esc));
+
   static String full(Room room, JoinStrings s) => _layout(
     room: room,
     s: s,
@@ -187,7 +193,7 @@ h1.big{font-size:44px}
 .ghost{color:var(--primary);font-weight:800;text-decoration:none;padding:10px}
 footer{margin-top:auto;text-align:center;font-size:13px;color:var(--muted)}
 footer a{color:var(--primary);font-weight:700}
-@media (prefers-reduced-motion: reduce){*{animation:none!important}}
+$familyCss@media (prefers-reduced-motion: reduce){*{animation:none!important}}
 </style>
 </head>
 <body class="$bodyClass">

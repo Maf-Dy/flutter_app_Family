@@ -1,4 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
+
+import '../../family/domain/family_game.dart';
 
 import 'category.dart';
 
@@ -11,6 +15,10 @@ enum GameMode {
 
   /// Teams take turns getting their team to guess the names: describe, one word, act it out.
   celebrity,
+
+  /// The classic game refereed by the app: families form on everyone's phones,
+  /// and the head of each family makes the guess.
+  family,
 }
 
 /// How players end up in teams in [GameMode.celebrity].
@@ -115,6 +123,8 @@ final class Room {
     this.allowDuplicates = true,
     this.mode = GameMode.classic,
     this.teamSetup = const TeamSetup(),
+    this.familyChat = true,
+    this.family,
     this.phase = RoomPhase.collecting,
     this.round = 1,
     this.players = const [],
@@ -140,6 +150,12 @@ final class Room {
 
   /// Only used in [GameMode.celebrity].
   final TeamSetup teamSetup;
+
+  /// Whether families can message each other in [GameMode.family].
+  final bool familyChat;
+
+  /// The game in progress in [GameMode.family], once it has started.
+  final FamilyGame? family;
   final RoomPhase phase;
   final int round;
 
@@ -157,6 +173,7 @@ final class Room {
   int get requiredPlayers => switch (mode) {
     GameMode.classic => minPlayers,
     GameMode.celebrity => teamSetup.count * 2,
+    GameMode.family => minPlayers,
   };
   bool get canStart => playersIn.length >= requiredPlayers;
   int get playersNeeded => (requiredPlayers - playersIn.length).clamp(0, requiredPlayers);
@@ -261,25 +278,45 @@ final class Room {
 
   Room startReading() => _copy(phase: RoomPhase.reading);
 
+  /// Closes the bowl and deals the names into a [FamilyGame] everyone plays on their phone.
+  Room startFamily(Random random) => _copy(
+    phase: RoomPhase.reading,
+    family: FamilyGame.start(
+      players: [for (final p in playersIn) FamilyPlayer(id: p.id, name: p.name)],
+      slips: [for (final s in slips) (text: s.text, writerId: s.writerId)],
+      chatEnabled: familyChat,
+      random: random,
+    ),
+  );
+
+  Room withFamily(FamilyGame game) => family == null ? this : _copy(family: game);
+
   /// Back to collecting without clearing the bowl, e.g. the host left the reading early.
-  Room reopen() => _copy(phase: RoomPhase.collecting);
+  Room reopen() => _copy(phase: RoomPhase.collecting, clearFamily: true);
 
   /// Same players, empty bowl: everyone writes new names.
-  Room nextRound() =>
-      _copy(phase: RoomPhase.collecting, round: round + 1, players: [for (final p in players) p.withSecrets(const [])]);
-
-  Room _copy({RoomPhase? phase, int? round, List<Player>? players}) => Room(
-    code: code,
-    category: category,
-    namesPerPlayer: namesPerPlayer,
-    hostName: hostName,
-    allowDuplicates: allowDuplicates,
-    mode: mode,
-    teamSetup: teamSetup,
-    phase: phase ?? this.phase,
-    round: round ?? this.round,
-    players: players == null ? this.players : List.unmodifiable(players),
+  Room nextRound() => _copy(
+    phase: RoomPhase.collecting,
+    round: round + 1,
+    players: [for (final p in players) p.withSecrets(const [])],
+    clearFamily: true,
   );
+
+  Room _copy({RoomPhase? phase, int? round, List<Player>? players, FamilyGame? family, bool clearFamily = false}) =>
+      Room(
+        code: code,
+        category: category,
+        namesPerPlayer: namesPerPlayer,
+        hostName: hostName,
+        allowDuplicates: allowDuplicates,
+        mode: mode,
+        teamSetup: teamSetup,
+        familyChat: familyChat,
+        family: clearFamily ? null : family ?? this.family,
+        phase: phase ?? this.phase,
+        round: round ?? this.round,
+        players: players == null ? this.players : List.unmodifiable(players),
+      );
 
   /// Trims and collapses whitespace so "  Lionel   Messi " reads as "Lionel Messi".
   static String tidy(String input) => input.trim().replaceAll(RegExp(r'\s+'), ' ');

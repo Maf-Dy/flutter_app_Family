@@ -9,6 +9,7 @@ import '../domain/room.dart';
 import '../domain/room_host.dart';
 import 'join_page.dart';
 import 'join_strings.dart';
+import 'family_view.dart';
 
 /// Serves the room over plain HTTP on this phone, so friends only need a browser.
 ///
@@ -97,6 +98,15 @@ class LanRoomHost implements RoomHost {
             ..contentType = ContentType.json
             ..set(HttpHeaders.cacheControlHeader, 'no-store');
           response.write(jsonEncode({'count': _room.slipCount, 'version': JoinPage.versionFor(_room, player)}));
+        case ('GET', '/game'):
+          final game = _room.family;
+          if (game == null) {
+            response.statusCode = HttpStatus.notFound;
+          } else {
+            _json(response, familyViewFor(game, clientId));
+          }
+        case ('POST', '/game/guess' || '/game/suggest' || '/game/unvote' || '/game/say'):
+          await _familyAction(request, clientId, request.uri.pathSegments.last);
         case ('GET', '/favicon.ico'):
           response.statusCode = HttpStatus.noContent;
         default:
@@ -112,6 +122,7 @@ class LanRoomHost implements RoomHost {
   }
 
   String _pageFor(JoinStrings strings, Player? player, {required bool editing}) {
+    if (_room.family != null) return JoinPage.family(_room, strings, player);
     if (!_room.isCollecting) return JoinPage.reading(_room, strings, player);
     if (player != null && player.hasSubmitted && !editing) return JoinPage.done(_room, strings, player);
     if (player == null && _room.players.length >= Room.maxPlayers) return JoinPage.full(_room, strings);
@@ -147,6 +158,37 @@ class LanRoomHost implements RoomHost {
     response
       ..statusCode = HttpStatus.seeOther
       ..headers.set(HttpHeaders.locationHeader, '/');
+  }
+
+  /// A move in the family game from a friend's phone. Answers `{"error": null}` or the reason it was refused.
+  Future<void> _familyAction(HttpRequest request, String? clientId, String action) async {
+    final response = request.response;
+    final form = await _readForm(request);
+    final game = _room.family;
+    if (game == null || form == null || clientId == null || game.player(clientId) == null) {
+      response.statusCode = HttpStatus.forbidden;
+      _json(response, {'error': 'notPlaying'});
+      return;
+    }
+    final target = form['target'] ?? '';
+    final slip = int.tryParse(form['slip'] ?? '') ?? -1;
+    final text = form['text'] ?? '';
+    final (error, next) = switch (action) {
+      'guess' => (game.checkGuess(clientId, target, slip), game.guess(clientId, target, slip)),
+      'suggest' => (game.checkSuggestion(clientId, target, slip), game.suggest(clientId, target, slip)),
+      'unvote' => (null, game.unvote(clientId)),
+      _ => (game.checkMessage(clientId, text), game.say(clientId, text)),
+    };
+    if (error == null) _set(_room.withFamily(next));
+    response.statusCode = error == null ? HttpStatus.ok : HttpStatus.conflict;
+    _json(response, {'error': error?.name});
+  }
+
+  void _json(HttpResponse response, Object? body) {
+    response.headers
+      ..contentType = ContentType.json
+      ..set(HttpHeaders.cacheControlHeader, 'no-store');
+    response.write(jsonEncode(body));
   }
 
   Future<Map<String, String>?> _readForm(HttpRequest request) async {

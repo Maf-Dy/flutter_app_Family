@@ -57,6 +57,7 @@ final class RoomState {
     this.allowDuplicates = true,
     this.mode = GameMode.classic,
     this.teamSetup = const TeamSetup(),
+    this.familyChat = true,
     this.namesPerPlayer = 1,
     this.connection = const ConnectionChecking(),
     this.room,
@@ -71,6 +72,9 @@ final class RoomState {
   final bool allowDuplicates;
   final GameMode mode;
   final TeamSetup teamSetup;
+
+  /// Whether families can message each other in [GameMode.family].
+  final bool familyChat;
   final int namesPerPlayer;
   final Connection connection;
   final Room? room;
@@ -97,6 +101,7 @@ final class RoomState {
     bool? allowDuplicates,
     GameMode? mode,
     TeamSetup? teamSetup,
+    bool? familyChat,
     int? namesPerPlayer,
     Connection? connection,
     Room? room,
@@ -111,6 +116,7 @@ final class RoomState {
     allowDuplicates: allowDuplicates ?? this.allowDuplicates,
     mode: mode ?? this.mode,
     teamSetup: teamSetup ?? this.teamSetup,
+    familyChat: familyChat ?? this.familyChat,
     namesPerPlayer: namesPerPlayer ?? this.namesPerPlayer,
     connection: connection ?? this.connection,
     room: clearRoom ? null : room ?? this.room,

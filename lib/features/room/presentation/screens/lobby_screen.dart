@@ -218,8 +218,10 @@ class LobbyScreen extends StatelessWidget {
   Future<void> _startReading(BuildContext context) async {
     final cubit = context.read<RoomCubit>();
     final room = cubit.state.room;
+    // Family online has no host screen yet and can't be picked on New room; see PROGRESS.md.
+    if (room == null || room.mode == GameMode.family) return;
     final slips = cubit.startReading();
-    if (room == null || slips == null) return;
+    if (slips == null) return;
     unawaited(Haptics.start());
     // A leftover lobby message would cover the reading screen's buttons.
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -231,7 +233,7 @@ class LobbyScreen extends StatelessWidget {
           slips: slips,
           players: [for (final p in room.players) p.id],
         ),
-        GameMode.celebrity => CelebrityArgs(
+        GameMode.celebrity || GameMode.family => CelebrityArgs(
           category: room.category,
           slips: slips,
           players: [for (final p in room.playersIn) (id: p.id, name: p.name, team: p.team)],
