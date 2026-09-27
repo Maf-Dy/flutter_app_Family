@@ -2,7 +2,12 @@ import 'package:family_game/features/room/domain/room.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const empty = Room(code: 'K7Q4', category: 'Famous people', namesPerPlayer: 1);
+  const empty = Room(
+    code: 'K7Q4',
+    category: GameCategory.preset(PresetCategory.famousPeople),
+    namesPerPlayer: 1,
+    hostName: 'Mafdy',
+  );
 
   group('validate', () {
     test('accepts a name and one secret', () {
@@ -19,7 +24,12 @@ void main() {
     });
 
     test('needs exactly namesPerPlayer secrets', () {
-      const two = Room(code: 'K7Q4', category: 'Movies', namesPerPlayer: 2);
+      const two = Room(
+        code: 'K7Q4',
+        category: GameCategory.preset(PresetCategory.movies),
+        namesPerPlayer: 2,
+        hostName: 'Mafdy',
+      );
       expect(two.validate(name: 'Omar', secrets: ['Up']), SubmissionError.missingSecret);
       expect(two.validate(name: 'Omar', secrets: ['Up', 'Heat']), isNull);
     });
@@ -55,10 +65,15 @@ void main() {
   });
 
   test('host secrets fill up to namesPerPlayer and ignore blanks', () {
-    const two = Room(code: 'K7Q4', category: 'Movies', namesPerPlayer: 2);
+    const two = Room(
+      code: 'K7Q4',
+      category: GameCategory.preset(PresetCategory.movies),
+      namesPerPlayer: 2,
+      hostName: 'Mafdy',
+    );
     final room = two.withHostSecret('Up').withHostSecret('  ').withHostSecret('Heat').withHostSecret('Jaws');
     expect(room.host!.secrets, ['Up', 'Heat']);
-    expect(room.host!.name, 'You');
+    expect(room.host!.name, 'Mafdy');
     expect(room.hostSecretsLeft, 0);
   });
 
@@ -76,7 +91,7 @@ void main() {
     final room = empty.withSubmission(playerId: 'a', name: 'Omar', secrets: ['Messi']).withHostSecret('Adele');
     expect(room.slips.map((s) => (s.text, s.writerId, s.writerName)), [
       ('Messi', 'a', 'Omar'),
-      ('Adele', Player.hostId, 'You'),
+      ('Adele', Player.hostId, 'Mafdy'),
     ]);
   });
 
@@ -93,5 +108,45 @@ void main() {
 
   test('host secrets are ignored while reading', () {
     expect(empty.startReading().withHostSecret('Messi').slipCount, 0);
+  });
+
+  group('same name twice', () {
+    const strict = Room(
+      code: 'K7Q4',
+      category: GameCategory.preset(PresetCategory.footballers),
+      namesPerPlayer: 1,
+      hostName: 'Mafdy',
+      allowDuplicates: false,
+    );
+
+    test('is allowed by default, even spelled the same', () {
+      final room = empty.withSubmission(playerId: 'a', name: 'Omar', secrets: ['Messi']);
+      expect(room.validate(name: 'Nour', secrets: ['messi'], playerId: 'b'), isNull);
+    });
+
+    test('when not allowed, catches case, spacing and Arabic letter variants', () {
+      final room = strict.withSubmission(playerId: 'a', name: 'Omar', secrets: ['Lionel Messi']);
+      expect(room.validate(name: 'Nour', secrets: ['lionel  MESSI'], playerId: 'b'), SubmissionError.duplicate);
+      final arabic = strict.withSubmission(playerId: 'a', name: 'Omar', secrets: ['أم كلثوم']);
+      expect(arabic.validate(name: 'Nour', secrets: ['ام كلثوم'], playerId: 'b'), SubmissionError.duplicate);
+      final taa = strict.withSubmission(playerId: 'a', name: 'Omar', secrets: ['فيروزة']);
+      expect(taa.validate(name: 'Nour', secrets: ['فيروزه'], playerId: 'b'), SubmissionError.duplicate);
+    });
+
+    test('different spellings still get through', () {
+      final room = strict.withSubmission(playerId: 'a', name: 'Omar', secrets: ['Messi']);
+      expect(room.validate(name: 'Nour', secrets: ['Mesi'], playerId: 'b'), isNull);
+    });
+
+    test('a friend can resubmit their own name', () {
+      final room = strict.withSubmission(playerId: 'a', name: 'Omar', secrets: ['Messi']);
+      expect(room.validate(name: 'Omar', secrets: ['Messi'], playerId: 'a'), isNull);
+    });
+
+    test('the host is checked too', () {
+      final room = strict.withSubmission(playerId: 'a', name: 'Omar', secrets: ['Messi']);
+      expect(room.validateHostSecret('MESSI'), SubmissionError.duplicate);
+      expect(room.withHostSecret('MESSI').host, isNull);
+    });
   });
 }

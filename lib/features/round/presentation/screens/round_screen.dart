@@ -10,6 +10,7 @@ import '../widgets/shuffle_intro.dart';
 import 'names_board_screen.dart';
 import 'read_aloud_screen.dart';
 import 'who_wrote_screen.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// One round at the table. Pops with a [RoundExit], or null to go back to the lobby.
 class RoundScreen extends StatelessWidget {
@@ -78,11 +79,11 @@ class _RoundFlowState extends State<_RoundFlow> {
     final leave = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Leave this round?'),
-        content: const Text('The names stay in the bowl, and friends can change them again.'),
+        title: Text(context.l10n.leaveRoundTitle),
+        content: Text(context.l10n.leaveRoundBody),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Stay')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Leave')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.stay)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(context.l10n.leave)),
         ],
       ),
     );

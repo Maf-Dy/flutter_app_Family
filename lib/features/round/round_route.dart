@@ -4,7 +4,7 @@ import '../room/domain/room.dart';
 final class RoundArgs {
   const RoundArgs({required this.category, required this.slips, required this.players});
 
-  final String category;
+  final GameCategory category;
   final List<Slip> slips;
 
   /// Player ids in join order, so avatars keep the colours they had in the lobby.

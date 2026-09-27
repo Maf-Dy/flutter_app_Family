@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n.dart';
 
 Future<void> showHowToPlay(BuildContext context) =>
     showModalBottomSheet<void>(context: context, isScrollControlled: true, builder: (context) => const _HowToPlay());
@@ -6,16 +7,11 @@ Future<void> showHowToPlay(BuildContext context) =>
 class _HowToPlay extends StatelessWidget {
   const _HowToPlay();
 
-  static const _steps = [
-    'Everyone scans the QR code and secretly writes a name from the category.',
-    'The host reads all the names aloud, once or twice.',
-    'Put the phone down. Take turns asking someone “Did you write …?” Guess right and they join your family. The last family standing wins.',
-    'Afterwards, tap “Who wrote what?” to see them all.',
-  ];
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final steps = [l10n.howToPlayStep1, l10n.howToPlayStep2, l10n.howToPlayStep3, l10n.howToPlayStep4];
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -23,9 +19,9 @@ class _HowToPlay extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('How to play', style: theme.textTheme.headlineSmall),
+            Text(l10n.howToPlay, style: theme.textTheme.headlineSmall),
             const SizedBox(height: 16),
-            for (final (i, step) in _steps.indexed)
+            for (final (i, step) in steps.indexed)
               Padding(
                 padding: const EdgeInsets.only(bottom: 14),
                 child: Row(
@@ -43,7 +39,7 @@ class _HowToPlay extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 6),
-            FilledButton(onPressed: () => Navigator.pop(context), child: const Text('Got it')),
+            FilledButton(onPressed: () => Navigator.pop(context), child: Text(l10n.gotIt)),
           ],
         ),
       ),

@@ -4,6 +4,7 @@ import '../../../../core/motion/motion.dart';
 import '../../../../core/theme/game_colors.dart';
 import '../../../../core/widgets/player_avatar.dart';
 import '../../domain/room.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// Who has joined, and whether their names are in. Never shows what they wrote.
 class PlayersList extends StatelessWidget {
@@ -19,20 +20,28 @@ class PlayersList extends StatelessWidget {
         for (final (i, player) in room.players.indexed)
           _Arrive(
             key: ValueKey(player.id),
-            child: _PlayerRow(name: player.name, joinIndex: i, status: _status(player)),
+            child: _PlayerRow(
+              name: player.isHost ? context.l10n.youSuffix(player.name) : player.name,
+              joinIndex: i,
+              status: _status(context.l10n, player),
+            ),
           ),
         if (!hostJoined)
-          _PlayerRow(name: 'You', joinIndex: room.players.length, status: (label: 'Waiting', done: false)),
+          _PlayerRow(
+            name: context.l10n.youSuffix(room.hostName),
+            joinIndex: room.players.length,
+            status: (label: context.l10n.waiting, done: false),
+          ),
       ],
     );
   }
 
-  ({String label, bool done}) _status(Player player) {
-    if (!player.hasSubmitted) return (label: 'Waiting', done: false);
+  ({String label, bool done}) _status(AppLocalizations l10n, Player player) {
+    if (!player.hasSubmitted) return (label: l10n.waiting, done: false);
     if (player.isHost && player.secrets.length < room.namesPerPlayer) {
-      return (label: '${player.secrets.length} of ${room.namesPerPlayer}', done: false);
+      return (label: l10n.secretsOf(player.secrets.length, room.namesPerPlayer), done: false);
     }
-    return (label: 'Name in', done: true);
+    return (label: l10n.nameIn, done: true);
   }
 }
 

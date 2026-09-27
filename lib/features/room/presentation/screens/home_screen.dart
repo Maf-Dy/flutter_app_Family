@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/widgets/bowl.dart';
 import '../widgets/how_to_play_sheet.dart';
+import '../../../../core/l10n/l10n.dart';
+import '../../../settings/presentation/widgets/settings_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -10,6 +12,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -20,9 +23,14 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Expanded(child: _Wordmark()),
                   IconButton(
-                    tooltip: 'How to play',
+                    tooltip: l10n.howToPlay,
                     onPressed: () => showHowToPlay(context),
                     icon: const Icon(Icons.help_outline_rounded),
+                  ),
+                  IconButton(
+                    tooltip: l10n.settings,
+                    onPressed: () => showSettings(context),
+                    icon: const Icon(Icons.tune_rounded),
                   ),
                 ],
               ),
@@ -38,10 +46,10 @@ class HomeScreen extends StatelessWidget {
                       children: [
                         const Center(child: Bowl()),
                         const SizedBox(height: 16),
-                        Text('Who wrote\nwhat?', textAlign: TextAlign.center, style: theme.textTheme.displaySmall),
+                        Text(l10n.homeHeadline, textAlign: TextAlign.center, style: theme.textTheme.displaySmall),
                         const SizedBox(height: 10),
                         Text(
-                          'Everyone secretly drops a name in the bowl. Then put the phone down and play.',
+                          l10n.homeTagline,
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                         ),
@@ -66,12 +74,12 @@ class _Wordmark extends StatelessWidget {
     final theme = Theme.of(context);
     return Semantics(
       header: true,
-      label: 'Family',
+      label: context.l10n.appTitle,
       excludeSemantics: true,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text('family', style: theme.textTheme.headlineMedium?.copyWith(fontSize: 26, letterSpacing: -1)),
+          Text(context.l10n.wordmark, style: theme.textTheme.headlineMedium?.copyWith(fontSize: 26, letterSpacing: -1)),
           Padding(
             padding: const EdgeInsets.only(left: 2, bottom: 7),
             child: CircleAvatar(radius: 3.5, backgroundColor: theme.colorScheme.tertiary),
@@ -113,10 +121,10 @@ class _HostButton extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Host a room', style: theme.textTheme.titleLarge?.copyWith(color: scheme.onPrimary)),
+                    Text(context.l10n.hostRoom, style: theme.textTheme.titleLarge?.copyWith(color: scheme.onPrimary)),
                     const SizedBox(height: 2),
                     Text(
-                      'Friends join from their phone\'s browser. No app, no internet needed.',
+                      context.l10n.hostRoomDetail,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: scheme.onPrimary.withValues(alpha: 0.85),
                         height: 1.3,

@@ -41,6 +41,7 @@ class PaperSlip extends StatelessWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: AppFonts.hand,
+            fontFamilyFallback: AppFonts.arabicHand,
             fontWeight: FontWeight.w700,
             color: colors.slipInk,
             fontSize: large ? 34 : 17,

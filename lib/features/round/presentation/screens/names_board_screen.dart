@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/motion/motion.dart';
 import '../state/round_cubit.dart';
 import '../widgets/paper_slip.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// The phone goes down on the table here. Nothing moves once the slips have
 /// settled, so the screen does not pull eyes away from the game.
@@ -53,7 +54,7 @@ class _NamesBoardScreenState extends State<NamesBoardScreen> with SingleTickerPr
     final total = _settle.duration!.inMilliseconds;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Names on the table')),
+      appBar: AppBar(title: Text(context.l10n.namesOnTheTable)),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -61,7 +62,7 @@ class _NamesBoardScreenState extends State<NamesBoardScreen> with SingleTickerPr
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Text(
-                'Put the phone down and play. The screen stays on in case anyone forgets a name.',
+                context.l10n.boardHint,
                 style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
             ),
@@ -104,12 +105,12 @@ class _NamesBoardScreenState extends State<NamesBoardScreen> with SingleTickerPr
                 children: [
                   Expanded(
                     flex: 2,
-                    child: FilledButton.tonal(onPressed: cubit.readAgain, child: const Text('Read again')),
+                    child: FilledButton.tonal(onPressed: cubit.readAgain, child: Text(context.l10n.readAgain)),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     flex: 3,
-                    child: FilledButton(onPressed: cubit.openReveal, child: const Text('Who wrote what?')),
+                    child: FilledButton(onPressed: cubit.openReveal, child: Text(context.l10n.whoWroteWhat)),
                   ),
                 ],
               ),

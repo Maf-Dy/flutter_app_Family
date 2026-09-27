@@ -1,12 +1,9 @@
-import 'package:family_game/core/router/app_router.dart';
-import 'package:family_game/core/theme/app_theme.dart';
 import 'package:family_game/features/room/domain/network_access.dart';
-import 'package:family_game/features/room/domain/room_host.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/fakes.dart';
+import 'support/harness.dart';
 
 /// Every screen at phone portrait and landscape, in both text directions.
 /// Layout overflow fails a widget test, so these also guard against clipping.
@@ -28,23 +25,7 @@ void main() {
       ..devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      MultiRepositoryProvider(
-        providers: [
-          RepositoryProvider<NetworkAccess>.value(value: network),
-          RepositoryProvider<RoomHostFactory>.value(value: () => host = FakeRoomHost()),
-        ],
-        child: MaterialApp(
-          theme: AppTheme.light(),
-          darkTheme: AppTheme.dark(),
-          themeMode: dark ? ThemeMode.dark : ThemeMode.light,
-          // Reduced motion also stops the looping animations, so pumpAndSettle can settle.
-          builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(disableAnimations: true),
-            child: Directionality(textDirection: direction, child: child!),
-          ),
-          onGenerateRoute: AppRoutes.onGenerateRoute,
-        ),
-      ),
+      testApp(network: network, createHost: () => host = FakeRoomHost(), direction: direction, dark: dark),
     );
     await tester.pumpAndSettle();
   }
@@ -121,7 +102,7 @@ void main() {
         await tapVisible(tester, find.text('New round, same room'));
 
         // Back in the lobby with an empty bowl and the same players
-        expect(find.text('0 in the bowl'), findsOneWidget);
+        expect(find.text('Bowl\'s empty'), findsOneWidget);
         expect(find.text('Omar'), findsOneWidget);
         expect(host.room.round, 2);
       });
@@ -191,15 +172,7 @@ void main() {
       ..physicalSize = sizes['portrait']!
       ..devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(
-      MultiRepositoryProvider(
-        providers: [
-          RepositoryProvider<NetworkAccess>.value(value: network),
-          RepositoryProvider<RoomHostFactory>.value(value: () => host = FakeRoomHost()),
-        ],
-        child: MaterialApp(theme: AppTheme.light(), onGenerateRoute: AppRoutes.onGenerateRoute),
-      ),
-    );
+    await tester.pumpWidget(testApp(network: network, createHost: () => host = FakeRoomHost(), reducedMotion: false));
     // Looping animations never settle, so step frames instead of pumpAndSettle.
     Future<void> frames([int count = 40]) async {
       for (var i = 0; i < count; i++) {
@@ -240,7 +213,7 @@ void main() {
     expect(find.text('That\'s all of them!'), findsOneWidget);
     expect(find.text('New round, same room'), findsOneWidget);
     await tapAndRun('New round, same room');
-    expect(find.text('0 in the bowl'), findsOneWidget);
+    expect(find.text('Bowl\'s empty'), findsOneWidget);
   });
 
   testWidgets('tapping the shuffle skips straight to the first name', (tester) async {
@@ -248,15 +221,7 @@ void main() {
       ..physicalSize = sizes['portrait']!
       ..devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(
-      MultiRepositoryProvider(
-        providers: [
-          RepositoryProvider<NetworkAccess>.value(value: network),
-          RepositoryProvider<RoomHostFactory>.value(value: () => host = FakeRoomHost()),
-        ],
-        child: MaterialApp(theme: AppTheme.light(), onGenerateRoute: AppRoutes.onGenerateRoute),
-      ),
-    );
+    await tester.pumpWidget(testApp(network: network, createHost: () => host = FakeRoomHost(), reducedMotion: false));
     Future<void> frames(int count) async {
       for (var i = 0; i < count; i++) {
         await tester.pump(const Duration(milliseconds: 50));
@@ -281,4 +246,50 @@ void main() {
     expect(find.text('Shuffling 3 names…'), findsNothing);
     expect(find.text('Read aloud'), findsOneWidget);
   });
+
+  for (final MapEntry(key: sizeName, value: size) in sizes.entries) {
+    testWidgets('Egyptian Arabic, right to left, fits: $sizeName', (tester) async {
+      tester.view
+        ..physicalSize = size
+        ..devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        testApp(network: network, createHost: () => host = FakeRoomHost(), locale: const Locale('ar')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('مين كتب\nإيه؟'), findsOneWidget);
+      await tapVisible(tester, find.text('افتح قعدة'));
+      await tapVisible(tester, find.text('لعيبة كورة'));
+      await tapVisible(tester, find.byType(Switch));
+      expect(find.textContaining('ممنوع'), findsOneWidget);
+      await tapVisible(tester, find.text('افتح القعدة'));
+      host
+        ..join('a', 'عمر', ['محمد صلاح'])
+        ..join('b', 'نور', ['أبو تريكة']);
+      await tester.pumpAndSettle();
+      expect(find.text('اسمين في الطبق'), findsOneWidget);
+      expect(find.text('Mafdy (إنت)'), findsOneWidget, reason: 'the host appears under their chosen name');
+
+      // Same name twice is off: the host is told, and the field keeps the text.
+      await tester.ensureVisible(find.byType(TextField));
+      await tester.enterText(find.byType(TextField), 'ابو تريكه');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(find.textContaining('حد سبقك'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), 'حسام حسن');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(find.text('ناقص واحد كمان ونبدأ'), findsNothing);
+
+      await tapVisible(tester, find.text('يلا نقرا'));
+      expect(find.text('اقرا بصوت عالي'), findsOneWidget);
+      for (var i = 0; i < 2; i++) {
+        await tapVisible(tester, find.text('اللي بعده'));
+      }
+      await tapVisible(tester, find.text('خلصنا قراية'));
+      await tapVisible(tester, find.text('مين كتب إيه؟'));
+      await tapVisible(tester, find.text('افضح الكل'));
+      expect(find.text('دور جديد، نفس القعدة'), findsOneWidget);
+    });
+  }
 }

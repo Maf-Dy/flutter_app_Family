@@ -11,6 +11,7 @@ import '../state/round_cubit.dart';
 import '../widgets/confetti.dart';
 import '../widgets/paper_slip.dart';
 import '../widgets/reveal_card.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// Optional, after the game: each slip turns over to show who wrote it.
 class WhoWroteScreen extends StatefulWidget {
@@ -69,7 +70,7 @@ class _WhoWroteScreenState extends State<WhoWroteScreen> {
     final game = context.gameColors;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Who wrote what?')),
+      appBar: AppBar(title: Text(context.l10n.whoWroteWhat)),
       body: Stack(
         children: [
           SafeArea(
@@ -83,7 +84,7 @@ class _WhoWroteScreenState extends State<WhoWroteScreen> {
                     layoutBuilder: (current, previous) =>
                         Stack(alignment: AlignmentDirectional.centerStart, children: [...previous, ?current]),
                     child: Text(
-                      state.allRevealed ? 'That\'s all of them!' : 'Tap a name, or reveal them all.',
+                      state.allRevealed ? context.l10n.thatsAll : context.l10n.whoWroteHint,
                       key: ValueKey(state.allRevealed),
                       style: state.allRevealed
                           ? theme.textTheme.titleLarge
@@ -103,8 +104,8 @@ class _WhoWroteScreenState extends State<WhoWroteScreen> {
                       return Semantics(
                         button: !revealed,
                         label: revealed
-                            ? '${slip.text}, written by ${slip.writerName}'
-                            : '${slip.text}. Tap to reveal who wrote it',
+                            ? context.l10n.writtenBy(slip.text, slip.writerName)
+                            : context.l10n.tapToReveal(slip.text),
                         excludeSemantics: true,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
@@ -153,15 +154,15 @@ class _WhoWroteScreenState extends State<WhoWroteScreen> {
                   child: state.allRevealed
                       ? FilledButton(
                           onPressed: () => Navigator.of(context).pop(RoundExit.newRound),
-                          child: const Text('New round, same room'),
+                          child: Text(context.l10n.newRoundSameRoom),
                         )
-                      : FilledButton(onPressed: _revealAll, child: const Text('Reveal all')),
+                      : FilledButton(onPressed: _revealAll, child: Text(context.l10n.revealAll)),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                   child: TextButton(
                     onPressed: () => Navigator.of(context).pop(RoundExit.endGame),
-                    child: const Text('End game'),
+                    child: Text(context.l10n.endGame),
                   ),
                 ),
               ],

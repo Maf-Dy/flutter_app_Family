@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/motion/motion.dart';
 import '../../domain/network_access.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// QR code on a white tile: scanners need dark-on-light, in both themes.
 class QrTile extends StatelessWidget {
@@ -35,11 +36,13 @@ class QrTile extends StatelessWidget {
 
 /// The join link: QR, room code and link, with Share and Copy.
 class JoinCard extends StatelessWidget {
-  const JoinCard({super.key, required this.url, required this.code, this.caption = 'Scan to join'});
+  const JoinCard({super.key, required this.url, required this.code, this.caption});
 
   final String url;
   final String code;
-  final String caption;
+
+  /// Defaults to "Scan to join".
+  final String? caption;
 
   @override
   Widget build(BuildContext context) {
@@ -49,19 +52,19 @@ class JoinCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         child: Row(
           children: [
-            QrTile(data: url, label: 'QR code for $url'),
+            QrTile(data: url, label: context.l10n.qrForLink(url)),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    caption.toUpperCase(),
+                    (caption ?? context.l10n.scanToJoin).toUpperCase(),
                     style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                   Text(
                     code,
-                    semanticsLabel: 'Room ${code.split('').join(' ')}',
+                    semanticsLabel: context.l10n.roomCodeLabel(code.split('').join(' ')),
                     style: theme.textTheme.headlineLarge?.copyWith(letterSpacing: 3),
                   ),
                   SelectableText(
@@ -76,8 +79,12 @@ class JoinCard extends StatelessWidget {
                     spacing: 6,
                     runSpacing: 6,
                     children: [
-                      _SmallButton(icon: Icons.share_rounded, label: 'Share', onPressed: () => _share(context)),
-                      _SmallButton(icon: Icons.copy_rounded, label: 'Copy', onPressed: () => _copy(context)),
+                      _SmallButton(
+                        icon: Icons.share_rounded,
+                        label: context.l10n.share,
+                        onPressed: () => _share(context),
+                      ),
+                      _SmallButton(icon: Icons.copy_rounded, label: context.l10n.copy, onPressed: () => _copy(context)),
                     ],
                   ),
                 ],
@@ -93,7 +100,7 @@ class JoinCard extends StatelessWidget {
     final box = context.findRenderObject() as RenderBox?;
     await SharePlus.instance.share(
       ShareParams(
-        text: 'Join our Family game: $url',
+        text: context.l10n.shareText(url),
         sharePositionOrigin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
       ),
     );
@@ -104,7 +111,7 @@ class JoinCard extends StatelessWidget {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(content: Text('Link copied'), duration: Duration(seconds: 2)));
+      ..showSnackBar(SnackBar(content: Text(context.l10n.linkCopied), duration: const Duration(seconds: 2)));
   }
 }
 
@@ -154,7 +161,7 @@ class _HotspotCodesState extends State<HotspotCodes> {
       children: [
         Row(
           children: [
-            for (final (step, label) in const [(1, 'Join the Wi-Fi'), (2, 'Open the game')]) ...[
+            for (final (step, label) in [(1, context.l10n.stepJoinWifi), (2, context.l10n.stepOpenGame)]) ...[
               if (step == 2) const SizedBox(width: 8),
               Expanded(
                 child: _StepTab(
@@ -179,7 +186,7 @@ class _HotspotCodesState extends State<HotspotCodes> {
                       children: [
                         QrTile(
                           data: widget.credentials.qrPayload,
-                          label: 'QR code to join the Wi-Fi ${widget.credentials.ssid}',
+                          label: context.l10n.qrForWifi(widget.credentials.ssid),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
@@ -187,18 +194,18 @@ class _HotspotCodesState extends State<HotspotCodes> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'SCAN WITH CAMERA',
+                                context.l10n.scanWithCamera.toUpperCase(),
                                 style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                               ),
                               const SizedBox(height: 6),
-                              _Credential(label: 'Wi-Fi', value: widget.credentials.ssid),
+                              _Credential(label: context.l10n.wifi, value: widget.credentials.ssid),
                               if (widget.credentials.security != HotspotSecurity.open)
-                                _Credential(label: 'Password', value: widget.credentials.password),
+                                _Credential(label: context.l10n.password, value: widget.credentials.password),
                               const SizedBox(height: 6),
                               FilledButton.tonal(
                                 onPressed: () => setState(() => _step = 2),
                                 style: FilledButton.styleFrom(minimumSize: const Size(0, 36)),
-                                child: const Text('Next'),
+                                child: Text(context.l10n.next),
                               ),
                             ],
                           ),
@@ -207,12 +214,16 @@ class _HotspotCodesState extends State<HotspotCodes> {
                     ),
                   ),
                 )
-              : JoinCard(key: const ValueKey(2), url: widget.url, code: widget.code, caption: 'Then scan this'),
+              : JoinCard(
+                  key: const ValueKey(2),
+                  url: widget.url,
+                  code: widget.code,
+                  caption: context.l10n.thenScanThis,
+                ),
         ),
         const SizedBox(height: 8),
         Text(
-          'This is a private hotspot made by the app, so it doesn\'t show in your phone\'s Hotspot settings. '
-          'Friends see “${widget.credentials.ssid}” in their Wi-Fi list.',
+          context.l10n.privateHotspotNote(widget.credentials.ssid),
           style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
       ],
@@ -235,7 +246,7 @@ class _StepTab extends StatelessWidget {
     return Semantics(
       selected: selected,
       button: true,
-      label: 'Step $step, $label',
+      label: context.l10n.stepLabel(step, label),
       excludeSemantics: true,
       child: Material(
         color: selected ? scheme.onSurface : scheme.surfaceContainerHighest,

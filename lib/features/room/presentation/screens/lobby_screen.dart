@@ -18,6 +18,8 @@ import '../widgets/join_codes.dart';
 import '../widgets/link_help_sheet.dart';
 import '../widgets/no_network_card.dart';
 import '../widgets/players_list.dart';
+import '../../../../core/l10n/l10n.dart';
+import '../category_label.dart';
 
 class LobbyScreen extends StatelessWidget {
   const LobbyScreen({super.key});
@@ -34,11 +36,11 @@ class LobbyScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            tooltip: 'Close room',
+            tooltip: context.l10n.closeRoom,
             onPressed: () => Navigator.of(context).maybePop(),
             icon: const Icon(Icons.close_rounded),
           ),
-          title: Text(room.category),
+          title: Text(categoryLabel(context.l10n, room.category)),
         ),
         body: Stack(
           children: [
@@ -63,7 +65,23 @@ class LobbyScreen extends StatelessWidget {
                       ),
                     ],
                   );
-                  final bowl = _BowlSection(room: room, onHostSecret: cubit.addHostSecret);
+                  final bowl = _BowlSection(
+                    room: room,
+                    onHostSecret: (secret) {
+                      final error = cubit.addHostSecret(secret);
+                      if (error == SubmissionError.duplicate) {
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(
+                            SnackBar(
+                              content: Text(context.l10n.duplicateHostSecret),
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                      }
+                      return error == null;
+                    },
+                  );
                   const padding = EdgeInsets.fromLTRB(16, 0, 16, 24);
                   // Landscape and tablets: codes beside the bowl, each side scrolls on its own.
                   if (constraints.maxWidth >= 640) {
@@ -128,12 +146,7 @@ class LobbyScreen extends StatelessWidget {
         ),
       ),
     );
-    final brokenLink = state.linkCheck == LinkCheck.broken
-        ? note(
-            'This phone couldn\'t open its own link, so friends won\'t either. Tap Check again, or use a hotspot.',
-            error: true,
-          )
-        : null;
+    final brokenLink = state.linkCheck == LinkCheck.broken ? note(context.l10n.linkBroken, error: true) : null;
 
     return switch (state.connection) {
       ConnectionChecking() => const Card(
@@ -142,10 +155,16 @@ class LobbyScreen extends StatelessWidget {
           child: Center(child: CircularProgressIndicator()),
         ),
       ),
-      ConnectionStartingHotspot() => const Card(
+      ConnectionStartingHotspot() => Card(
         child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Column(children: [CircularProgressIndicator(), SizedBox(height: 14), Text('Starting hotspot…')]),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              const CircularProgressIndicator(),
+              const SizedBox(height: 14),
+              Text(context.l10n.startingHotspot),
+            ],
+          ),
         ),
       ),
       ConnectionReady(:final hotspotFailure) when url != null => Column(
@@ -153,14 +172,15 @@ class LobbyScreen extends StatelessWidget {
         children: [
           JoinCard(url: url, code: room.code),
           ?brokenLink,
-          if (hotspotFailure != null) note(hotspotFailureText(hotspotFailure), error: true),
+          if (hotspotFailure != null) note(hotspotFailureText(context.l10n, hotspotFailure), error: true),
           Wrap(
             alignment: WrapAlignment.end,
             children: [
-              if (brokenLink != null) TextButton(onPressed: cubit.refreshConnection, child: const Text('Check again')),
+              if (brokenLink != null)
+                TextButton(onPressed: cubit.refreshConnection, child: Text(context.l10n.checkAgain)),
               TextButton(
                 onPressed: () => showLinkHelp(context, url: url, onUseHotspot: cubit.createHotspot),
-                child: const Text('Link not opening?'),
+                child: Text(context.l10n.linkNotOpening),
               ),
             ],
           ),
@@ -170,10 +190,10 @@ class LobbyScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (wifiAvailable) ...[
-            note('You\'re on Wi-Fi now. Friends on the hotspot stay connected until you switch.'),
+            note(context.l10n.onWifiNow),
             Align(
               alignment: AlignmentDirectional.centerEnd,
-              child: TextButton(onPressed: cubit.switchToWifi, child: const Text('Switch to Wi-Fi')),
+              child: TextButton(onPressed: cubit.switchToWifi, child: Text(context.l10n.switchToWifi)),
             ),
           ],
           HotspotCodes(credentials: credentials, url: url, code: room.code),
@@ -196,6 +216,8 @@ class LobbyScreen extends StatelessWidget {
     final slips = cubit.startReading();
     if (room == null || slips == null) return;
     unawaited(Haptics.start());
+    // A leftover lobby message would cover the reading screen's buttons.
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     final exit = await Navigator.of(context).pushNamed<RoundExit>(
       AppRoutes.round,
       arguments: RoundArgs(category: room.category, slips: slips, players: [for (final p in room.players) p.id]),
@@ -244,7 +266,7 @@ class _StartButtonState extends State<_StartButton> with SingleTickerProviderSta
       animation: _pulse,
       builder: (context, child) =>
           Transform.scale(scale: 1 + 0.05 * math.sin(_pulse.value * math.pi * 2).abs(), child: child),
-      child: FilledButton(onPressed: widget.onPressed, child: const Text('Start reading')),
+      child: FilledButton(onPressed: widget.onPressed, child: Text(context.l10n.startReading)),
     );
   }
 }
@@ -253,7 +275,9 @@ class _BowlSection extends StatelessWidget {
   const _BowlSection({required this.room, required this.onHostSecret});
 
   final Room room;
-  final ValueChanged<String> onHostSecret;
+
+  /// Returns whether the name went in.
+  final bool Function(String secret) onHostSecret;
 
   @override
   Widget build(BuildContext context) {
@@ -276,15 +300,13 @@ class _BowlSection extends StatelessWidget {
                       child: child,
                     ),
                     child: Text(
-                      '${room.slipCount} in the bowl',
+                      context.l10n.inTheBowl(room.slipCount),
                       key: ValueKey(room.slipCount),
                       style: theme.textTheme.headlineSmall,
                     ),
                   ),
                   Text(
-                    room.canStart
-                        ? 'Ready when you are'
-                        : '${room.playersNeeded} more ${room.playersNeeded == 1 ? 'player' : 'players'} to start',
+                    room.canStart ? context.l10n.readyWhenYouAre : context.l10n.morePlayersToStart(room.playersNeeded),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w700,
@@ -301,8 +323,8 @@ class _BowlSection extends StatelessWidget {
           const SizedBox(height: 14),
           HostSecretField(
             label: room.namesPerPlayer == 1
-                ? 'Your secret name'
-                : 'Your secret name (${room.namesPerPlayer - room.hostSecretsLeft + 1} of ${room.namesPerPlayer})',
+                ? context.l10n.yourSecretName
+                : context.l10n.yourSecretNameOf(room.namesPerPlayer - room.hostSecretsLeft + 1, room.namesPerPlayer),
             onSubmit: onHostSecret,
           ),
         ],
@@ -363,10 +385,10 @@ class _LiveChipState extends State<_LiveChip> with SingleTickerProviderStateMixi
     final game = context.gameColors;
     final fg = _live ? game.live : theme.colorScheme.onSurfaceVariant;
     final label = switch (widget.connection) {
-      ConnectionReady() => 'Room open',
-      ConnectionAppHotspot() => 'Hotspot on',
-      ConnectionStartingHotspot() => 'Starting hotspot',
-      _ => 'Waiting for a network',
+      ConnectionReady() => context.l10n.roomOpen,
+      ConnectionAppHotspot() => context.l10n.hotspotOn,
+      ConnectionStartingHotspot() => context.l10n.startingHotspot,
+      _ => context.l10n.waitingForNetwork,
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -384,7 +406,7 @@ class _LiveChipState extends State<_LiveChip> with SingleTickerProviderStateMixi
           const SizedBox(width: 6),
           Flexible(
             child: Text(
-              '$label · ${widget.playersIn} in',
+              context.l10n.playersInChip(label, widget.playersIn),
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.labelMedium?.copyWith(color: fg),
             ),

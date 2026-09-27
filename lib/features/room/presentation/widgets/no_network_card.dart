@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/network_access.dart';
 import '../state/room_cubit.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// Shown when the phone is on no local network: offers the app's own hotspot.
 class NoNetworkCard extends StatelessWidget {
@@ -30,13 +31,9 @@ class NoNetworkCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 10,
           children: [
-            Text('No Wi-Fi around', style: theme.textTheme.titleLarge),
+            Text(context.l10n.noWifiAround, style: theme.textTheme.titleLarge),
             Text(
-              connection.canCreateHotspot
-                  ? 'The app can make a private hotspot. Friends join it by scanning a code. '
-                        'They lose mobile data while connected, which the game doesn\'t need.'
-                  : 'Turn on your phone\'s hotspot in Settings, then come back here. '
-                        'Friends join the hotspot and scan the code.',
+              connection.canCreateHotspot ? context.l10n.noWifiAroundCanCreate : context.l10n.noWifiAroundCannotCreate,
               style: muted,
             ),
             if (failure != null)
@@ -47,7 +44,7 @@ class NoNetworkCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  hotspotFailureText(failure),
+                  hotspotFailureText(context.l10n, failure),
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onErrorContainer,
                     fontWeight: FontWeight.w700,
@@ -58,11 +55,11 @@ class NoNetworkCard extends StatelessWidget {
               FilledButton.icon(
                 onPressed: onCreateHotspot,
                 icon: const Icon(Icons.wifi_tethering_rounded),
-                label: const Text('Create hotspot'),
+                label: Text(context.l10n.createHotspot),
               ),
             if (failure == HotspotFailure.permissionBlocked)
-              OutlinedButton(onPressed: onOpenSettings, child: const Text('Open settings')),
-            TextButton(onPressed: onCheckAgain, child: const Text('Check again')),
+              OutlinedButton(onPressed: onOpenSettings, child: Text(context.l10n.openSettings)),
+            TextButton(onPressed: onCheckAgain, child: Text(context.l10n.checkAgain)),
           ],
         ),
       ),
@@ -71,18 +68,12 @@ class NoNetworkCard extends StatelessWidget {
 }
 
 /// Why the app's hotspot did not start, in the host's words.
-String hotspotFailureText(HotspotFailure failure) => switch (failure) {
-  HotspotFailure.permissionDenied =>
-    'Android needs your permission to create the hotspot. On some phones it is called Location; the app never reads where you are.',
-  HotspotFailure.permissionBlocked =>
-    'The permission is turned off for Family Game. Allow it in Settings, then try again.',
-  HotspotFailure.incompatibleMode =>
-    'Your phone\'s own hotspot is on, or this phone can\'t run a second hotspot while on Wi-Fi. '
-        'Friends can join your hotspot or Wi-Fi instead: tap Check again.',
-  HotspotFailure.notAllowed =>
-    'This phone doesn\'t let apps create a hotspot. Turn on your hotspot in Settings instead.',
-  HotspotFailure.unsupported =>
-    'This phone can\'t create a hotspot from an app. Turn on your hotspot in Settings instead.',
-  HotspotFailure.noAddress => 'The hotspot started, but the room couldn\'t find it. Tap Check again.',
-  HotspotFailure.failed => 'Android couldn\'t start the hotspot. Make sure Wi-Fi and Location are on, then try again.',
+String hotspotFailureText(AppLocalizations l10n, HotspotFailure failure) => switch (failure) {
+  HotspotFailure.permissionDenied => l10n.hotspotPermissionDenied,
+  HotspotFailure.permissionBlocked => l10n.hotspotPermissionBlocked,
+  HotspotFailure.incompatibleMode => l10n.hotspotIncompatible,
+  HotspotFailure.notAllowed => l10n.hotspotNotAllowed,
+  HotspotFailure.unsupported => l10n.hotspotUnsupported,
+  HotspotFailure.noAddress => l10n.hotspotNoAddress,
+  HotspotFailure.failed => l10n.hotspotFailed,
 };

@@ -48,7 +48,9 @@ class RoomCubit extends Cubit<RoomState> {
     await refreshConnection();
   }
 
-  void selectCategory(String category) => emit(state.copyWith(category: category));
+  void selectCategory(GameCategory category) => emit(state.copyWith(category: category));
+
+  void setAllowDuplicates(bool allow) => emit(state.copyWith(allowDuplicates: allow));
 
   void setNamesPerPlayer(int count) => emit(state.copyWith(namesPerPlayer: count.clamp(1, Room.maxNamesPerPlayer)));
 
@@ -169,11 +171,18 @@ class RoomCubit extends Cubit<RoomState> {
     emit(state.copyWith(linkCheck: works ? LinkCheck.works : LinkCheck.broken));
   }
 
-  Future<void> openRoom() async {
+  /// Opens the room with the current settings; [hostName] is how the host shows up in it.
+  Future<void> openRoom({required String hostName}) async {
     if (state.opening || state.stage == RoomStage.lobby) return;
     emit(state.copyWith(opening: true));
     final host = _createHost();
-    final room = Room(code: _newCode(), category: state.category, namesPerPlayer: state.namesPerPlayer);
+    final room = Room(
+      code: _newCode(),
+      category: state.category,
+      namesPerPlayer: state.namesPerPlayer,
+      hostName: hostName,
+      allowDuplicates: state.allowDuplicates,
+    );
     try {
       final port = await host.open(room);
       if (isClosed) {
@@ -199,7 +208,14 @@ class RoomCubit extends Cubit<RoomState> {
     if (!isClosed) emit(state.copyWith(stage: RoomStage.setup, clearRoom: true));
   }
 
-  void addHostSecret(String secret) => _host?.update((room) => room.withHostSecret(secret));
+  /// Puts one of the host's own names in the bowl. Returns why it was refused, if it was.
+  SubmissionError? addHostSecret(String secret) {
+    final host = _host;
+    if (host == null) return SubmissionError.roomClosed;
+    final error = host.room.validateHostSecret(secret);
+    if (error == null) host.update((room) => room.withHostSecret(secret));
+    return error;
+  }
 
   /// Locks the bowl and returns its slips, or null when the room cannot start yet.
   List<Slip>? startReading() {

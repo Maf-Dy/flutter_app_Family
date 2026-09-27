@@ -16,10 +16,12 @@ void main() {
     String path, {
     String? form,
     bool withCookie = true,
+    String? language,
   }) async {
     final request = await client.openUrl(method, Uri.parse('http://127.0.0.1:$port$path'));
     request.followRedirects = false;
     if (withCookie) request.headers.set(HttpHeaders.cookieHeader, cookie);
+    if (language != null) request.headers.set(HttpHeaders.acceptLanguageHeader, language);
     if (form != null) {
       request.headers.contentType = ContentType('application', 'x-www-form-urlencoded', charset: 'utf-8');
       request.write(form);
@@ -34,7 +36,14 @@ void main() {
 
   setUp(() async {
     host = LanRoomHost(preferredPort: 0);
-    port = await host.open(const Room(code: 'K7Q4', category: 'Famous <b>people</b>', namesPerPlayer: 1));
+    port = await host.open(
+      const Room(
+        code: 'K7Q4',
+        category: GameCategory.custom('Famous <b>people</b>'),
+        namesPerPlayer: 1,
+        hostName: 'Mafdy',
+      ),
+    );
     client = HttpClient();
   });
 
@@ -60,7 +69,7 @@ void main() {
     expect(host.room.slipCount, 1);
 
     final page = await send('GET', '/');
-    expect(page.body, contains("You're in"));
+    expect(page.body, contains('You’re in'));
     expect(page.body, isNot(contains('Lionel Messi')), reason: 'the confirmation never repeats the secret');
 
     final edit = await send('GET', '/?edit=1');
@@ -101,5 +110,13 @@ void main() {
   test('rejects oversized bodies and unknown paths', () async {
     expect((await send('POST', '/', form: 'name=${'x' * 9000}')).status, HttpStatus.requestEntityTooLarge);
     expect((await send('GET', '/admin')).status, HttpStatus.notFound);
+  });
+
+  test('speaks Egyptian Arabic, right to left, to Arabic phones', () async {
+    final page = await send('GET', '/', language: 'ar-EG,ar;q=0.9,en;q=0.8');
+    expect(page.body, contains('dir="rtl"'));
+    expect(page.body, contains('ارميه في الطبق'));
+    final english = await send('GET', '/', language: 'en-US');
+    expect(english.body, contains('dir="ltr"'));
   });
 }

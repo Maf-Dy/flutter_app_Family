@@ -10,6 +10,10 @@ abstract final class AppFonts {
 
   /// Handwriting, used only on the paper slips.
   static const hand = 'Kalam';
+
+  /// Arabic has no glyphs in the faces above; these fill in, in either language.
+  static const arabic = ['Baloo Bhaijaan 2'];
+  static const arabicHand = ['Aref Ruqaa'];
 }
 
 abstract final class AppTheme {
@@ -75,7 +79,7 @@ abstract final class AppTheme {
   );
 
   static ThemeData _build(ColorScheme scheme, GameColors game) {
-    final base = ThemeData(colorScheme: scheme, fontFamily: AppFonts.body);
+    final base = ThemeData(colorScheme: scheme, fontFamily: AppFonts.body, fontFamilyFallback: AppFonts.arabic);
     final text = base.textTheme;
     TextStyle? display(TextStyle? style, FontWeight weight, [double spacing = 0]) =>
         style?.copyWith(fontFamily: AppFonts.display, fontWeight: weight, letterSpacing: spacing, height: 1.05);

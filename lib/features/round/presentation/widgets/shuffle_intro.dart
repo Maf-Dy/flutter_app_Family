@@ -6,6 +6,7 @@ import '../../../../core/motion/motion.dart';
 import '../../../../core/platform/haptics.dart';
 import '../../../../core/theme/game_colors.dart';
 import '../../../../core/widgets/bowl.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// The moment reading starts: the bowl shakes and blank slips fly out into a
 /// deck, then [onDone] hands over to the first name. Tap to skip.
@@ -65,9 +66,9 @@ class _ShuffleIntroState extends State<ShuffleIntro> with SingleTickerProviderSt
     final flying = math.min(widget.count, 7);
     return Scaffold(
       body: Semantics(
-        label: 'Shuffling ${widget.count} names',
+        label: context.l10n.shuffling(widget.count),
         button: true,
-        hint: 'Tap to skip',
+        hint: context.l10n.tapToSkip,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: _finish,
@@ -105,7 +106,7 @@ class _ShuffleIntroState extends State<ShuffleIntro> with SingleTickerProviderSt
                             right: 24,
                             bottom: 32,
                             child: Text(
-                              'Shuffling ${widget.count} names…',
+                              context.l10n.shuffling(widget.count),
                               textAlign: TextAlign.center,
                               style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                             ),

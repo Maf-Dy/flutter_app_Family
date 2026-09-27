@@ -8,6 +8,7 @@ import '../../domain/room_host.dart';
 import '../state/room_cubit.dart';
 import 'lobby_screen.dart';
 import 'new_room_screen.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// One hosting session: pick settings, then the lobby. Leaving it closes the room.
 class RoomScreen extends StatelessWidget {
@@ -50,9 +51,8 @@ class _RoomFlowState extends State<_RoomFlow> {
   Widget build(BuildContext context) {
     return BlocConsumer<RoomCubit, RoomState>(
       listenWhen: (previous, current) => current.openFailed,
-      listener: (context, state) => ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Couldn\'t open the room. Close other apps that share on Wi-Fi and try again.')),
-      ),
+      listener: (context, state) =>
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(context.l10n.openRoomFailed))),
       buildWhen: (previous, current) => previous.stage != current.stage,
       builder: (context, state) => PopScope<Object?>(
         canPop: state.stage == RoomStage.setup,
@@ -77,11 +77,11 @@ class _RoomFlowState extends State<_RoomFlow> {
     final close = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Close the room?'),
-        content: const Text('Friends\' pages stop working and the names in the bowl are cleared.'),
+        title: Text(context.l10n.closeRoomTitle),
+        content: Text(context.l10n.closeRoomBody),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Keep open')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Close room')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(context.l10n.keepOpen)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(context.l10n.closeRoom)),
         ],
       ),
     );

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// The host's own secret name, typed hidden so the table can't read it.
 class HostSecretField extends StatefulWidget {
   const HostSecretField({super.key, required this.onSubmit, required this.label});
 
-  final ValueChanged<String> onSubmit;
+  /// Returns whether the name was accepted; the field only clears when it was.
+  final bool Function(String secret) onSubmit;
   final String label;
 
   @override
@@ -23,7 +25,7 @@ class _HostSecretFieldState extends State<HostSecretField> {
 
   void _submit() {
     if (_controller.text.trim().isEmpty) return;
-    widget.onSubmit(_controller.text);
+    if (!widget.onSubmit(_controller.text)) return;
     _controller.clear();
     setState(() => _hidden = true);
   }
@@ -46,7 +48,7 @@ class _HostSecretFieldState extends State<HostSecretField> {
               labelText: widget.label,
               counterText: '',
               suffixIcon: IconButton(
-                tooltip: _hidden ? 'Show' : 'Hide',
+                tooltip: _hidden ? context.l10n.show : context.l10n.hide,
                 onPressed: () => setState(() => _hidden = !_hidden),
                 icon: Icon(_hidden ? Icons.visibility_rounded : Icons.visibility_off_rounded),
               ),
@@ -55,7 +57,7 @@ class _HostSecretFieldState extends State<HostSecretField> {
         ),
         const SizedBox(width: 8),
         IconButton.filled(
-          tooltip: 'Drop in the bowl',
+          tooltip: context.l10n.dropInBowl,
           onPressed: _submit,
           style: IconButton.styleFrom(
             minimumSize: const Size(52, 52),

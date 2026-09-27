@@ -1,16 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'core/l10n/l10n.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/room/domain/network_access.dart';
 import 'features/room/domain/room_host.dart';
+import 'features/settings/domain/app_settings.dart';
+import 'features/settings/presentation/state/settings_cubit.dart';
 
 class FamilyApp extends StatelessWidget {
-  const FamilyApp({super.key, required this.network, required this.createHost});
+  const FamilyApp({
+    super.key,
+    required this.network,
+    required this.createHost,
+    required this.settingsStore,
+    required this.settings,
+  });
 
   final NetworkAccess network;
   final RoomHostFactory createHost;
+  final SettingsStore settingsStore;
+
+  /// Loaded before the first frame, so the right language shows from the start.
+  final AppSettings settings;
 
   @override
   Widget build(BuildContext context) {
@@ -19,13 +33,27 @@ class FamilyApp extends StatelessWidget {
         RepositoryProvider<NetworkAccess>.value(value: network),
         RepositoryProvider<RoomHostFactory>.value(value: createHost),
       ],
-      child: MaterialApp(
-        title: 'Family Game',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light(),
-        darkTheme: AppTheme.dark(),
-        initialRoute: AppRoutes.home,
-        onGenerateRoute: AppRoutes.onGenerateRoute,
+      child: BlocProvider(
+        create: (_) => SettingsCubit(settingsStore, settings),
+        child: BlocBuilder<SettingsCubit, AppSettings>(
+          buildWhen: (previous, current) => previous.language != current.language,
+          builder: (context, _) => MaterialApp(
+            onGenerateTitle: (context) => context.l10n.appTitle,
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.light(),
+            darkTheme: AppTheme.dark(),
+            locale: context.read<SettingsCubit>().locale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            initialRoute: AppRoutes.home,
+            onGenerateRoute: AppRoutes.onGenerateRoute,
+          ),
+        ),
       ),
     );
   }

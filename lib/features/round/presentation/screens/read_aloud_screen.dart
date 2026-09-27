@@ -5,6 +5,7 @@ import '../../../../core/platform/haptics.dart';
 import '../state/round_cubit.dart';
 import '../widgets/flip.dart';
 import '../widgets/paper_slip.dart';
+import '../../../../core/l10n/l10n.dart';
 
 class ReadAloudScreen extends StatelessWidget {
   const ReadAloudScreen({super.key});
@@ -18,7 +19,7 @@ class ReadAloudScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(state.pass == 1 ? 'Read aloud' : 'Read again'),
+        title: Text(state.pass == 1 ? context.l10n.readAloud : context.l10n.readAgain),
         actions: [
           Padding(
             padding: const EdgeInsetsDirectional.only(end: 16),
@@ -49,7 +50,7 @@ class ReadAloudScreen extends StatelessWidget {
                       key: ValueKey((state.pass, state.index)),
                       child: Semantics(
                         liveRegion: true,
-                        label: 'Name ${state.index + 1} of $total',
+                        label: context.l10n.nameXofY(state.index + 1, total),
                         child: PaperSlip(text: state.current.text, tiltDegrees: -2, large: true),
                       ),
                     ),
@@ -58,7 +59,7 @@ class ReadAloudScreen extends StatelessWidget {
               ),
             ),
             Text(
-              state.isLast ? 'That was the last one.' : 'Read it out, then tap Next.',
+              state.isLast ? context.l10n.lastOne : context.l10n.readItOut,
               style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
             Padding(
@@ -68,23 +69,23 @@ class ReadAloudScreen extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: state.isLast
-                        ? FilledButton.tonal(onPressed: cubit.readAgain, child: const Text('Read again'))
+                        ? FilledButton.tonal(onPressed: cubit.readAgain, child: Text(context.l10n.readAgain))
                         : FilledButton.tonal(
                             onPressed: state.isFirst ? null : cubit.previous,
-                            child: const Text('Back'),
+                            child: Text(context.l10n.back),
                           ),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     flex: 3,
                     child: state.isLast
-                        ? FilledButton(onPressed: cubit.finishReading, child: const Text('Done reading'))
+                        ? FilledButton(onPressed: cubit.finishReading, child: Text(context.l10n.doneReading))
                         : FilledButton(
                             onPressed: () {
                               Haptics.tick();
                               cubit.next();
                             },
-                            child: const Text('Next name'),
+                            child: Text(context.l10n.nextName),
                           ),
                   ),
                 ],

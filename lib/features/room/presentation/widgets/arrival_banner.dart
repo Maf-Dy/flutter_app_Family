@@ -5,6 +5,7 @@ import '../../../../core/motion/motion.dart';
 import '../../../../core/theme/game_colors.dart';
 import '../../domain/room.dart';
 import '../state/room_cubit.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// Pops a "Lina's name is in" banner in the player's colour each time a friend
 /// drops their names in the bowl. Several arrivals queue up and show in turn.
@@ -98,7 +99,7 @@ class _Banner extends StatelessWidget {
     final initial = arrival.name.characters.first.toUpperCase();
     return Semantics(
       liveRegion: true,
-      label: '${arrival.name}\'s name is in the bowl',
+      label: context.l10n.arrival(arrival.name),
       excludeSemantics: true,
       child: Container(
         padding: const EdgeInsetsDirectional.fromSTEB(6, 6, 16, 6),
@@ -121,7 +122,7 @@ class _Banner extends StatelessWidget {
             const SizedBox(width: 10),
             Flexible(
               child: Text(
-                '${arrival.name}\'s name is in',
+                context.l10n.arrival(arrival.name),
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(color: game.onPlayer),
               ),

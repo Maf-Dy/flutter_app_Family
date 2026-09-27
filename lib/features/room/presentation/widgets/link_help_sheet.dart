@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/l10n/l10n.dart';
 
 /// "Link not opening?": the usual reasons, and the hotspot as the way out.
 Future<void> showLinkHelp(BuildContext context, {required String url, required VoidCallback onUseHotspot}) =>
@@ -17,12 +18,8 @@ class _LinkHelp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tips = [
-      'Friends must be on the same Wi-Fi as this phone, with mobile data not taking over.',
-      'Type the link exactly, including the number after the colon: $url',
-      'Office, hotel, café and guest Wi-Fi often stop phones from seeing each other. '
-          'The link then never opens, whatever you try. Use this phone\'s hotspot instead.',
-    ];
+    final l10n = context.l10n;
+    final tips = [l10n.linkHelpSameWifi, l10n.linkHelpTypeExactly(url), l10n.linkHelpIsolation];
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -30,7 +27,7 @@ class _LinkHelp extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Link not opening?', style: theme.textTheme.headlineSmall),
+            Text(l10n.linkNotOpening, style: theme.textTheme.headlineSmall),
             const SizedBox(height: 14),
             for (final tip in tips)
               Padding(
@@ -54,7 +51,7 @@ class _LinkHelp extends StatelessWidget {
                 onUseHotspot();
               },
               icon: const Icon(Icons.wifi_tethering_rounded),
-              label: const Text('Use a hotspot instead'),
+              label: Text(l10n.useHotspotInstead),
             ),
           ],
         ),

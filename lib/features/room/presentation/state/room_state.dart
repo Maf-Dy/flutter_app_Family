@@ -53,7 +53,8 @@ enum LinkCheck { unknown, works, broken }
 final class RoomState {
   const RoomState({
     this.stage = RoomStage.setup,
-    this.category = 'Famous people',
+    this.category = const GameCategory.preset(PresetCategory.famousPeople),
+    this.allowDuplicates = true,
     this.namesPerPlayer = 1,
     this.connection = const ConnectionChecking(),
     this.room,
@@ -63,10 +64,9 @@ final class RoomState {
     this.linkCheck = LinkCheck.unknown,
   });
 
-  static const categories = ['Famous people', 'Movies', 'Animals', 'Countries', 'Footballers', 'Anything'];
-
   final RoomStage stage;
-  final String category;
+  final GameCategory category;
+  final bool allowDuplicates;
   final int namesPerPlayer;
   final Connection connection;
   final Room? room;
@@ -89,7 +89,8 @@ final class RoomState {
 
   RoomState copyWith({
     RoomStage? stage,
-    String? category,
+    GameCategory? category,
+    bool? allowDuplicates,
     int? namesPerPlayer,
     Connection? connection,
     Room? room,
@@ -101,6 +102,7 @@ final class RoomState {
   }) => RoomState(
     stage: stage ?? this.stage,
     category: category ?? this.category,
+    allowDuplicates: allowDuplicates ?? this.allowDuplicates,
     namesPerPlayer: namesPerPlayer ?? this.namesPerPlayer,
     connection: connection ?? this.connection,
     room: clearRoom ? null : room ?? this.room,

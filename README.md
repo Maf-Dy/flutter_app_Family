@@ -12,9 +12,15 @@ The host's phone runs the room. Friends join from their phone's browser by scann
 |---|---|---|---|
 | ![Board](docs/screenshots/board.png) | ![Who wrote what](docs/screenshots/who_wrote.png) | ![Hotspot](docs/screenshots/lobby_hotspot_dark.png) | ![Join page](docs/screenshots/guest_join.png) |
 
+| عربي مصري: Home | عربي مصري: Lobby |
+|---|---|
+| ![Home in Arabic](docs/screenshots/home_ar.png) | ![Lobby in Arabic](docs/screenshots/lobby_ar.png) |
+
+The app speaks English and Egyptian Arabic (right to left). It follows the phone's language, and the settings on the home screen switch it. Friends' join pages follow their own phone's language.
+
 ## How a game goes
 
-1. **Host a room.** Pick a category and how many names each player writes.
+1. **Host a room.** Set your name once (it's remembered), pick one of 14 categories or type your own, choose how many names each player writes, and whether the same name may go in twice.
 2. **Friends join.** They scan the QR code and type their name and their secret name(s). The host sees who has joined, never what they wrote.
    - **On Wi-Fi:** one QR code with the game link.
    - **No Wi-Fi (Android 8+):** tap **Create hotspot**. Code 1 joins the hotspot with the camera, code 2 opens the game.

@@ -1,5 +1,9 @@
 import 'package:flutter/foundation.dart';
 
+import 'category.dart';
+
+export 'category.dart';
+
 enum RoomPhase {
   /// Friends can join and change their names.
   collecting,
@@ -9,7 +13,15 @@ enum RoomPhase {
 }
 
 /// Why a submission was refused. Wording is chosen at the UI edge.
-enum SubmissionError { roomClosed, missingName, missingSecret, tooLong }
+enum SubmissionError {
+  roomClosed,
+  missingName,
+  missingSecret,
+  tooLong,
+
+  /// Someone already put this name in the bowl, and the room asks for different names.
+  duplicate,
+}
 
 /// One name in the bowl.
 @immutable
@@ -48,6 +60,8 @@ final class Room {
     required this.code,
     required this.category,
     required this.namesPerPlayer,
+    required this.hostName,
+    this.allowDuplicates = true,
     this.phase = RoomPhase.collecting,
     this.round = 1,
     this.players = const [],
@@ -60,8 +74,15 @@ final class Room {
   static const maxPlayers = 30;
 
   final String code;
-  final String category;
+  final GameCategory category;
   final int namesPerPlayer;
+
+  /// What the host is called in the lobby and the reveal.
+  final String hostName;
+
+  /// Whether two slips may carry the same name. Different spellings of one
+  /// person always get through; that is part of the fun.
+  final bool allowDuplicates;
   final RoomPhase phase;
   final int round;
 
@@ -95,7 +116,8 @@ final class Room {
   ];
 
   /// Checks a friend's form before it is accepted. Returns null when valid.
-  SubmissionError? validate({required String name, required List<String> secrets}) {
+  /// [playerId] lets a friend resubmit their own names without clashing with themselves.
+  SubmissionError? validate({required String name, required List<String> secrets, String? playerId}) {
     if (!isCollecting) return SubmissionError.roomClosed;
     final cleanName = tidy(name);
     final cleanSecrets = secrets.map(tidy).toList();
@@ -106,12 +128,37 @@ final class Room {
     if (cleanName.length > maxNameLength || cleanSecrets.any((s) => s.length > maxSecretLength)) {
       return SubmissionError.tooLong;
     }
+    if (!allowDuplicates && _clashes(cleanSecrets, exceptPlayer: playerId)) return SubmissionError.duplicate;
     return null;
+  }
+
+  /// Why the host's own [secret] can't go in the bowl, or null when it can.
+  SubmissionError? validateHostSecret(String secret) {
+    final clean = tidy(secret);
+    if (!isCollecting) return SubmissionError.roomClosed;
+    if (clean.isEmpty) return SubmissionError.missingSecret;
+    if (clean.length > maxSecretLength) return SubmissionError.tooLong;
+    if (!allowDuplicates && _clashes([...?host?.secrets, clean])) return SubmissionError.duplicate;
+    return null;
+  }
+
+  bool _clashes(List<String> secrets, {String? exceptPlayer}) {
+    final taken = <String>{
+      for (final p in players)
+        if (p.id != exceptPlayer)
+          for (final s in p.secrets) matchKey(s),
+    };
+    final mine = <String>{};
+    for (final s in secrets) {
+      final key = matchKey(s);
+      if (taken.contains(key) || !mine.add(key)) return true;
+    }
+    return false;
   }
 
   /// Adds a friend, or replaces what they sent before. Call [validate] first.
   Room withSubmission({required String playerId, required String name, required List<String> secrets}) {
-    assert(validate(name: name, secrets: secrets) == null, 'Submission must be validated first');
+    assert(validate(name: name, secrets: secrets, playerId: playerId) == null, 'Submission must be validated first');
     final player = Player(id: playerId, name: tidy(name), secrets: List.unmodifiable(secrets.map(tidy)));
     final index = joinIndexOf(playerId);
     if (index < 0 && players.length >= maxPlayers) return this;
@@ -124,14 +171,14 @@ final class Room {
 
   /// Adds one of the host's own secret names, up to [namesPerPlayer].
   Room withHostSecret(String secret) {
+    if (validateHostSecret(secret) != null || hostSecretsLeft <= 0) return this;
     final clean = tidy(secret);
-    if (!isCollecting || clean.isEmpty || clean.length > maxSecretLength || hostSecretsLeft <= 0) return this;
     final current = host;
     if (current == null) {
       return _copy(
         players: [
           ...players,
-          Player(id: Player.hostId, name: 'You', secrets: List.unmodifiable([clean]), isHost: true),
+          Player(id: Player.hostId, name: hostName, secrets: List.unmodifiable([clean]), isHost: true),
         ],
       );
     }
@@ -155,6 +202,8 @@ final class Room {
     code: code,
     category: category,
     namesPerPlayer: namesPerPlayer,
+    hostName: hostName,
+    allowDuplicates: allowDuplicates,
     phase: phase ?? this.phase,
     round: round ?? this.round,
     players: players == null ? this.players : List.unmodifiable(players),
@@ -162,4 +211,15 @@ final class Room {
 
   /// Trims and collapses whitespace so "  Lionel   Messi " reads as "Lionel Messi".
   static String tidy(String input) => input.trim().replaceAll(RegExp(r'\s+'), ' ');
+
+  /// A spelling-tolerant key for spotting the same name twice: ignores case,
+  /// spaces, punctuation, Arabic diacritics and the usual Arabic letter variants
+  /// (أ إ آ ا, ة ه, ى ي). Real misspellings still count as different names.
+  static String matchKey(String name) => tidy(name)
+      .toLowerCase()
+      .replaceAll(RegExp('[ً-ٰٟـ]'), '')
+      .replaceAll(RegExp('[آأإٱ]'), 'ا')
+      .replaceAll('ة', 'ه')
+      .replaceAll('ى', 'ي')
+      .replaceAll(RegExp(r'[^\p{L}\p{N}]', unicode: true), '');
 }

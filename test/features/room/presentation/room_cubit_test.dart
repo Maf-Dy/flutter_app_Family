@@ -122,7 +122,7 @@ void main() {
       network = FakeNetwork();
       final cubit = build();
       await cubit.start();
-      await cubit.openRoom();
+      await cubit.openRoom(hostName: 'Mafdy');
       await cubit.createHotspot();
       host.join('a', 'Omar', ['Messi']);
       await pumpEventQueue();
@@ -163,7 +163,7 @@ void main() {
       network = FakeNetwork(address: '192.168.1.23', onWifi: true, reachable: false);
       final cubit = build();
       await cubit.start();
-      await cubit.openRoom();
+      await cubit.openRoom(hostName: 'Mafdy');
       await pumpEventQueue();
       expect(cubit.state.linkCheck, LinkCheck.broken);
 
@@ -184,11 +184,11 @@ void main() {
       final cubit = build();
       await cubit.start();
       cubit
-        ..selectCategory('Movies')
+        ..selectCategory(const GameCategory.preset(PresetCategory.movies))
         ..setNamesPerPlayer(5);
-      await cubit.openRoom();
+      await cubit.openRoom(hostName: 'Mafdy');
       expect(cubit.state.stage, RoomStage.lobby);
-      expect(cubit.state.room!.category, 'Movies');
+      expect(cubit.state.room!.category, const GameCategory.preset(PresetCategory.movies));
       expect(cubit.state.room!.namesPerPlayer, Room.maxNamesPerPlayer);
       expect(cubit.state.room!.code, matches(RegExp(r'^[A-Z2-9]{4}$')));
       expect(cubit.state.joinUrl, 'http://192.168.1.23:8182');
@@ -199,7 +199,7 @@ void main() {
     test('reports a room that could not open', () async {
       final cubit = build(failOpen: true);
       await cubit.start();
-      await cubit.openRoom();
+      await cubit.openRoom(hostName: 'Mafdy');
       expect(cubit.state.stage, RoomStage.setup);
       expect(cubit.state.openFailed, isTrue);
       expect(cubit.state.opening, isFalse);
@@ -209,7 +209,7 @@ void main() {
     test('starts reading only with enough players, then runs rounds', () async {
       final cubit = build();
       await cubit.start();
-      await cubit.openRoom();
+      await cubit.openRoom(hostName: 'Mafdy');
       host
         ..join('a', 'Omar', ['Messi'])
         ..join('b', 'Nour', ['Fairuz']);
@@ -237,7 +237,7 @@ void main() {
     test('closing the room returns to setup', () async {
       final cubit = build();
       await cubit.start();
-      await cubit.openRoom();
+      await cubit.openRoom(hostName: 'Mafdy');
       await cubit.closeRoom();
       expect(cubit.state.stage, RoomStage.setup);
       expect(cubit.state.room, isNull);

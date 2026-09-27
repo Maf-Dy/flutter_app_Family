@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import '../domain/room.dart';
 import '../domain/room_host.dart';
 import 'join_page.dart';
+import 'join_strings.dart';
 
 /// Serves the room over plain HTTP on this phone, so friends only need a browser.
 ///
@@ -85,11 +86,12 @@ class LanRoomHost implements RoomHost {
         );
       }
       final player = clientId == null ? null : _room.playerById(clientId);
+      final strings = JoinStrings.forAcceptLanguage(request.headers.value(HttpHeaders.acceptLanguageHeader));
       switch ((request.method, request.uri.path)) {
         case ('GET', '/'):
-          _html(response, _pageFor(player, editing: request.uri.queryParameters.containsKey('edit')));
+          _html(response, _pageFor(strings, player, editing: request.uri.queryParameters.containsKey('edit')));
         case ('POST', '/'):
-          await _submit(request, clientId, player);
+          await _submit(request, strings, clientId, player);
         case ('GET', '/status'):
           response.headers
             ..contentType = ContentType.json
@@ -109,14 +111,14 @@ class LanRoomHost implements RoomHost {
     }
   }
 
-  String _pageFor(Player? player, {required bool editing}) {
-    if (!_room.isCollecting) return JoinPage.reading(_room, player);
-    if (player != null && player.hasSubmitted && !editing) return JoinPage.done(_room, player);
-    if (player == null && _room.players.length >= Room.maxPlayers) return JoinPage.full(_room);
-    return JoinPage.form(_room, player: player);
+  String _pageFor(JoinStrings strings, Player? player, {required bool editing}) {
+    if (!_room.isCollecting) return JoinPage.reading(_room, strings, player);
+    if (player != null && player.hasSubmitted && !editing) return JoinPage.done(_room, strings, player);
+    if (player == null && _room.players.length >= Room.maxPlayers) return JoinPage.full(_room, strings);
+    return JoinPage.form(_room, strings, player: player);
   }
 
-  Future<void> _submit(HttpRequest request, String? clientId, Player? player) async {
+  Future<void> _submit(HttpRequest request, JoinStrings strings, String? clientId, Player? player) async {
     final response = request.response;
     final form = await _readForm(request);
     if (form == null) {
@@ -125,7 +127,7 @@ class LanRoomHost implements RoomHost {
     }
     final name = form['name'] ?? '';
     final secrets = [for (var i = 0; i < _room.namesPerPlayer; i++) form['s$i'] ?? ''];
-    final error = _room.validate(name: name, secrets: secrets);
+    final error = _room.validate(name: name, secrets: secrets, playerId: clientId);
     // Without a cookie there is no stable identity yet; the cookie set on this
     // response makes the next attempt stick.
     if (error != null || clientId == null) {
@@ -133,8 +135,8 @@ class LanRoomHost implements RoomHost {
       _html(
         response,
         error == SubmissionError.roomClosed
-            ? JoinPage.reading(_room, player)
-            : JoinPage.form(_room, player: player, name: name, secrets: secrets, error: error),
+            ? JoinPage.reading(_room, strings, player)
+            : JoinPage.form(_room, strings, player: player, name: name, secrets: secrets, error: error),
       );
       return;
     }
