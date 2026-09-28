@@ -253,7 +253,7 @@ const _script = r'''
       st.players.forEach(function(p){ if (p.head === mine) box.appendChild(el('span', 'chip' + (p.id === mine ? ' head' : '') + (isAway(p.id) ? ' away' : ''), (p.id === mine ? '👑 ' : '') + iso(p.name) + (p.id === me ? ' ' + S.youTag : '') + (isAway(p.id) ? ' · ' + S.offline : ''))); });
 
       fill($('who'), st.players.filter(function(p){ return p.head !== mine && !caught(p.id); }).map(function(p){ return { value: p.id, label: p.name }; }));
-      fill($('which'), st.slips.filter(function(x){ return x.writer == null; }).map(function(x){ return { value: String(x.id), label: x.text }; }));
+      fill($('which'), st.slips.filter(function(x){ return x.writer == null && !x.mine; }).map(function(x){ return { value: String(x.id), label: x.text }; }));
       var go = $('go');
       go.textContent = st.canAsk ? S.ask : S.suggest;
       go.dataset.action = st.canAsk ? 'guess' : 'suggest';

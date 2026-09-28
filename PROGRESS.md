@@ -1,6 +1,6 @@
 # Progress: expansion work
 
-Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 183 tests pass on this commit.
+Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 212 tests pass on this commit.
 
 ## Done
 
@@ -97,6 +97,48 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 183 te
 - **Fixed:** on Arabic phones the "who caught whom" line came out scrambled when names were in English (inserted names are now isolated).
 - **Tests:** rules (stand-in asker, skip, claims), the view, the server (presence with a fake clock, a seat handed over with its cookie), and the host screen (let in, not them, skip, asking for an offline head, join code). Checked in headless Chromium: a phone going offline and back with a queued message, and an Arabic phone coming back in a new browser and getting its seat after approval.
 
+### Rules and Wi-Fi check of every mode (branch `claude/project-thread-jxaml7`)
+- **Team race:**
+  - Starts at 3 names each (up to 5) and needs 12 names in the bowl.
+  - A team that empties the bowl carries its leftover seconds into the next round.
+  - The name on screen at time-up is shuffled back in, not handed to the next team.
+  - Every team needs 2 players; the host can move people even when friends picked teams.
+  - The clock pauses (and hides the name) when the app is hidden, on Back, or with Pause.
+  - A "How to play" card before round 1.
+  - Guests' pages say "The team race is on!" instead of the reading text.
+- **Classic and Pass the phone:**
+  - A host part-way through their names isn't counted in yet.
+  - Two players can't share a name.
+  - Emoji-only names no longer clash.
+- **Join page (all modes, before the game):**
+  - Reconnecting / still offline / connected again bar, and polls with a timeout.
+  - Typed names are kept in the browser, and sending while offline is held back.
+  - The id cookie lasts 12 hours, and a first post without a cookie still gets in.
+  - A page left open from an earlier room reloads instead of joining the new one.
+  - The host can tap a friend in the lobby to take an old entry out, e.g. after they rejoined on a new phone.
+- **Family online:**
+  - Phones see players only by a public id, so nobody can copy a cookie and play as someone else.
+  - Presence resets for a new game and after the host's phone slept.
+  - Seat claims:
+    - only while the player is really away;
+    - one open claim per browser;
+    - a refused browser can't ask again.
+  - Chat:
+    - failed messages retry;
+    - a resend is never posted twice;
+    - polls run one at a time.
+  - After a win, a lost connection says the game is over instead of "Reconnecting".
+  - Duplicate names match the room's Arabic-aware rule, and caught people can't be asked about.
+  - Your own names aren't offered in "Which name?".
+- **Checked in headless Chromium:**
+  - The Classic page going offline, keeping what was typed, coming back and joining.
+  - A second "Omar" being refused, then let in after the host took the old entry out.
+  - A three-phone Family game with no page errors.
+- **Not done:**
+  - The host app has no Android foreground service, so if Android stops the app in the background the game ends for everyone.
+  - If the host is a player and heads the family on turn, their family can't stand in for them.
+  - Leaving a reading reopens the bowl.
+
 ## Remaining
 1. **On a real device:** play the browser family page on 3+ phones over Wi-Fi and on the app's hotspot (polling, chat, voting, the vibration on your turn). Turn one phone's Wi-Fi off and on mid-game, and open the game in a second browser to take a seat back.
 2. **On a real device:** "Join a game" on a second phone, on home Wi-Fi and on the app's hotspot, including scanning both codes; and "Create hotspot" staying on. The Kotlin changes (multicast lock, hotspot stop, Wi-Fi settings) were not compiled in the cloud session.
@@ -105,7 +147,7 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 183 te
 
 ## Deferred by you
 - Paid app vs in-app purchase: one-time purchase agreed (no ads, no subscription); price, what's paid and any player limit still open. No code yet.
-- Team race: the same few names repeat each round with a small bowl. Mafdy picked a bigger bowl (up to 5 names each, 1 round under 15 names) but is rethinking the mode; not built yet.
+- Team race: built as bigger bowl + 3 rounds + How to play (12 names minimum, 3 each by default). Mafdy to try it.
 
 ## Bugs you mentioned
 - **Fixed:** closing the custom category dialog without a name threw an error (its text box was thrown away while the dialog was still fading out).

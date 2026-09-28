@@ -48,7 +48,13 @@ Map<String, Object?> familyViewFor(FamilyGame game, String? playerId) {
     ],
     'slips': [
       for (final s in game.slips)
-        {'id': s.id, 'text': s.text, if (game.revealed.contains(s.id)) 'writer': pub(s.writerId)},
+        {
+          'id': s.id,
+          'text': s.text,
+          if (game.revealed.contains(s.id)) 'writer': pub(s.writerId),
+          // Your own names aren't worth asking about: you know who wrote them.
+          if (inGame && s.writerId == playerId) 'mine': true,
+        },
     ],
     'families': [
       for (final head in game.familyHeads)

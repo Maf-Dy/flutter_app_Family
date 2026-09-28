@@ -1155,7 +1155,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String carryOnTurn(String team, int seconds) {
-    return '$team خلّص البولة، فهيبدأ الدور الجاي بالـ $seconds ثانية اللي كانت فاضلاله.';
+    return '$team فضّى الطبق، فهيبدأ الجولة اللي بعدها بالـ $seconds ثانية اللي كانت فاضلاله.';
   }
 
   @override
@@ -1164,32 +1164,32 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get howToPlayBowl => 'كل الأسامي بتتحط في بولة واحدة، والفرق بتلعب بالدور.';
+  String get howToPlayBowl => 'كل الأسامي بتتحط في طبق واحد، والفرق بتلعب بالدور.';
 
   @override
   String get howToPlayTurn =>
       'في دوركم، واحد منكم يمسك الموبايل ويخلّي فريقه يخمّن أكبر عدد من الأسامي قبل ما الوقت يخلص. كل اسم يتخمّن بنقطة.';
 
   @override
-  String get howToPlaySkip => 'مش عارف توصفه؟ عدّيه ويرجع البولة.';
+  String get howToPlaySkip => 'مش عارف توصفه؟ عدّيه ويرجع الطبق.';
 
   @override
   String get howToPlayRounds =>
-      'لما البولة تخلص، كل الأسامي ترجع تاني للدور اللي بعده بس التلميح أصعب: توصف، بعدين كلمة واحدة، بعدين تمثيل.';
+      'لما الطبق يفضى، كل الأسامي ترجع تاني للجولة اللي بعدها بس التلميح أصعب: توصف، بعدين كلمة واحدة، بعدين تمثيل.';
 
   @override
-  String get howToPlayWhy => 'ودي الحلاوة: نفس الأسامي بترجع، فافتكروا اللي اتقال. في الدور التالت حركة صغيرة تكفي.';
+  String get howToPlayWhy => 'ودي الحلاوة: نفس الأسامي بترجع، فافتكروا اللي اتقال. في الجولة التالتة حركة صغيرة تكفي.';
 
   @override
-  String get howToPlayWin => 'اللي يجمع نقط أكتر بعد 3 أدوار يكسب.';
+  String get howToPlayWin => 'اللي يجمع نقط أكتر بعد 3 جولات يكسب.';
 
   @override
   String teamRaceMoreNames(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'سباق الفرق محتاج $count أسامي كمان في البولة',
-      one: 'سباق الفرق محتاج اسم كمان في البولة',
+      other: 'سباق الفرق محتاج $count أسامي كمان في الطبق',
+      one: 'سباق الفرق محتاج اسم كمان في الطبق',
     );
     return '$_temp0';
   }
@@ -1200,7 +1200,7 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get removePlayerBody => 'أساميه هتطلع من البولة. استخدمها لو حد دخل تاني من موبايل جديد وفضل اسمه القديم.';
+  String get removePlayerBody => 'أساميه هتطلع من الطبق. استخدمها لو حد دخل تاني من موبايل جديد وفضل اسمه القديم.';
 
   @override
   String get removePlayer => 'طلّعه';

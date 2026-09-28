@@ -119,4 +119,18 @@ void main() {
     expect(familyPlayerIdFor(game, 'p3'), isNull);
     expect(familyPlayerIdFor(game, 'secret-nour'), isNull, reason: 'real ids are not accepted in their place');
   });
+
+  test('a phone marks the names it wrote, so they are not offered as a guess', () {
+    final game = start();
+    final slips = [for (final s in (familyViewFor(game, 'b')['slips'] as List)) s as Map];
+    expect(
+      [
+        for (final s in slips)
+          if (s['mine'] == true) s['text'],
+      ],
+      ['Fairuz'],
+    );
+    final watcher = [for (final s in (familyViewFor(game, 'zz')['slips'] as List)) s as Map];
+    expect(watcher.any((s) => s.containsKey('mine')), isFalse);
+  });
 }

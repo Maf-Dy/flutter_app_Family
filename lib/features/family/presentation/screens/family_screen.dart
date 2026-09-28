@@ -218,6 +218,7 @@ class _FamilyViewState extends State<_FamilyView> {
           AskCard(
             game: game,
             myHead: myHead,
+            me: me,
             canAsk: canAsk,
             target: _target,
             slip: _slip,

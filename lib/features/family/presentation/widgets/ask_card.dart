@@ -13,6 +13,7 @@ class AskCard extends StatelessWidget {
     required this.canAsk,
     required this.target,
     required this.slip,
+    this.me,
     required this.onTarget,
     required this.onSlip,
     required this.onSubmit,
@@ -21,6 +22,9 @@ class AskCard extends StatelessWidget {
 
   final FamilyGame game;
   final String myHead;
+
+  /// The host's own id: names they wrote aren't offered, they already know those.
+  final String? me;
 
   /// The host heads the family and it's their turn: the button asks for real.
   final bool canAsk;
@@ -38,7 +42,10 @@ class AskCard extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final people = game.askableFor(myHead);
-    final names = game.hiddenSlips;
+    final names = [
+      for (final s in game.hiddenSlips)
+        if (s.writerId != me) s,
+    ];
     // A friend's move can take a choice off the table; never hand the dropdown a value it doesn't list.
     final target = people.any((p) => p.id == this.target) ? this.target : null;
     final slip = names.any((s) => s.id == this.slip) ? this.slip : null;
