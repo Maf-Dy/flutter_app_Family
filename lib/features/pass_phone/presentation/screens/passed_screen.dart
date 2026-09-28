@@ -115,9 +115,7 @@ class PassedScreen extends StatelessWidget {
                     )
                   else
                     Text(
-                      playersIn.length < bowl.requiredPlayers
-                          ? l10n.passNeedMore(playersIn.length, bowl.requiredPlayers)
-                          : l10n.teamRaceMoreNames(bowl.room.slipsNeeded),
+                      l10n.passNeedMore(playersIn.length, bowl.requiredPlayers),
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(color: onColor.withValues(alpha: 0.85)),
                     ),

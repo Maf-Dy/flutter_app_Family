@@ -109,9 +109,10 @@ final class EnglishJoinStrings extends JoinStrings {
   @override
   String get missedRound => 'You missed this round. You can join the next one from this page.';
   @override
-  String get raceOn => 'The team race is on!';
+  String get raceOn => 'The face-off is on!';
   @override
-  String get raceWatch => 'Gather round the host’s phone and play with your team.';
+  String get raceWatch =>
+      'Gather round the host’s phone with your team. When your name comes up, keep a straight face!';
   @override
   String get lobbyReconnecting => 'Reconnecting… Your names are safe with the host.';
   @override
@@ -263,9 +264,9 @@ final class ArabicJoinStrings extends JoinStrings {
   @override
   String get missedRound => 'الدور ده فاتك. تقدر تدخل الدور الجاي من نفس الصفحة.';
   @override
-  String get raceOn => 'سباق الفرق بدأ!';
+  String get raceOn => 'فريق قصاد فريق بدأ!';
   @override
-  String get raceWatch => 'اتلمّوا حوالين موبايل صاحب القعدة والعبوا مع فريقكم.';
+  String get raceWatch => 'اتلمّوا حوالين موبايل صاحب القعدة مع فريقكم. ولما اسمك يطلع، اعمل نفسك مش واخد بالك!';
   @override
   String get lobbyReconnecting => 'بنرجّع الاتصال… أساميك في أمان عند صاحب القعدة.';
   @override

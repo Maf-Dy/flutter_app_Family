@@ -13,7 +13,7 @@ enum GameMode {
   /// Read the names aloud, then play at the table.
   classic,
 
-  /// Teams take turns getting their team to guess the names: describe, one word, act it out.
+  /// Face-off: teams take turns guessing which player on another team wrote each name.
   celebrity,
 
   /// The classic game refereed by the app: families form on everyone's phones,
@@ -36,25 +36,21 @@ enum TeamPick {
 /// Team settings for [GameMode.celebrity].
 @immutable
 final class TeamSetup {
-  const TeamSetup({this.count = 2, this.pick = TeamPick.random, this.turnSeconds = 60});
+  const TeamSetup({this.count = 2, this.pick = TeamPick.random});
 
   static const minTeams = 2;
   static const maxTeams = 4;
-  static const turnChoices = [30, 45, 60, 90];
 
   final int count;
   final TeamPick pick;
-  final int turnSeconds;
 
-  TeamSetup copyWith({int? count, TeamPick? pick, int? turnSeconds}) =>
-      TeamSetup(count: count ?? this.count, pick: pick ?? this.pick, turnSeconds: turnSeconds ?? this.turnSeconds);
+  TeamSetup copyWith({int? count, TeamPick? pick}) => TeamSetup(count: count ?? this.count, pick: pick ?? this.pick);
 
   @override
-  bool operator ==(Object other) =>
-      other is TeamSetup && other.count == count && other.pick == pick && other.turnSeconds == turnSeconds;
+  bool operator ==(Object other) => other is TeamSetup && other.count == count && other.pick == pick;
 
   @override
-  int get hashCode => Object.hash(count, pick, turnSeconds);
+  int get hashCode => Object.hash(count, pick);
 }
 
 enum RoomPhase {
@@ -135,19 +131,6 @@ final class Room {
 
   static const minPlayers = 3;
   static const maxNamesPerPlayer = 3;
-
-  /// Team race goes through the bowl three times, so it wants more names:
-  /// up to 5 each, 3 each to start with, and at least 12 in the bowl.
-  static const maxTeamRaceNames = 5;
-  static const defaultTeamRaceNames = 3;
-  static const minTeamRaceSlips = 12;
-
-  static int maxNamesFor(GameMode mode) => mode == GameMode.celebrity ? maxTeamRaceNames : maxNamesPerPlayer;
-
-  /// Names each after switching to [mode]: Team race starts at 3 each, the other modes cap it again.
-  static int namesForMode(int current, GameMode mode) => mode == GameMode.celebrity
-      ? current.clamp(defaultTeamRaceNames, maxTeamRaceNames)
-      : current.clamp(1, maxNamesPerPlayer);
   static const maxNameLength = 30;
   static const maxSecretLength = 60;
   static const maxPlayers = 30;
@@ -188,17 +171,15 @@ final class Room {
   ];
   int get slipCount => players.fold(0, (sum, p) => sum + p.secrets.length);
 
-  /// Players needed before the game can start: every team needs a clue-giver and a guesser.
+  /// Players needed before the game can start: every team needs two players,
+  /// so the other teams have someone to choose between.
   int get requiredPlayers => switch (mode) {
     GameMode.classic => minPlayers,
     GameMode.celebrity => teamSetup.count * 2,
     GameMode.family => minPlayers,
   };
-  bool get canStart => playersIn.length >= requiredPlayers && slipsNeeded == 0;
+  bool get canStart => playersIn.length >= requiredPlayers;
   int get playersNeeded => (requiredPlayers - playersIn.length).clamp(0, requiredPlayers);
-
-  /// Names still missing before a team race has enough to go round three times.
-  int get slipsNeeded => mode == GameMode.celebrity ? max(0, minTeamRaceSlips - slips.length) : 0;
 
   /// Whether friends pick their team on the join page.
   bool get playersPickTeams => mode == GameMode.celebrity && teamSetup.pick == TeamPick.players;

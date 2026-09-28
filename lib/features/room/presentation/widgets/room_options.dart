@@ -166,21 +166,6 @@ class TeamSettings extends StatelessWidget {
                     ),
               ],
             ),
-            const SizedBox(height: 14),
-            Text(l10n.turnLength, style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final seconds in TeamSetup.turnChoices)
-                  SelectChip(
-                    label: l10n.secondsShort(seconds),
-                    selected: setup.turnSeconds == seconds,
-                    onTap: () => onChanged(setup.copyWith(turnSeconds: seconds)),
-                  ),
-              ],
-            ),
           ],
         ),
       ),

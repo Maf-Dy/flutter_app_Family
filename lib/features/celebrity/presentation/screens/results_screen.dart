@@ -46,7 +46,7 @@ class _ResultsScreenState extends State<ResultsScreen> {
         title: headline,
         subtitle: categoryLabel(l10n, widget.category),
         rows: [
-          for (final (i, total) in game.totals.indexed)
+          for (final (i, total) in game.scores.indexed)
             (label: teamName(l10n, i), value: '$total', color: teamColor(context, i)),
         ],
       ),

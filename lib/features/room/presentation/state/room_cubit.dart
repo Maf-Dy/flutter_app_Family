@@ -59,16 +59,14 @@ class RoomCubit extends Cubit<RoomState> {
 
   void setAllowDuplicates(bool allow) => emit(state.copyWith(allowDuplicates: allow));
 
-  void setMode(GameMode mode) =>
-      emit(state.copyWith(mode: mode, namesPerPlayer: Room.namesForMode(state.namesPerPlayer, mode)));
+  void setMode(GameMode mode) => emit(state.copyWith(mode: mode));
 
   void setFamilyChat(bool on) => emit(state.copyWith(familyChat: on));
 
   void setTeamSetup(TeamSetup setup) =>
       emit(state.copyWith(teamSetup: setup.copyWith(count: setup.count.clamp(TeamSetup.minTeams, TeamSetup.maxTeams))));
 
-  void setNamesPerPlayer(int count) =>
-      emit(state.copyWith(namesPerPlayer: count.clamp(1, Room.maxNamesFor(state.mode))));
+  void setNamesPerPlayer(int count) => emit(state.copyWith(namesPerPlayer: count.clamp(1, Room.maxNamesPerPlayer)));
 
   /// Re-checks how friends can reach this phone. Safe to call often: a call that
   /// arrives mid-check runs one more check afterwards instead of being dropped.

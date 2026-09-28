@@ -161,15 +161,15 @@ void main() {
     expect(find.text('Start'), findsOneWidget);
   });
 
-  testWidgets('Team race needs four and goes straight to the teams', (tester) async {
+  testWidgets('Face-off needs four and goes straight to the teams', (tester) async {
     await pumpApp(tester);
     await tapVisible(tester, find.text('Pass the phone'));
-    await tapVisible(tester, find.text('Team race'));
+    await tapVisible(tester, find.text('Face-off'));
     expect(find.text('Players choose'), findsNothing);
     await tapVisible(tester, find.text('Start'));
     for (final (i, name) in ['Sara', 'Omar', 'Nour', 'Karim'].indexed) {
       if (i > 0) await tapVisible(tester, find.text("I'm next"));
-      await takeTurn(tester, name, 'Secret $name', names: 3);
+      await takeTurn(tester, name, 'Secret $name');
     }
     await hold(tester, find.text('Hold to start the game'), const Duration(milliseconds: 2100));
     await tapVisible(tester, find.text('Yes, start the game'));

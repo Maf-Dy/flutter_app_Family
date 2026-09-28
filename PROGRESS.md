@@ -1,6 +1,6 @@
 # Progress: expansion work
 
-Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 214 tests pass on this commit.
+Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 210 tests pass on this commit.
 
 ## Done
 
@@ -12,7 +12,7 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 214 te
 - "Same name twice" is a room option. It is allowed by default, and when it's off the app blocks the same name even when it's spelled differently.
 
 ### Step 2: Team race, share card, team picking (commit 45609e2)
-- Team race (Celebrity) mode: 2–4 teams, a 30/45/60/90 s timer, one round: describe each name, and the game ends when the bowl is empty.
+- Team race (Celebrity) mode, since replaced by Face-off (see below).
 - Teams can be random, picked by players on the join page, or arranged by the host.
 - A shareable end-of-night picture card for team race results and for the classic who-wrote-what reveal.
 
@@ -97,8 +97,16 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 214 te
 - **Fixed:** on Arabic phones the "who caught whom" line came out scrambled when names were in English (inserted names are now isolated).
 - **Tests:** rules (stand-in asker, skip, claims), the view, the server (presence with a fake clock, a seat handed over with its cookie), and the host screen (let in, not them, skip, asking for an offline head, join code). Checked in headless Chromium: a phone going offline and back with a queued message, and an Arabic phone coming back in a new browser and getting its seat after approval.
 
+### Face-off replaces Team race (2026-09-28)
+- **Why:** Mafdy found Team race was just عروستي (charades with the bowl's names) and wanted a team mode rooted in "guess who wrote it". Picked "Face-off + bets" from two ideas (the other was Partners).
+- **Rules** (`lib/features/celebrity/domain/face_off_game.dart`): teams take turns; the app draws the next name that nobody on the team on turn wrote; the team picks which player on another team wrote it. Right +1; a double bet is +2 right, −1 wrong. Duplicate names: either writer counts. A team with nothing left to guess is skipped; the game ends when the bowl is empty. No timer.
+- **Screens:** Teams (with How to play), Pick (name on a slip, the other teams' players as chips, "Bet double" switch, "{name} wrote it!"), Reveal (right/wrong, who wrote it, points, scoreboard), Results.
+- **Removed:** the turn clock, hand-off, Got it/Skip, turn length setting, 3–5 names each and the 12-name minimum. Names each is 1–3 like Classic; every team still needs 2 players.
+- Guests' pages say "The face-off is on!" and to keep a straight face. Internals keep the `celebrity` names (`GameMode.celebrity`, `CelebrityCubit`).
+- **Tests:** `test/features/celebrity/face_off_game_test.dart` (turns, scoring, bets, duplicates, skipped team, 3 teams, cubit) and the full flow in `screens_test.dart`.
+
 ### Rules and Wi-Fi check of every mode (branch `claude/project-thread-jxaml7`)
-- **Team race:**
+- **Team race** (since replaced by Face-off, above):
   - Starts at 3 names each (up to 5) and needs 12 names in the bowl.
   - One round only (Mafdy's pick after play-testing 2026-09-28: repeating the same names over 3 rounds felt wrong). Each name is guessed once; the bowl emptying ends the game. Every turn gets the full clock.
   - The name on screen at time-up is shuffled back in, not handed to the next team.
@@ -149,7 +157,7 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 214 te
 
 ## Deferred by you
 - Paid app vs in-app purchase: one-time purchase agreed (no ads, no subscription); price, what's paid and any player limit still open. No code yet.
-- Team race: one round + How to play (12 names minimum, 3 each by default). Mafdy to try it.
+- Face-off (replaces Team race, 2026-09-28): Mafdy to play-test it on the Pixel.
 
 ## Bugs you mentioned
 - **Fixed:** closing the custom category dialog without a name threw an error (its text box was thrown away while the dialog was still fading out).

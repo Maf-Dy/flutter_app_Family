@@ -102,7 +102,7 @@ abstract final class JoinPage {
       body:
           '''
     <div class="center stack">
-      <div class="megaphone" aria-hidden="true">${race ? '⏱️' : '📣'}</div>
+      <div class="megaphone" aria-hidden="true">${race ? '🥊' : '📣'}</div>
       <h1 class="${isIn ? 'big' : ''}">${_esc(title)}</h1>
       <p class="muted">${_esc(detail)}</p>
     </div>

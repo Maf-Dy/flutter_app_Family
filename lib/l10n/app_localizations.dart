@@ -62,7 +62,8 @@ import 'app_localizations_en.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,15 +84,19 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('ar'), Locale('en')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
+    Locale('en'),
+  ];
 
   /// No description provided for @appTitle.
   ///
@@ -1013,13 +1019,13 @@ abstract class AppLocalizations {
   /// No description provided for @modeCelebrity.
   ///
   /// In en, this message translates to:
-  /// **'Team race'**
+  /// **'Face-off'**
   String get modeCelebrity;
 
   /// No description provided for @modeCelebrityDetail.
   ///
   /// In en, this message translates to:
-  /// **'Teams race the clock to guess every name in the bowl.'**
+  /// **'Teams take turns guessing who on the other team wrote each name. Sure? Bet double.'**
   String get modeCelebrityDetail;
 
   /// No description provided for @teams.
@@ -1057,18 +1063,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'I arrange'**
   String get teamPickHost;
-
-  /// No description provided for @turnLength.
-  ///
-  /// In en, this message translates to:
-  /// **'Turn length'**
-  String get turnLength;
-
-  /// No description provided for @secondsShort.
-  ///
-  /// In en, this message translates to:
-  /// **'{count}s'**
-  String secondsShort(int count);
 
   /// No description provided for @teamName0.
   ///
@@ -1118,83 +1112,17 @@ abstract class AppLocalizations {
   /// **'Let\'s play'**
   String get letsPlay;
 
-  /// No description provided for @roundDescribe.
-  ///
-  /// In en, this message translates to:
-  /// **'Describe it'**
-  String get roundDescribe;
-
-  /// No description provided for @roundDescribeDetail.
-  ///
-  /// In en, this message translates to:
-  /// **'Say anything except the name itself.'**
-  String get roundDescribeDetail;
-
-  /// No description provided for @startRound.
-  ///
-  /// In en, this message translates to:
-  /// **'Start'**
-  String get startRound;
-
   /// No description provided for @teamTurn.
   ///
   /// In en, this message translates to:
   /// **'{team}\'s turn'**
   String teamTurn(String team);
 
-  /// No description provided for @passPhoneTo.
-  ///
-  /// In en, this message translates to:
-  /// **'Pass the phone to'**
-  String get passPhoneTo;
-
-  /// No description provided for @giverHint.
-  ///
-  /// In en, this message translates to:
-  /// **'The rest of the team guesses. Other teams, no peeking!'**
-  String get giverHint;
-
-  /// No description provided for @imReady.
-  ///
-  /// In en, this message translates to:
-  /// **'I\'m ready'**
-  String get imReady;
-
-  /// No description provided for @gotItGuess.
-  ///
-  /// In en, this message translates to:
-  /// **'Got it!'**
-  String get gotItGuess;
-
-  /// No description provided for @skip.
-  ///
-  /// In en, this message translates to:
-  /// **'Skip'**
-  String get skip;
-
   /// No description provided for @namesLeft.
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =0{Bowl\'s empty} =1{1 name left} other{{count} names left}}'**
   String namesLeft(int count);
-
-  /// No description provided for @secondsLeft.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{1 second left} other{{count} seconds left}}'**
-  String secondsLeft(int count);
-
-  /// No description provided for @timesUp.
-  ///
-  /// In en, this message translates to:
-  /// **'Time\'s up!'**
-  String get timesUp;
-
-  /// No description provided for @bowlEmptied.
-  ///
-  /// In en, this message translates to:
-  /// **'The bowl is empty!'**
-  String get bowlEmptied;
 
   /// No description provided for @turnScore.
   ///
@@ -1967,62 +1895,26 @@ abstract class AppLocalizations {
   /// No description provided for @teamNeedsTwo.
   ///
   /// In en, this message translates to:
-  /// **'Needs at least 2 players: one describes, one guesses.'**
+  /// **'Needs at least 2 players, so the other team has someone to choose from.'**
   String get teamNeedsTwo;
-
-  /// No description provided for @pauseTurn.
-  ///
-  /// In en, this message translates to:
-  /// **'Pause'**
-  String get pauseTurn;
-
-  /// No description provided for @resumeTurn.
-  ///
-  /// In en, this message translates to:
-  /// **'Carry on'**
-  String get resumeTurn;
-
-  /// No description provided for @turnPaused.
-  ///
-  /// In en, this message translates to:
-  /// **'Paused'**
-  String get turnPaused;
-
-  /// No description provided for @turnPausedBody.
-  ///
-  /// In en, this message translates to:
-  /// **'The clock is stopped and the name is hidden. Tap Carry on when you\'re ready.'**
-  String get turnPausedBody;
 
   /// No description provided for @howToPlayBowl.
   ///
   /// In en, this message translates to:
-  /// **'All the names go into one bowl, and the teams take turns.'**
+  /// **'Everyone\'s names go into one bowl. Each name comes out once, and the teams take turns.'**
   String get howToPlayBowl;
 
   /// No description provided for @howToPlayTurn.
   ///
   /// In en, this message translates to:
-  /// **'On your turn, one of you holds the phone and gets your team to guess as many names as you can before the clock runs out. Every name guessed is a point.'**
+  /// **'On your turn, the app shows a name written by someone on another team. Talk it over and pick who wrote it. Right is a point.'**
   String get howToPlayTurn;
-
-  /// No description provided for @howToPlaySkip.
-  ///
-  /// In en, this message translates to:
-  /// **'Stuck? Skip it and it goes back in the bowl.'**
-  String get howToPlaySkip;
 
   /// No description provided for @howToPlayWin.
   ///
   /// In en, this message translates to:
-  /// **'When the bowl is empty the game ends. The team with the most names wins.'**
+  /// **'When the bowl is empty the game ends. The team with the most points wins.'**
   String get howToPlayWin;
-
-  /// No description provided for @teamRaceMoreNames.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{Team race needs 1 more name in the bowl} other{Team race needs {count} more names in the bowl}}'**
-  String teamRaceMoreNames(int count);
 
   /// No description provided for @removePlayerTitle.
   ///
@@ -2053,9 +1945,100 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Friends are playing through this phone. Close the room when you\'re done.'**
   String get hostingText;
+
+  /// No description provided for @howToPlayPokerFace.
+  ///
+  /// In en, this message translates to:
+  /// **'When it\'s your name on the screen, keep a straight face!'**
+  String get howToPlayPokerFace;
+
+  /// No description provided for @howToPlayDouble.
+  ///
+  /// In en, this message translates to:
+  /// **'Sure of your answer? Bet double: +2 if you\'re right, but you lose a point if you\'re wrong.'**
+  String get howToPlayDouble;
+
+  /// No description provided for @faceOffWhoWrote.
+  ///
+  /// In en, this message translates to:
+  /// **'Who on the other team wrote it?'**
+  String get faceOffWhoWrote;
+
+  /// No description provided for @faceOffTalkItOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Talk it over as a team, then pick one.'**
+  String get faceOffTalkItOver;
+
+  /// No description provided for @faceOffDouble.
+  ///
+  /// In en, this message translates to:
+  /// **'Bet double'**
+  String get faceOffDouble;
+
+  /// No description provided for @faceOffDoubleDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Right: +2. Wrong: you lose a point.'**
+  String get faceOffDoubleDetail;
+
+  /// No description provided for @faceOffPickSomeone.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick who wrote it'**
+  String get faceOffPickSomeone;
+
+  /// No description provided for @faceOffLockIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wrote it!'**
+  String faceOffLockIn(String name);
+
+  /// No description provided for @faceOffRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Right!'**
+  String get faceOffRight;
+
+  /// No description provided for @faceOffWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong!'**
+  String get faceOffWrong;
+
+  /// No description provided for @faceOffWroteIt.
+  ///
+  /// In en, this message translates to:
+  /// **'{writer} wrote “{name}”'**
+  String faceOffWroteIt(String writer, String name);
+
+  /// No description provided for @faceOffYouSaid.
+  ///
+  /// In en, this message translates to:
+  /// **'You said {name}'**
+  String faceOffYouSaid(String name);
+
+  /// No description provided for @faceOffNoPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'No points for {team}'**
+  String faceOffNoPoints(String team);
+
+  /// No description provided for @faceOffLosesPoint.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} loses a point'**
+  String faceOffLosesPoint(String team);
+
+  /// No description provided for @faceOffWasDouble.
+  ///
+  /// In en, this message translates to:
+  /// **'It was a double bet.'**
+  String get faceOffWasDouble;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -2064,7 +2047,8 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['ar', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['ar', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;

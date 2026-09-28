@@ -115,7 +115,7 @@ void main() {
     expect(page, contains('Reconnecting… Your names are safe with the host.'));
   });
 
-  test('a team race tells friends to gather round, not that names are being read', () async {
+  test('a face-off tells friends to gather round, not that names are being read', () async {
     host.update(
       (room) => Room(
         code: room.code,
@@ -126,7 +126,7 @@ void main() {
       ).withSubmission(playerId: '0123456789abcdef0123456789abcdef', name: 'Omar', secrets: ['Messi']).startReading(),
     );
     final page = (await send('GET', '/')).body;
-    expect(page, contains('The team race is on!'));
+    expect(page, contains('The face-off is on!'));
     expect(page, isNot(contains('The host is reading the names')));
   });
 

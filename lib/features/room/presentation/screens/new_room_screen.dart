@@ -78,7 +78,7 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
               const SizedBox(height: 10),
               for (final (mode, title, detail, icon) in [
                 (GameMode.classic, l10n.modeClassic, l10n.modeClassicDetail, Icons.local_dining_rounded),
-                (GameMode.celebrity, l10n.modeCelebrity, l10n.modeCelebrityDetail, Icons.timer_rounded),
+                (GameMode.celebrity, l10n.modeCelebrity, l10n.modeCelebrityDetail, Icons.sports_kabaddi_rounded),
                 (GameMode.family, l10n.modeFamily, l10n.modeFamilyDetail, Icons.diversity_3_rounded),
               ])
                 Padding(
@@ -132,11 +132,7 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
               const SizedBox(height: 28),
               SectionLabel(l10n.namesPerPlayer),
               const SizedBox(height: 10),
-              NamesPerPlayerCard(
-                count: state.namesPerPlayer,
-                max: Room.maxNamesFor(state.mode),
-                onChanged: cubit.setNamesPerPlayer,
-              ),
+              NamesPerPlayerCard(count: state.namesPerPlayer, onChanged: cubit.setNamesPerPlayer),
               const SizedBox(height: 28),
               SectionLabel(l10n.rules),
               const SizedBox(height: 10),

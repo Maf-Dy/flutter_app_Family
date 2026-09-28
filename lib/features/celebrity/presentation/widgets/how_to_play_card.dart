@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/l10n.dart';
 
-/// The team race rules in six short lines, shown before the first round.
+/// The face-off rules in five short lines, shown with the teams.
 class HowToPlayCard extends StatelessWidget {
   const HowToPlayCard({super.key});
 
@@ -12,8 +12,9 @@ class HowToPlayCard extends StatelessWidget {
     final l10n = context.l10n;
     final rules = [
       (Icons.emoji_food_beverage_rounded, l10n.howToPlayBowl),
-      (Icons.timer_rounded, l10n.howToPlayTurn),
-      (Icons.redo_rounded, l10n.howToPlaySkip),
+      (Icons.groups_rounded, l10n.howToPlayTurn),
+      (Icons.sentiment_neutral_rounded, l10n.howToPlayPokerFace),
+      (Icons.casino_rounded, l10n.howToPlayDouble),
       (Icons.emoji_events_rounded, l10n.howToPlayWin),
     ];
     return Card(

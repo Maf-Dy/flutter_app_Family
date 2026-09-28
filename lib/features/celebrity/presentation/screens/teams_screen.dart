@@ -5,6 +5,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../room/domain/room.dart';
 import '../../domain/teams.dart';
 import '../state/celebrity_cubit.dart';
+import '../widgets/how_to_play_card.dart';
 import '../../../room/presentation/team_style.dart';
 
 class TeamsScreen extends StatelessWidget {
@@ -30,70 +31,75 @@ class TeamsScreen extends StatelessWidget {
         ],
       ),
       body: SafeArea(
-        child: ListView(
+        // Not a lazy list: every team stays built, so a moved player can always be tapped back.
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-          children: [
-            if (pick != TeamPick.random)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Text(
-                  pick == TeamPick.host ? l10n.tapToMove : '${l10n.teamsChosenNote} ${l10n.tapToMove}',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                ),
-              ),
-            for (final (i, team) in game.teams.indexed)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Card(
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        color: teamColor(context, i),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                        child: Text(
-                          teamName(l10n, i),
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            if (team.isNotEmpty)
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  for (final id in team)
-                                    if (pick != TeamPick.random)
-                                      ActionChip(
-                                        avatar: const Icon(Icons.swap_horiz_rounded, size: 18),
-                                        label: Text(cubit.nameOf(id)),
-                                        onPressed: () => cubit.movePlayer(id),
-                                      )
-                                    else
-                                      Chip(label: Text(cubit.nameOf(id))),
-                                ],
-                              ),
-                            if (team.length < minTeamSize)
-                              Padding(
-                                padding: EdgeInsets.only(top: team.isEmpty ? 0 : 8),
-                                child: Text(l10n.teamNeedsTwo, style: TextStyle(color: theme.colorScheme.error)),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (pick != TeamPick.random)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    pick == TeamPick.host ? l10n.tapToMove : '${l10n.teamsChosenNote} ${l10n.tapToMove}',
+                    style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                   ),
                 ),
-              ),
-          ],
+              for (final (i, team) in game.teams.indexed)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Card(
+                    clipBehavior: Clip.antiAlias,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Container(
+                          color: teamColor(context, i),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          child: Text(
+                            teamName(l10n, i),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (team.isNotEmpty)
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    for (final id in team)
+                                      if (pick != TeamPick.random)
+                                        ActionChip(
+                                          avatar: const Icon(Icons.swap_horiz_rounded, size: 18),
+                                          label: Text(cubit.nameOf(id)),
+                                          onPressed: () => cubit.movePlayer(id),
+                                        )
+                                      else
+                                        Chip(label: Text(cubit.nameOf(id))),
+                                  ],
+                                ),
+                              if (team.length < minTeamSize)
+                                Padding(
+                                  padding: EdgeInsets.only(top: team.isEmpty ? 0 : 8),
+                                  child: Text(l10n.teamNeedsTwo, style: TextStyle(color: theme.colorScheme.error)),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              const HowToPlayCard(),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: SafeArea(

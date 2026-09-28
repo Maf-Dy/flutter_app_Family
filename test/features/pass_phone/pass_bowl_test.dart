@@ -41,7 +41,7 @@ void main() {
       );
     });
 
-    test('needs 3 players for Classic and 2 per team for Team race', () {
+    test('needs 3 players for Classic and 2 per team for Face-off', () {
       var classic = bowl();
       var race = bowl(mode: GameMode.celebrity, names: 3);
       for (final name in ['A', 'B', 'C']) {
@@ -53,15 +53,13 @@ void main() {
       expect(race.submit(name: 'D', secrets: ['D 1', 'D 2', 'D 3']).canStart, isTrue);
     });
 
-    test('Team race needs 12 names in the bowl, however many play', () {
-      var race = bowl(mode: GameMode.celebrity, names: 2);
-      for (final name in ['A', 'B', 'C', 'D', 'E']) {
-        race = race.submit(name: name, secrets: ['$name 1', '$name 2']);
+    test('Face-off can start with one name each once two teams of two are in', () {
+      var race = bowl(mode: GameMode.celebrity, names: 1);
+      for (final name in ['A', 'B', 'C']) {
+        race = race.submit(name: name, secrets: ['$name 1']);
       }
-      expect(race.room.slipsNeeded, 2);
       expect(race.canStart, isFalse);
-      race = race.submit(name: 'F', secrets: ['F 1', 'F 2']);
-      expect(race.room.slipsNeeded, 0);
+      race = race.submit(name: 'D', secrets: ['D 1']);
       expect(race.canStart, isTrue);
     });
 
@@ -148,11 +146,11 @@ void main() {
       expect(args.players, hasLength(3));
     });
 
-    test('Team race hands over the players who are in', () {
+    test('Face-off hands over the players who are in', () {
       final cubit = threeIn(mode: GameMode.celebrity);
       cubit
         ..next()
-        ..submit(name: 'Karim', secrets: ['Karim 1', 'Karim 2', 'Karim 3']);
+        ..submit(name: 'Karim', secrets: ['Karim']);
       final args = cubit.celebrityArgs()!;
       expect([for (final p in args.players) p.name], ['Sara', 'Omar', 'Nour', 'Karim']);
       expect(cubit.roundArgs(), isNull);

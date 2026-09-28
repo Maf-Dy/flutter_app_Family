@@ -29,14 +29,15 @@ The app speaks English and Egyptian Arabic (right to left). It follows the phone
 4. **Names on the table.** The list stays on screen (the screen stays awake) in case anyone forgets a name. Play at the table.
 5. **Who wrote what?** Optional, after the game: each slip flips to show who wrote it. Then start a new round in the same room.
 
-## Team race mode
+## Face-off mode
 
-Pick **Team race** when opening a room. Everyone writes names as usual, then:
+Pick **Face-off** (فريق قصاد فريق) when opening a room. Everyone writes names as usual, then:
 
-1. **Teams.** 2–4 teams, made one of three ways: the app shuffles (with Reshuffle), friends pick on the join page, or the host taps players to move them.
-2. **One round.** Describe each name (anything but the name itself). Each name is guessed once, and the game ends when the bowl is empty.
-3. **Turns.** The phone goes to each team's next clue-giver. Tap *Got it!* for every name the team guesses, or *Skip* to put it back, before the clock (30–90 s) runs out.
-4. **Results** with confetti. *Share this night* makes a picture of the scores for the family group; the classic mode's *Who wrote what?* has one too.
+1. **Teams.** 2–4 teams of at least 2, made one of three ways: the app shuffles (with Reshuffle), friends pick on the join page, or the host taps players to move them.
+2. **Turns.** The app draws a name written by someone on another team. The team on turn talks it over and picks who wrote it, while the other team keeps a straight face. Right is +1.
+3. **Bet double.** A team that's sure can bet double: +2 if right, −1 if wrong.
+4. **One pass through the bowl.** Each name comes out once; when the bowl is empty the game ends.
+5. **Results** with confetti. *Share this night* makes a picture of the scores for the family group; the classic mode's *Who wrote what?* has one too.
 
 ## Family online mode
 
@@ -98,7 +99,7 @@ lib/
     │   ├── data/                  # LanRoomHost (HTTP server), JoinPage (HTML), DeviceNetwork
     │   └── presentation/          # RoomCubit, home / new room / lobby screens
     ├── round/                     # classic: read aloud, names on the table, who wrote what
-    ├── celebrity/                 # team race: teams, rounds, turn clock, results
+    ├── celebrity/                 # face-off: teams, who-wrote-it guesses, bets, results
     ├── family/                    # family online: rules, the host's seat and board
     └── settings/                  # host name and language, saved on the phone
         ├── round_route.dart       # RoundArgs / RoundExit: what the lobby hands over

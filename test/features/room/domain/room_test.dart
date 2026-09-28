@@ -199,23 +199,22 @@ void main() {
       expect(Room.matchKey('أحمد'), Room.matchKey('احمد'));
     });
 
-    test('Team race wants at least 12 names and starts at 3 each', () {
-      expect(Room.namesForMode(1, GameMode.celebrity), 3);
-      expect(Room.namesForMode(5, GameMode.classic), 3);
-      expect(Room.maxNamesFor(GameMode.celebrity), 5);
+    test('Face-off starts with two players per team, however few names each', () {
       var race = const Room(
         code: 'K7Q4',
         category: GameCategory.preset(PresetCategory.movies),
-        namesPerPlayer: 2,
+        namesPerPlayer: 1,
         hostName: 'Mafdy',
         mode: GameMode.celebrity,
       );
-      for (final id in ['a', 'b', 'c', 'd']) {
-        race = race.withSubmission(playerId: id, name: id, secrets: ['$id 1', '$id 2']);
+      for (final id in ['a', 'b', 'c']) {
+        race = race.withSubmission(playerId: id, name: id, secrets: ['$id 1']);
       }
-      expect(race.playersNeeded, 0);
-      expect(race.slipsNeeded, 4);
+      expect(race.playersNeeded, 1);
       expect(race.canStart, isFalse);
+      race = race.withSubmission(playerId: 'd', name: 'd', secrets: ['d 1']);
+      expect(race.playersNeeded, 0);
+      expect(race.canStart, isTrue);
     });
   });
 

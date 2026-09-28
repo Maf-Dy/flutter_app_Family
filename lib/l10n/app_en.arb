@@ -304,23 +304,14 @@
   "gameMode": "Game",
   "modeClassic": "Classic",
   "modeClassicDetail": "Read the names aloud, then play at the table.",
-  "modeCelebrity": "Team race",
-  "modeCelebrityDetail": "Teams race the clock to guess every name in the bowl.",
+  "modeCelebrity": "Face-off",
+  "modeCelebrityDetail": "Teams take turns guessing who on the other team wrote each name. Sure? Bet double.",
   "teams": "Teams",
   "teamCount": "Number of teams",
   "teamPickLabel": "Making teams",
   "teamPickRandom": "App shuffles",
   "teamPickPlayers": "Players choose",
   "teamPickHost": "I arrange",
-  "turnLength": "Turn length",
-  "secondsShort": "{count}s",
-  "@secondsShort": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "teamName0": "Purple team",
   "teamName1": "Orange team",
   "teamName2": "Green team",
@@ -329,9 +320,6 @@
   "tapToMove": "Tap a player to move them to the next team.",
   "teamsChosenNote": "Friends picked their teams; anyone who didn't was balanced in.",
   "letsPlay": "Let's play",
-  "roundDescribe": "Describe it",
-  "roundDescribeDetail": "Say anything except the name itself.",
-  "startRound": "Start",
   "teamTurn": "{team}'s turn",
   "@teamTurn": {
     "placeholders": {
@@ -340,11 +328,6 @@
       }
     }
   },
-  "passPhoneTo": "Pass the phone to",
-  "giverHint": "The rest of the team guesses. Other teams, no peeking!",
-  "imReady": "I'm ready",
-  "gotItGuess": "Got it!",
-  "skip": "Skip",
   "namesLeft": "{count, plural, =0{Bowl's empty} =1{1 name left} other{{count} names left}}",
   "@namesLeft": {
     "placeholders": {
@@ -353,16 +336,6 @@
       }
     }
   },
-  "secondsLeft": "{count, plural, =1{1 second left} other{{count} seconds left}}",
-  "@secondsLeft": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "timesUp": "Time's up!",
-  "bowlEmptied": "The bowl is empty!",
   "turnScore": "+{points} for {team}",
   "@turnScore": {
     "placeholders": {
@@ -680,23 +653,10 @@
   "passKeepGoing": "Keep going",
   "passReaderTitle": "Give the phone to whoever reads the names out",
   "passReaderDetail": "Everyone else, listen closely!",
-  "teamNeedsTwo": "Needs at least 2 players: one describes, one guesses.",
-  "pauseTurn": "Pause",
-  "resumeTurn": "Carry on",
-  "turnPaused": "Paused",
-  "turnPausedBody": "The clock is stopped and the name is hidden. Tap Carry on when you're ready.",
-  "howToPlayBowl": "All the names go into one bowl, and the teams take turns.",
-  "howToPlayTurn": "On your turn, one of you holds the phone and gets your team to guess as many names as you can before the clock runs out. Every name guessed is a point.",
-  "howToPlaySkip": "Stuck? Skip it and it goes back in the bowl.",
-  "howToPlayWin": "When the bowl is empty the game ends. The team with the most names wins.",
-  "teamRaceMoreNames": "{count, plural, =1{Team race needs 1 more name in the bowl} other{Team race needs {count} more names in the bowl}}",
-  "@teamRaceMoreNames": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "teamNeedsTwo": "Needs at least 2 players, so the other team has someone to choose from.",
+  "howToPlayBowl": "Everyone's names go into one bowl. Each name comes out once, and the teams take turns.",
+  "howToPlayTurn": "On your turn, the app shows a name written by someone on another team. Talk it over and pick who wrote it. Right is a point.",
+  "howToPlayWin": "When the bowl is empty the game ends. The team with the most points wins.",
   "removePlayerTitle": "Take {name} out of the room?",
   "@removePlayerTitle": {
     "placeholders": {
@@ -708,5 +668,58 @@
   "removePlayerBody": "Their names come out of the bowl. Use this for an old entry left behind when someone joined again on a new phone.",
   "removePlayer": "Take out",
   "hostingTitle": "Hosting a game",
-  "hostingText": "Friends are playing through this phone. Close the room when you're done."
+  "hostingText": "Friends are playing through this phone. Close the room when you're done.",
+  "howToPlayPokerFace": "When it's your name on the screen, keep a straight face!",
+  "howToPlayDouble": "Sure of your answer? Bet double: +2 if you're right, but you lose a point if you're wrong.",
+  "faceOffWhoWrote": "Who on the other team wrote it?",
+  "faceOffTalkItOver": "Talk it over as a team, then pick one.",
+  "faceOffDouble": "Bet double",
+  "faceOffDoubleDetail": "Right: +2. Wrong: you lose a point.",
+  "faceOffPickSomeone": "Pick who wrote it",
+  "faceOffLockIn": "{name} wrote it!",
+  "@faceOffLockIn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "faceOffRight": "Right!",
+  "faceOffWrong": "Wrong!",
+  "faceOffWroteIt": "{writer} wrote “{name}”",
+  "@faceOffWroteIt": {
+    "placeholders": {
+      "writer": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "faceOffYouSaid": "You said {name}",
+  "@faceOffYouSaid": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "faceOffNoPoints": "No points for {team}",
+  "@faceOffNoPoints": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "faceOffLosesPoint": "{team} loses a point",
+  "@faceOffLosesPoint": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "faceOffWasDouble": "It was a double bet."
 }

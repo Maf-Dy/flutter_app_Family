@@ -1,6 +1,6 @@
 import '../room/domain/room.dart';
 
-/// What the team race needs from the room: plain values, no room state.
+/// What the face-off needs from the room: plain values, no room state.
 final class CelebrityArgs {
   const CelebrityArgs({required this.category, required this.slips, required this.players, required this.setup});
 
