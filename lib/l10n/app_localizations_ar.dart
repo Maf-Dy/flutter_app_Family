@@ -869,7 +869,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get familyErrorNotHead => 'كبير العيلة بس هو اللي يخمّن.';
 
   @override
-  String get familyErrorInvalidTarget => 'ده أصلًا من عيلتك يا عم!';
+  String get familyErrorInvalidTarget => 'مينفعش تسأل ده. اختار حد تاني.';
 
   @override
   String get familyErrorInvalidSlip => 'الاسم ده اتكشف خلاص.';

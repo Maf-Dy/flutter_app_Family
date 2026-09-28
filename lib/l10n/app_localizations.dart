@@ -1547,7 +1547,7 @@ abstract class AppLocalizations {
   /// No description provided for @familyErrorInvalidTarget.
   ///
   /// In en, this message translates to:
-  /// **'That person is already in your family.'**
+  /// **'You can’t ask that person. Pick someone else.'**
   String get familyErrorInvalidTarget;
 
   /// No description provided for @familyErrorInvalidSlip.

@@ -57,7 +57,7 @@ class LanRoomHost implements RoomHost {
     final server = await _bind();
     _server = server;
     server.listen(_handle, onError: (Object error) => debugPrint('LanRoomHost: $error'));
-    _presence = Timer.periodic(presenceTick, (_) => checkPresence());
+    _presence = Timer.periodic(presenceTick, (_) => _presenceTick());
     return server.port;
   }
 
@@ -79,6 +79,8 @@ class LanRoomHost implements RoomHost {
 
   void _set(Room next) {
     if (identical(next, _room)) return;
+    // A new family game (e.g. a new round): old sightings say nothing about it.
+    if (next.family != null && !identical(next.family!.players, _room.family?.players)) _seen.clear();
     _room = next;
     if (!_changes.isClosed) _changes.add(next);
   }
@@ -201,14 +203,15 @@ class LanRoomHost implements RoomHost {
       _json(response, {'error': 'notPlaying'});
       return;
     }
-    final target = form['target'] ?? '';
+    // Phones name players by their public id; the real id is someone's cookie.
+    final target = familyPlayerIdFor(game, form['target'] ?? '') ?? '';
     final slip = int.tryParse(form['slip'] ?? '') ?? -1;
     final text = form['text'] ?? '';
     final (error, next) = switch (action) {
       'guess' => (game.checkGuess(clientId, target, slip), game.guess(clientId, target, slip)),
       'suggest' => (game.checkSuggestion(clientId, target, slip), game.suggest(clientId, target, slip)),
       'unvote' => (null, game.unvote(clientId)),
-      _ => (game.checkMessage(clientId, text), game.say(clientId, text)),
+      _ => (game.checkMessage(clientId, text), game.say(clientId, text, nonce: _nonceOf(form))),
     };
     if (error == null) _set(_room.withFamily(next));
     response.statusCode = error == null ? HttpStatus.ok : HttpStatus.conflict;
@@ -222,12 +225,23 @@ class LanRoomHost implements RoomHost {
     ..sameSite = SameSite.lax
     ..path = '/';
 
+  /// A chat message's id from the sending phone, used to ignore resends.
+  static String? _nonceOf(Map<String, String> form) {
+    final nonce = form['cid'] ?? '';
+    return RegExp(r'^[0-9A-Za-z_-]{1,40}$').hasMatch(nonce) ? nonce : null;
+  }
+
   /// Once the host lets a new browser back in as a dropped player, it gets that
-  /// player's id, so from now on it simply is them.
+  /// player's id, so from now on it simply is them. Only while that player is
+  /// still away: if their own phone came back first, the seat stays theirs.
   String _takeBackSeat(String clientId, HttpResponse response) {
     final game = _room.family;
     final claim = game?.claimOf(clientId);
     if (game == null || claim == null || claim.status != ClaimStatus.approved) return clientId;
+    if (!game.isAway(claim.playerId)) {
+      _set(_room.withFamily(game.dropClaim(clientId)));
+      return clientId;
+    }
     response.cookies.add(_cookie(claim.playerId));
     _set(_room.withFamily(game.dropClaim(clientId)));
     return claim.playerId;
@@ -238,6 +252,26 @@ class LanRoomHost implements RoomHost {
     if (game == null || game.player(clientId) == null) return;
     _seen[clientId] = _clock();
     if (game.isAway(clientId)) _set(_room.withFamily(game.withAway({...game.away}..remove(clientId))));
+  }
+
+  /// Forgets when friends were last heard from, so no one shows as offline
+  /// just because this phone itself was asleep. Everyone gets a fresh
+  /// [awayAfter] to call in.
+  void resetPresence() {
+    _seen.clear();
+    _lastTick = null;
+  }
+
+  DateTime? _lastTick;
+
+  void _presenceTick() {
+    final now = _clock();
+    final last = _lastTick;
+    // Ticks stop while the app is paused; a long gap means the host's phone
+    // slept, not that every friend went quiet.
+    if (last != null && now.difference(last) > awayAfter) resetPresence();
+    _lastTick = now;
+    checkPresence();
   }
 
   /// Marks friends whose phones have gone quiet as offline, so the game can
@@ -262,13 +296,15 @@ class LanRoomHost implements RoomHost {
     final response = request.response;
     final form = await _readForm(request);
     final game = _room.family;
-    final playerId = form?['player'] ?? '';
-    if (game == null || clientId == null || game.player(clientId) != null || !game.isAway(playerId)) {
+    final playerId = game == null ? null : familyPlayerIdFor(game, form?['player'] ?? '');
+    final next = game == null || clientId == null || playerId == null ? null : game.claimSeat(clientId, playerId);
+    // Refused, too: someone still playing, a seat the host already turned this browser away from.
+    if (next == null || identical(next, game)) {
       response.statusCode = HttpStatus.conflict;
-      _json(response, {'error': 'invalidTarget'});
+      _json(response, {'error': 'claimRefused'});
       return;
     }
-    _set(_room.withFamily(game.claimSeat(clientId, playerId)));
+    _set(_room.withFamily(next));
     _json(response, {'error': null});
   }
 

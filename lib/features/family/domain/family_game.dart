@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../../room/domain/room.dart';
+
 /// Someone playing, with the name friends know them by.
 @immutable
 final class FamilyPlayer {
@@ -34,7 +36,13 @@ final class Suggestion {
 /// A private message inside one family.
 @immutable
 final class ChatMessage {
-  const ChatMessage({required this.id, required this.familyHead, required this.authorId, required this.text});
+  const ChatMessage({
+    required this.id,
+    required this.familyHead,
+    required this.authorId,
+    required this.text,
+    this.nonce,
+  });
 
   static const maxLength = 200;
 
@@ -44,6 +52,10 @@ final class ChatMessage {
   final String familyHead;
   final String authorId;
   final String text;
+
+  /// The sending phone's own id for this message, so a resend after a dropped
+  /// connection isn't posted twice. Null for messages from the host's screen.
+  final String? nonce;
 }
 
 /// A guess everyone can see, right or wrong.
@@ -230,7 +242,9 @@ final class FamilyGame {
 
   FamilyActionError? _checkPick(String family, String targetId, int slipId) {
     if (isOver) return FamilyActionError.gameOver;
-    if (player(targetId) == null || headOf(targetId) == family) return FamilyActionError.invalidTarget;
+    if (player(targetId) == null || headOf(targetId) == family || isCaught(targetId)) {
+      return FamilyActionError.invalidTarget;
+    }
     if (slip(slipId) == null || revealed.contains(slipId)) return FamilyActionError.invalidSlip;
     return null;
   }
@@ -248,8 +262,8 @@ final class FamilyGame {
     if (checkGuess(askerId, targetId, slipId) != null) return this;
     final family = turn;
     // Duplicate names are allowed, so any hidden slip with the same text counts.
-    final asked = slips[slipId].text.toLowerCase();
-    final correct = hiddenSlips.any((s) => s.writerId == targetId && s.text.toLowerCase() == asked);
+    final asked = Room.matchKey(slips[slipId].text);
+    final correct = hiddenSlips.any((s) => s.writerId == targetId && Room.matchKey(s.text) == asked);
     final event = GuessEvent(askerId: askerId, targetId: targetId, slipId: slipId, correct: correct);
     if (!correct) {
       return _copy(turn: headOf(targetId), events: [...events, event], suggestions: {...suggestions}..remove(family));
@@ -269,7 +283,9 @@ final class FamilyGame {
         ..remove(caught),
       chat: [
         for (final m in chat)
-          m.familyHead == caught ? ChatMessage(id: m.id, familyHead: family, authorId: m.authorId, text: m.text) : m,
+          m.familyHead == caught
+              ? ChatMessage(id: m.id, familyHead: family, authorId: m.authorId, text: m.text, nonce: m.nonce)
+              : m,
       ],
     );
   }
@@ -332,14 +348,18 @@ final class FamilyGame {
     return null;
   }
 
-  FamilyGame say(String authorId, String text) {
+  /// Posts [text] to the author's family. A [nonce] the author already used is
+  /// a resend of a message that did arrive, so it changes nothing.
+  FamilyGame say(String authorId, String text, {String? nonce}) {
     if (checkMessage(authorId, text) != null) return this;
+    if (nonce != null && chat.any((m) => m.authorId == authorId && m.nonce == nonce)) return this;
     final clean = text.trim().replaceAll(RegExp(r'\s+'), ' ');
     final message = ChatMessage(
       id: (chat.isEmpty ? 0 : chat.last.id) + 1,
       familyHead: headOf(authorId),
       authorId: authorId,
       text: clean.length > ChatMessage.maxLength ? clean.substring(0, ChatMessage.maxLength) : clean,
+      nonce: nonce,
     );
     final all = [...chat, message];
     return _copy(chat: all.length > maxChat ? all.sublist(all.length - maxChat) : all);
@@ -352,13 +372,22 @@ final class FamilyGame {
   ];
 
   /// Who has dropped out. Returns this game unchanged when nothing changed.
+  ///
+  /// Asks for the seat of someone who came back are dropped: the seat is theirs
+  /// again. Refusals are kept, so a refused phone can't simply ask again.
   FamilyGame withAway(Set<String> ids) {
     final next = {
       for (final id in ids)
         if (player(id) != null) id,
     };
     if (next.length == away.length && next.every(away.contains)) return this;
-    return _copy(away: next);
+    return _copy(
+      away: next,
+      claims: [
+        for (final c in claims)
+          if (c.status == ClaimStatus.denied || next.contains(c.playerId)) c,
+      ],
+    );
   }
 
   /// Passes the turn on from a family whose phones have all dropped out.
@@ -376,32 +405,43 @@ final class FamilyGame {
       if (away.contains(p.id)) p,
   ];
 
+  /// [clientId]'s latest ask.
   SeatClaim? claimOf(String clientId) {
-    for (final c in claims) {
+    for (final c in claims.reversed) {
       if (c.clientId == clientId) return c;
     }
     return null;
   }
 
-  /// [clientId] asks to take back [playerId]'s seat. Replaces any earlier ask from the same browser.
+  /// Whether the host already turned [clientId] away from [playerId]'s seat.
+  bool wasRefused(String clientId, String playerId) =>
+      claims.any((c) => c.clientId == clientId && c.playerId == playerId && c.status == ClaimStatus.denied);
+
+  /// [clientId] asks to take back [playerId]'s seat. Replaces any earlier open
+  /// ask from the same browser, so each browser has at most one; a browser the
+  /// host turned away can't ask for that seat again this game.
   FamilyGame claimSeat(String clientId, String playerId) {
-    if (isOver || player(clientId) != null || !away.contains(playerId)) return this;
+    if (isOver || player(clientId) != null || !away.contains(playerId) || wasRefused(clientId, playerId)) {
+      return this;
+    }
     final others = [
       for (final c in claims)
-        if (c.clientId != clientId) c,
+        if (c.clientId != clientId || c.status == ClaimStatus.denied) c,
     ];
     final all = [...others, SeatClaim(clientId: clientId, playerId: playerId)];
     return _copy(claims: all.length > maxClaims ? all.sublist(all.length - maxClaims) : all);
   }
 
-  /// The host lets [clientId] back in, or turns them away.
+  /// The host lets [clientId] back in, or turns them away. A seat is only
+  /// handed over while its player is still away.
   FamilyGame resolveClaim(String clientId, {required bool approve}) {
     final claim = claimOf(clientId);
     if (claim == null || claim.status != ClaimStatus.pending) return this;
+    if (approve && !away.contains(claim.playerId)) return this;
     return _copy(
       claims: [
         for (final c in claims)
-          c.clientId == clientId
+          identical(c, claim)
               ? SeatClaim(
                   clientId: c.clientId,
                   playerId: c.playerId,

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:family_game/features/family/domain/family_game.dart';
@@ -38,22 +39,22 @@ void main() {
   test('a player sees only their own family\'s ideas and chat', () {
     final game = midGame();
     final nour = familyViewFor(game, 'b');
-    expect(nour['me'], 'b');
-    expect(nour['myHead'], 'a');
+    expect(nour['me'], 'p1');
+    expect(nour['myHead'], 'p0');
     expect(listOf(nour, 'chat').map((m) => m['text']), ['Yara wrote Adele']);
-    expect(listOf(nour, 'ideas').single, containsPair('target', 'c'));
+    expect(listOf(nour, 'ideas').single, containsPair('target', 'p2'));
     expect(listOf(nour, 'ideas').single, containsPair('mine', true));
 
     final yara = familyViewFor(game, 'c');
     expect(listOf(yara, 'chat').map((m) => m['text']), ['Omar has Messi']);
-    expect(listOf(yara, 'ideas').single, containsPair('target', 'a'));
+    expect(listOf(yara, 'ideas').single, containsPair('target', 'p0'));
   });
 
   test('who wrote a name shows only once it is out', () {
     final game = midGame();
     final slips = listOf(familyViewFor(game, 'c'), 'slips');
     final withWriter = {for (final s in slips) s['text']: s['writer']};
-    expect(withWriter, {'Messi': null, 'Fairuz': 'b', 'Adele': null});
+    expect(withWriter, {'Messi': null, 'Fairuz': 'p1', 'Adele': null});
   });
 
   test('watchers and strangers see the board, never ideas or chat', () {
@@ -77,13 +78,45 @@ void main() {
   test('phones see who dropped out, who asks, and how a seat ask is going', () {
     final game = midGame().withAway({'a'});
     final nour = familyViewFor(game, 'b');
-    expect(nour['away'], ['a']);
+    expect(nour['away'], ['p0']);
     expect(nour['canAsk'], game.turn == 'a', reason: 'Nour asks for Omar while he is away');
     expect(nour['claimable'], isEmpty, reason: 'players already have a seat');
 
     final stranger = familyViewFor(game.claimSeat('x', 'a'), 'x');
     expect(listOf(stranger, 'claimable').single['name'], 'Omar');
-    expect(stranger['myClaim'], {'player': 'a', 'status': 'pending'});
+    expect(stranger['myClaim'], {'player': 'p0', 'status': 'pending'});
     expect(familyViewFor(game.claimSeat('x', 'a'), 'y')['myClaim'], isNull, reason: 'each phone sees only its own ask');
+
+    final refused = familyViewFor(game.claimSeat('x', 'a').resolveClaim('x', approve: false), 'x');
+    expect(refused['claimable'], isEmpty, reason: 'a refused phone isn\'t offered that seat again');
+  });
+
+  test('phones never see anyone\'s real id, which is their cookie', () {
+    // Ids that can't turn up by accident anywhere else in the view.
+    const secret = [
+      FamilyPlayer(id: 'secret-omar', name: 'Omar'),
+      FamilyPlayer(id: 'secret-nour', name: 'Nour'),
+      FamilyPlayer(id: 'secret-yara', name: 'Yara'),
+    ];
+    var game = FamilyGame.start(
+      players: secret,
+      slips: const [(text: 'Messi', writerId: 'secret-omar'), (text: 'Adele', writerId: 'secret-yara')],
+      chatEnabled: true,
+      random: Random(1),
+    );
+    final turn = game.turn;
+    final other = secret.firstWhere((p) => p.id != turn && game.slips.any((s) => s.writerId == p.id)).id;
+    game = game
+        .guess(turn, other, game.slips.firstWhere((s) => s.writerId == other).id)
+        .say(turn, 'hi')
+        .withAway({'secret-nour'})
+        .claimSeat('secret-stranger', 'secret-nour');
+    for (final viewer in [...secret.map((p) => p.id), 'secret-stranger', null]) {
+      final json = jsonEncode(familyViewFor(game, viewer));
+      expect(json, isNot(contains('secret-')), reason: 'viewer $viewer');
+    }
+    expect(familyPlayerIdFor(game, familyPublicId(game, 'secret-nour')), 'secret-nour');
+    expect(familyPlayerIdFor(game, 'p3'), isNull);
+    expect(familyPlayerIdFor(game, 'secret-nour'), isNull, reason: 'real ids are not accepted in their place');
   });
 }

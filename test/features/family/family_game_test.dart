@@ -133,6 +133,41 @@ void main() {
     expect(game.revealed, {slipBy(game, 'b')}, reason: 'only Nour\'s own slip is out');
   });
 
+  test('a repeated name is matched the way the room matches names, Arabic spellings included', () {
+    var game = FamilyGame.start(
+      players: players,
+      slips: const [
+        (text: 'أحمد زكي', writerId: 'a'),
+        (text: 'احمد  زكى', writerId: 'b'),
+        (text: 'Adele', writerId: 'c'),
+      ],
+      chatEnabled: true,
+      random: Random(1),
+    );
+    if (game.turn != 'c') game = game.guess(game.turn, 'c', slipBy(game, game.turn));
+    game = game.guess('c', 'b', slipBy(game, 'a'));
+    expect(game.events.last.correct, isTrue);
+  });
+
+  test('caught people can\'t be asked again, by guess or idea', () {
+    var game = omarsTurn();
+    game = game.guess('a', 'b', slipBy(game, 'b'));
+    // Yara's turn comes when Omar asks her wrongly.
+    game = game.guess('a', 'c', slipBy(game, 'a'));
+    expect(game.turn, 'c');
+    expect(game.checkGuess('c', 'b', slipBy(game, 'a')), FamilyActionError.invalidTarget);
+    expect(game.checkSuggestion('c', 'b', slipBy(game, 'a')), FamilyActionError.invalidTarget);
+    expect(game.guess('c', 'b', slipBy(game, 'a')), same(game));
+  });
+
+  test('a resent message with the same id is posted once', () {
+    final game = start().say('a', 'hi', nonce: 'm1');
+    expect(game.say('a', 'hi', nonce: 'm1'), same(game));
+    expect(game.say('b', 'hi', nonce: 'm1').chat, hasLength(2), reason: 'ids are per author');
+    expect(game.say('a', 'hi', nonce: 'm2').chat, hasLength(2));
+    expect(game.say('a', 'hi').chat, hasLength(2));
+  });
+
   test('every change bumps the version', () {
     final game = start();
     expect(game.say('a', 'hi').version, greaterThan(game.version));
@@ -205,6 +240,30 @@ void main() {
       expect(approved.claimOf('x')!.status, ClaimStatus.approved);
       expect(approved.resolveClaim('x', approve: false), same(approved), reason: 'decided once');
       expect(approved.dropClaim('x').claims, isEmpty);
+    });
+
+    test('a seat is only handed over while its player is still away', () {
+      final asked = start().withAway({'b'}).claimSeat('x', 'b');
+      final back = asked.withAway(const {});
+      expect(back.claims, isEmpty, reason: 'Nour came back, so the ask is moot');
+      expect(back.resolveClaim('x', approve: true), same(back));
+
+      final approved = asked.resolveClaim('x', approve: true).withAway(const {});
+      expect(approved.claims, isEmpty, reason: 'a yes that wasn\'t used yet goes too');
+    });
+
+    test('a turned-away browser can\'t ask for that seat again this game', () {
+      final game = start().withAway({'b', 'c'});
+      final denied = game.claimSeat('x', 'b').resolveClaim('x', approve: false);
+      expect(denied.claimSeat('x', 'b'), same(denied));
+      expect(denied.wasRefused('x', 'b'), isTrue);
+
+      final other = denied.claimSeat('x', 'c');
+      expect(other.claimOf('x')!.playerId, 'c');
+      expect(other.claimSeat('x', 'b'), same(other), reason: 'asking for another seat doesn\'t wipe the refusal');
+      expect(other.withAway({'b', 'c'}).wasRefused('x', 'b'), isTrue);
+      expect(other.withAway({'c'}).wasRefused('x', 'b'), isTrue, reason: 'refusals outlive Nour coming back');
+      expect(other.pendingClaims, hasLength(1), reason: 'one open ask per browser');
     });
   });
 }

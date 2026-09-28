@@ -179,7 +179,7 @@ final class EnglishJoinStrings extends JoinStrings {
     'err_pickBoth': 'Pick a person and a name first.',
     'err_notYourTurn': 'Hold on, it’s not your family’s turn.',
     'err_notHead': 'Only the head of your family makes the guess.',
-    'err_invalidTarget': 'That person is already in your family.',
+    'err_invalidTarget': 'You can’t ask that person. Pick someone else.',
     'err_invalidSlip': 'That name is already out.',
     'err_gameOver': 'The game is over.',
     'err_chatOff': 'Chat is off in this room.',
@@ -198,6 +198,7 @@ final class EnglishJoinStrings extends JoinStrings {
     'claimPending': 'Waiting for {host} to let you back in as {name}…',
     'claimDenied': '{host} said no. You can watch this game.',
     'sending': 'sending…',
+    'gameOverBye': 'The game is over. Thanks for playing!',
   };
 }
 
@@ -333,7 +334,7 @@ final class ArabicJoinStrings extends JoinStrings {
     'err_pickBoth': 'اختار الشخص والاسم الأول.',
     'err_notYourTurn': 'استنى، مش دور عيلتك.',
     'err_notHead': 'كبير العيلة بس هو اللي يخمّن.',
-    'err_invalidTarget': 'ده أصلًا من عيلتك يا عم!',
+    'err_invalidTarget': 'مينفعش تسأل ده. اختار حد تاني.',
     'err_invalidSlip': 'الاسم ده اتكشف خلاص.',
     'err_gameOver': 'اللعبة خلصت.',
     'err_chatOff': 'الدردشة مقفولة في القعدة دي.',
@@ -352,5 +353,6 @@ final class ArabicJoinStrings extends JoinStrings {
     'claimPending': 'مستنيين {host} يرجّعك باسم {name}…',
     'claimDenied': '{host} قال لأ. تقدر تتفرج على اللعبة دي.',
     'sending': 'بيتبعت…',
+    'gameOverBye': 'اللعبة خلصت. شكرًا إنكم لعبتوا!',
   };
 }

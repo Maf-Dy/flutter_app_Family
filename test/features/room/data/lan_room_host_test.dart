@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:family_game/features/room/data/family_view.dart';
 import 'package:family_game/features/room/data/lan_room_host.dart';
 import 'package:family_game/features/room/domain/room.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -193,6 +194,9 @@ void main() {
 
     Map<String, Object?> json(String body) => jsonDecode(body) as Map<String, Object?>;
 
+    /// How phones name a player: never by their cookie.
+    String pub(String id) => familyPublicId(host.room.family!, id);
+
     setUp(() async {
       await host.close();
       host = LanRoomHost(preferredPort: 0);
@@ -221,8 +225,8 @@ void main() {
     test('each phone sees itself, and no hidden writers', () async {
       host.update((room) => room.startFamily(Random(1)));
       final view = json((await send('GET', '/game', as: nour)).body);
-      expect(view['me'], nour);
-      expect(view['myHead'], nour);
+      expect(view['me'], pub(nour));
+      expect(view['myHead'], pub(nour));
       final slips = (view['slips']! as List<Object?>).cast<Map<String, Object?>>();
       expect(slips.map((s) => s['text']), unorderedEquals(['Up', 'Coco', 'Heat']));
       expect(slips.every((s) => !s.containsKey('writer')), isTrue);
@@ -238,16 +242,19 @@ void main() {
       final other = [omar, nour, yara].firstWhere((id) => id != turn);
       final otherSlip = game.slips.firstWhere((s) => s.writerId == other).id;
 
-      final early = await send('POST', '/game/guess', form: 'target=$turn&slip=$otherSlip', as: other);
+      final early = await send('POST', '/game/guess', form: 'target=${pub(turn)}&slip=$otherSlip', as: other);
       expect(early.status, HttpStatus.conflict);
       expect(json(early.body)['error'], 'notYourTurn');
 
-      final right = await send('POST', '/game/guess', form: 'target=$other&slip=$otherSlip', as: turn);
+      final byCookie = await send('POST', '/game/guess', form: 'target=$other&slip=$otherSlip', as: turn);
+      expect(json(byCookie.body)['error'], 'invalidTarget', reason: 'players are named by public id only');
+
+      final right = await send('POST', '/game/guess', form: 'target=${pub(other)}&slip=$otherSlip', as: turn);
       expect(right.status, HttpStatus.ok);
       expect(json(right.body)['error'], isNull);
       expect(host.room.family!.headOf(other), turn);
 
-      final notHead = await send('POST', '/game/guess', form: 'target=$turn&slip=$otherSlip', as: other);
+      final notHead = await send('POST', '/game/guess', form: 'target=${pub(turn)}&slip=$otherSlip', as: other);
       expect(json(notHead.body)['error'], 'notHead');
 
       final watcher = await send('POST', '/game/say', form: 'text=hi');
@@ -260,7 +267,7 @@ void main() {
       await send('POST', '/game/say', form: 'text=${Uri.encodeQueryComponent('Nour wrote Coco')}', as: omar);
       final game = host.room.family!;
       final heat = game.slips.firstWhere((s) => s.writerId == yara).id;
-      await send('POST', '/game/suggest', form: 'target=$yara&slip=$heat', as: omar);
+      await send('POST', '/game/suggest', form: 'target=${pub(yara)}&slip=$heat', as: omar);
       expect(host.room.family!.suggestionsFor(omar).single.voters, {omar});
 
       final mine = json((await send('GET', '/game', as: omar)).body);
@@ -303,7 +310,7 @@ void main() {
       expect(host.room.family!.away, {yara}, reason: 'Yara has been quiet for 8 seconds');
 
       final seen = json((await send('GET', '/game', as: omar)).body);
-      expect(seen['away'], [yara]);
+      expect(seen['away'], [pub(yara)]);
 
       await send('GET', '/game', as: yara);
       expect(host.room.family!.away, isEmpty, reason: 'one call and she is back');
@@ -316,20 +323,89 @@ void main() {
 
       final watching = json((await send('GET', '/game', as: stranger)).body);
       expect(watching['me'], isNull);
-      expect((watching['claimable']! as List<Object?>).single, {'id': nour, 'name': 'Nour'});
+      expect((watching['claimable']! as List<Object?>).single, {'id': pub(nour), 'name': 'Nour'});
+      expect(watching.toString(), isNot(contains(nour)), reason: 'a cookie value would let anyone be Nour');
 
-      final taken = await send('POST', '/game/claim', form: 'player=$omar', as: stranger);
+      final taken = await send('POST', '/game/claim', form: 'player=${pub(omar)}', as: stranger);
       expect(taken.status, HttpStatus.conflict, reason: 'Omar is still playing');
-      expect((await send('POST', '/game/claim', form: 'player=$nour', as: stranger)).status, HttpStatus.ok);
-      expect(json((await send('GET', '/game', as: stranger)).body)['myClaim'], {'player': nour, 'status': 'pending'});
+      expect((await send('POST', '/game/claim', form: 'player=${pub(nour)}', as: stranger)).status, HttpStatus.ok);
+      expect(json((await send('GET', '/game', as: stranger)).body)['myClaim'], {
+        'player': pub(nour),
+        'status': 'pending',
+      });
 
       host.update((room) => room.withFamily(room.family!.resolveClaim(stranger, approve: true)));
       final back = await send('GET', '/game', as: stranger);
-      expect(json(back.body)['me'], nour);
+      expect(json(back.body)['me'], pub(nour));
       final cookie = back.headers[HttpHeaders.setCookieHeader]!.single;
       expect(cookie, startsWith('${LanRoomHost.cookieName}=$nour'), reason: 'from now on this browser is Nour');
       expect(host.room.family!.claims, isEmpty);
       expect(host.room.family!.away, isEmpty);
+    });
+
+    test('a browser the host turned away can\'t ask for that seat again', () async {
+      host.update((room) => room.startFamily(Random(1)));
+      host.update((room) => room.withFamily(room.family!.withAway({nour})));
+      final stranger = 'd' * 32;
+      await send('POST', '/game/claim', form: 'player=${pub(nour)}', as: stranger);
+      host.update((room) => room.withFamily(room.family!.resolveClaim(stranger, approve: false)));
+
+      final again = await send('POST', '/game/claim', form: 'player=${pub(nour)}', as: stranger);
+      expect(again.status, HttpStatus.conflict);
+      expect(host.room.family!.pendingClaims, isEmpty);
+    });
+
+    test('a resent chat message is posted once', () async {
+      host.update((room) => room.startFamily(Random(1)));
+      for (var i = 0; i < 2; i++) {
+        final sent = await send('POST', '/game/say', form: 'text=hi&cid=k3j9x2', as: omar);
+        expect(json(sent.body)['error'], isNull);
+      }
+      await send('POST', '/game/say', form: 'text=hi&cid=k3j9x3', as: omar);
+      expect(host.room.family!.chat, hasLength(2));
+    });
+
+    group('presence', () {
+      late DateTime now;
+
+      setUp(() async {
+        now = DateTime(2026, 9, 28, 20);
+        await host.close();
+        host = LanRoomHost(preferredPort: 0, clock: () => now, presenceTick: const Duration(hours: 1));
+        port = await host.open(
+          const Room(
+            code: 'K7Q4',
+            category: GameCategory.preset(PresetCategory.movies),
+            namesPerPlayer: 1,
+            hostName: 'Mafdy',
+            mode: GameMode.family,
+          ),
+        );
+        await send('POST', '/', form: 'name=Omar&s0=Up', as: omar);
+        await send('POST', '/', form: 'name=Nour&s0=Coco', as: nour);
+        host.update((room) => room.startFamily(Random(1)));
+        host.checkPresence();
+      });
+
+      test('a new game gives everyone a fresh start, however long the last round took', () async {
+        now = now.add(const Duration(minutes: 5));
+        host.update((room) => room.nextRound());
+        await send('POST', '/', form: 'name=Omar&s0=Jaws', as: omar);
+        await send('POST', '/', form: 'name=Nour&s0=Cars', as: nour);
+        host.update((room) => room.startFamily(Random(2)));
+        host.checkPresence();
+        expect(host.room.family!.away, isEmpty);
+      });
+
+      test('after the host\'s phone slept, no one is marked offline until they had time to call', () async {
+        now = now.add(const Duration(minutes: 1));
+        host.resetPresence();
+        host.checkPresence();
+        expect(host.room.family!.away, isEmpty);
+        now = now.add(const Duration(seconds: 7));
+        host.checkPresence();
+        expect(host.room.family!.away, {omar, nour});
+      });
     });
 
     test('the family page speaks Egyptian Arabic to Arabic phones', () async {

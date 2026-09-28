@@ -242,7 +242,7 @@
   "familyLeaveBody": "اللعبة هتقفل عند الكل، بس الأسامي هتفضل في الطبق.",
   "familyErrorNotYourTurn": "استنى، مش دور عيلتك.",
   "familyErrorNotHead": "كبير العيلة بس هو اللي يخمّن.",
-  "familyErrorInvalidTarget": "ده أصلًا من عيلتك يا عم!",
+  "familyErrorInvalidTarget": "مينفعش تسأل ده. اختار حد تاني.",
   "familyErrorInvalidSlip": "الاسم ده اتكشف خلاص.",
   "familyErrorGameOver": "اللعبة خلصت.",
   "familyErrorChatOff": "الدردشة مقفولة في القعدة دي.",
