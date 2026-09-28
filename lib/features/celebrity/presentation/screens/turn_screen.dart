@@ -30,6 +30,11 @@ class TurnScreen extends StatelessWidget {
         automaticallyImplyLeading: false,
         title: Text(roundTitle(l10n, game.round)),
         actions: [
+          IconButton(
+            tooltip: state.paused ? l10n.resumeTurn : l10n.pauseTurn,
+            onPressed: state.paused ? cubit.resume : cubit.pause,
+            icon: Icon(state.paused ? Icons.play_arrow_rounded : Icons.pause_rounded),
+          ),
           Padding(
             padding: const EdgeInsetsDirectional.only(end: 16),
             child: Chip(
@@ -51,7 +56,9 @@ class TurnScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 320),
-                    child: current == null
+                    child: state.paused
+                        ? _Paused(onResume: cubit.resume)
+                        : current == null
                         ? const SizedBox.shrink()
                         : FlipIn(
                             key: ValueKey((game.bowl.length, current.text, current.writerId)),
@@ -75,7 +82,7 @@ class TurnScreen extends StatelessWidget {
                   Expanded(
                     flex: 2,
                     child: FilledButton.tonal(
-                      onPressed: game.bowl.length > 1 ? cubit.skip : null,
+                      onPressed: game.bowl.length > 1 && !state.paused ? cubit.skip : null,
                       style: FilledButton.styleFrom(minimumSize: const Size(0, 64)),
                       child: Text(l10n.skip),
                     ),
@@ -84,10 +91,12 @@ class TurnScreen extends StatelessWidget {
                   Expanded(
                     flex: 3,
                     child: FilledButton.icon(
-                      onPressed: () {
-                        Haptics.point();
-                        cubit.gotIt();
-                      },
+                      onPressed: state.paused
+                          ? null
+                          : () {
+                              Haptics.point();
+                              cubit.gotIt();
+                            },
                       style: FilledButton.styleFrom(
                         minimumSize: const Size(0, 64),
                         backgroundColor: context.gameColors.live,
@@ -103,6 +112,35 @@ class TurnScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Stands in for the name while the clock is stopped, so nobody peeks at it.
+class _Paused extends StatelessWidget {
+  const _Paused({required this.onResume});
+
+  final VoidCallback onResume;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.pause_circle_rounded, size: 64, color: theme.colorScheme.primary),
+        const SizedBox(height: 8),
+        Text(l10n.turnPaused, style: theme.textTheme.headlineSmall),
+        const SizedBox(height: 6),
+        Text(l10n.turnPausedBody, textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
+        const SizedBox(height: 16),
+        FilledButton.icon(
+          onPressed: onResume,
+          icon: const Icon(Icons.play_arrow_rounded),
+          label: Text(l10n.resumeTurn),
+        ),
+      ],
     );
   }
 }

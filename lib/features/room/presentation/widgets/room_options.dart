@@ -189,9 +189,15 @@ class TeamSettings extends StatelessWidget {
 }
 
 class NamesPerPlayerCard extends StatelessWidget {
-  const NamesPerPlayerCard({super.key, required this.count, required this.onChanged});
+  const NamesPerPlayerCard({
+    super.key,
+    required this.count,
+    required this.onChanged,
+    this.max = Room.maxNamesPerPlayer,
+  });
 
   final int count;
+  final int max;
   final ValueChanged<int> onChanged;
 
   @override
@@ -225,7 +231,7 @@ class NamesPerPlayerCard extends StatelessWidget {
             ),
             IconButton.filledTonal(
               tooltip: l10n.moreNames,
-              onPressed: count < Room.maxNamesPerPlayer ? () => onChanged(count + 1) : null,
+              onPressed: count < max ? () => onChanged(count + 1) : null,
               icon: const Icon(Icons.add_rounded),
             ),
           ],

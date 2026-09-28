@@ -302,24 +302,28 @@ void main() {
         await tapVisible(tester, find.text('I arrange'));
         await tapVisible(tester, find.text('Open room'));
         host
-          ..join('a', 'Omar', ['Messi'])
-          ..join('b', 'Nour', ['Fairuz'])
-          ..join('c', 'Yara', ['Adele'])
-          ..join('d', 'Sami', ['Mr. Bean']);
+          ..join('a', 'Omar', ['Messi', 'Salah', 'Zidane'])
+          ..join('b', 'Nour', ['Fairuz', 'Amr Diab', 'Sherine'])
+          ..join('c', 'Yara', ['Adele', 'Shakira', 'Beyonce'])
+          ..join('d', 'Sami', ['Mr. Bean', 'Adel Imam', 'Chaplin']);
         await tester.pumpAndSettle();
         await tapVisible(tester, find.text("Let's play"));
 
-        // Teams: the host moves Omar along, then plays.
+        // Teams: moving Omar leaves his team with one player, so the race can't start; moving him back fixes it.
         expect(find.text('Purple team'), findsOneWidget);
         await tapVisible(tester, find.widgetWithText(ActionChip, 'Omar'));
+        expect(find.text('Needs at least 2 players: one describes, one guesses.'), findsOneWidget);
+        expect(tester.widget<FilledButton>(find.widgetWithText(FilledButton, "Let's play")).onPressed, isNull);
+        await tapVisible(tester, find.widgetWithText(ActionChip, 'Omar'));
         await tapVisible(tester, find.text("Let's play"));
+        expect(find.text('How to play'), findsOneWidget);
 
         for (var round = 0; round < 3; round++) {
           expect(find.text('Round ${round + 1} of 3'), findsOneWidget);
           await tapVisible(tester, find.text('Start'));
           expect(find.text('Pass the phone to'), findsOneWidget);
           await tapVisible(tester, find.text("I'm ready"));
-          for (var i = 0; i < 4; i++) {
+          for (var i = 0; i < 12; i++) {
             await tapVisible(tester, find.text('Got it!'));
           }
           expect(find.text('The bowl is empty!'), findsOneWidget);

@@ -82,13 +82,14 @@ class PassPhoneCubit extends Cubit<PassPhoneState> {
 
   void selectCategory(GameCategory category) => emit(state.copyWith(category: category));
 
-  void setNamesPerPlayer(int count) => emit(state.copyWith(namesPerPlayer: count.clamp(1, Room.maxNamesPerPlayer)));
+  void setNamesPerPlayer(int count) =>
+      emit(state.copyWith(namesPerPlayer: count.clamp(1, Room.maxNamesFor(state.mode))));
 
   void setAllowDuplicates(bool allow) => emit(state.copyWith(allowDuplicates: allow));
 
   void setMode(GameMode mode) {
     if (mode == GameMode.family) return;
-    emit(state.copyWith(mode: mode));
+    emit(state.copyWith(mode: mode, namesPerPlayer: Room.namesForMode(state.namesPerPlayer, mode)));
   }
 
   /// Friends can't pick teams on a join page here, so that choice becomes random.

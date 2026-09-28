@@ -354,7 +354,11 @@ class _BowlSection extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    room.canStart ? context.l10n.readyWhenYouAre : context.l10n.morePlayersToStart(room.playersNeeded),
+                    room.canStart
+                        ? context.l10n.readyWhenYouAre
+                        : room.playersNeeded > 0
+                        ? context.l10n.morePlayersToStart(room.playersNeeded)
+                        : context.l10n.teamRaceMoreNames(room.slipsNeeded),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w700,

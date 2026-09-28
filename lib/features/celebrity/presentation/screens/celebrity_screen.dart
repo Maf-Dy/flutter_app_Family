@@ -25,7 +25,9 @@ class CelebrityScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => CelebrityCubit(args),
-      child: KeepScreenOn(child: _Flow(args: args)),
+      child: KeepScreenOn(
+        child: _PauseWhenHidden(child: _Flow(args: args)),
+      ),
     );
   }
 }
@@ -44,7 +46,7 @@ class _Flow extends StatelessWidget {
           current.game.phase == CelebrityPhase.turnOver && previous.game.phase == CelebrityPhase.playing,
       listener: (context, state) {
         if (state.game.phase == CelebrityPhase.turnOver) {
-          Haptics.timeUp();
+          if (!state.game.bowlEmpty) Haptics.timeUp();
         } else if (state.secondsLeft <= 5) {
           Haptics.countdown();
         }
@@ -53,6 +55,8 @@ class _Flow extends StatelessWidget {
         canPop: phase == CelebrityPhase.finished,
         onPopInvokedWithResult: (didPop, _) async {
           if (didPop) return;
+          // The clock stops while the host decides; staying shows the pause screen.
+          context.read<CelebrityCubit>().pause();
           if (await _confirmLeave(context) && context.mounted) Navigator.of(context).pop();
         },
         child: StageSwitcher(
@@ -85,4 +89,35 @@ class _Flow extends StatelessWidget {
     );
     return leave ?? false;
   }
+}
+
+/// Stops the turn clock when the app goes to the background, e.g. a phone call.
+class _PauseWhenHidden extends StatefulWidget {
+  const _PauseWhenHidden({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_PauseWhenHidden> createState() => _PauseWhenHiddenState();
+}
+
+class _PauseWhenHiddenState extends State<_PauseWhenHidden> {
+  late final AppLifecycleListener _listener = AppLifecycleListener(
+    onHide: () => context.read<CelebrityCubit>().pause(),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _listener;
+  }
+
+  @override
+  void dispose() {
+    _listener.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }

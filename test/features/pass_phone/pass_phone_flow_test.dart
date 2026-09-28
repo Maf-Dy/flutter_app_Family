@@ -38,9 +38,11 @@ void main() {
 
   Finder field(String label) => find.widgetWithText(TextField, label);
 
-  Future<void> takeTurn(WidgetTester tester, String name, String secret) async {
+  Future<void> takeTurn(WidgetTester tester, String name, String secret, {int names = 1}) async {
     await tester.enterText(field('Your name'), name);
-    await tester.enterText(field('Name 1'), secret);
+    for (var i = 1; i <= names; i++) {
+      await tester.enterText(field('Name $i'), names == 1 ? secret : '$secret $i');
+    }
     await tapVisible(tester, find.text('Into the bowl'));
   }
 
@@ -167,7 +169,7 @@ void main() {
     await tapVisible(tester, find.text('Start'));
     for (final (i, name) in ['Sara', 'Omar', 'Nour', 'Karim'].indexed) {
       if (i > 0) await tapVisible(tester, find.text("I'm next"));
-      await takeTurn(tester, name, 'Secret $name');
+      await takeTurn(tester, name, 'Secret $name', names: 3);
     }
     await hold(tester, find.text('Hold to start the game'), const Duration(milliseconds: 2100));
     await tapVisible(tester, find.text('Yes, start the game'));

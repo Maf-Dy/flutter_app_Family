@@ -115,6 +115,7 @@ final class EnglishJoinStrings extends JoinStrings {
     SubmissionError.tooLong => 'That is a bit long. Names can be up to ${Room.maxSecretLength} letters.',
     SubmissionError.duplicate => 'Someone already put that name in the bowl. Pick someone else!',
     SubmissionError.invalidTeam => 'Pick one of the teams.',
+    SubmissionError.nameTaken => 'Someone here already goes by that name. Add a letter so everyone can tell you apart.',
   };
   @override
   String get hostYourOwn => 'Want to host your own game?';
@@ -253,6 +254,7 @@ final class ArabicJoinStrings extends JoinStrings {
     SubmissionError.tooLong => 'طولت شوية! الاسم آخره ${Room.maxSecretLength} حرف.',
     SubmissionError.duplicate => 'حد سبقك بالاسم ده 😅 اكتب حد تاني!',
     SubmissionError.invalidTeam => 'اختار فريق من دول.',
+    SubmissionError.nameTaken => 'فيه حد هنا بنفس الاسم. زوّد حرف عشان نعرف نفرّق بينكم.',
   };
   @override
   String get hostYourOwn => 'عايز تعمل قعدتك؟';

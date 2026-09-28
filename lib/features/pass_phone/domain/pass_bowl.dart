@@ -76,6 +76,7 @@ final class PassBowl {
       SubmissionError.missingSecret => PassError.missingSecret,
       SubmissionError.tooLong => PassError.tooLong,
       SubmissionError.duplicate => PassError.duplicate,
+      SubmissionError.nameTaken => PassError.nameTaken,
       // Only reachable if the bowl were closed or teams were picked here; neither happens on one phone.
       SubmissionError.roomClosed || SubmissionError.invalidTeam => PassError.full,
     };

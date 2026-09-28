@@ -595,9 +595,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get teamsChosenNote => 'Friends picked their teams; anyone who didn\'t was balanced in.';
 
   @override
-  String get teamNeedsPlayers => 'Every team needs at least one player.';
-
-  @override
   String get letsPlay => 'Let\'s play';
 
   @override
@@ -1126,4 +1123,61 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passReaderDetail => 'Everyone else, listen closely!';
+
+  @override
+  String get teamNeedsTwo => 'Needs at least 2 players: one describes, one guesses.';
+
+  @override
+  String get pauseTurn => 'Pause';
+
+  @override
+  String get resumeTurn => 'Carry on';
+
+  @override
+  String get turnPaused => 'Paused';
+
+  @override
+  String get turnPausedBody => 'The clock is stopped and the name is hidden. Tap Carry on when you\'re ready.';
+
+  @override
+  String carryOnTurn(String team, int seconds) {
+    return '$team emptied the bowl, so they start the next round with the $seconds s they had left.';
+  }
+
+  @override
+  String carriedTime(String team, int seconds) {
+    return '$team starts with $seconds s left over.';
+  }
+
+  @override
+  String get howToPlayBowl => 'All the names go into one bowl, and the teams take turns.';
+
+  @override
+  String get howToPlayTurn =>
+      'On your turn, one of you holds the phone and gets your team to guess as many names as you can before the clock runs out. Every name guessed is a point.';
+
+  @override
+  String get howToPlaySkip => 'Stuck? Skip it and it goes back in the bowl.';
+
+  @override
+  String get howToPlayRounds =>
+      'When the bowl is empty, every name goes back in for the next round, with harder clues: describe, then one word, then act it out.';
+
+  @override
+  String get howToPlayWhy =>
+      'That\'s the fun: the same names come back, so remember what was said. By round 3 a tiny gesture is enough.';
+
+  @override
+  String get howToPlayWin => 'Most points after 3 rounds wins.';
+
+  @override
+  String teamRaceMoreNames(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Team race needs $count more names in the bowl',
+      one: 'Team race needs 1 more name in the bowl',
+    );
+    return '$_temp0';
+  }
 }

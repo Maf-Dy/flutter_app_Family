@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 
 import '../../room/domain/room.dart';
+import 'teams.dart';
 
 /// The three rounds, played with the same names each time.
 enum CelebrityRound {
@@ -52,6 +53,7 @@ final class CelebrityGame {
     required this.givers,
     required this.scores,
     this.turnPoints = 0,
+    this.carrySeconds,
   });
 
   factory CelebrityGame.start({required List<Slip> slips, required List<List<String>> teams}) {
@@ -90,6 +92,10 @@ final class CelebrityGame {
   /// Names guessed in the current turn.
   final int turnPoints;
 
+  /// Seconds the team still had when it emptied the bowl: it opens the next
+  /// round with them instead of a full turn.
+  final int? carrySeconds;
+
   Slip? get current => phase == CelebrityPhase.playing && bowl.isNotEmpty ? bowl.first : null;
   String get giverId => teams[team][givers[team] % teams[team].length];
   bool get bowlEmpty => bowl.isEmpty;
@@ -105,7 +111,7 @@ final class CelebrityGame {
     ];
   }
 
-  bool get teamsPlayable => teams.length >= 2 && teams.every((t) => t.isNotEmpty);
+  bool get teamsPlayable => teams.length >= 2 && teams.every((t) => t.length >= minTeamSize);
 
   CelebrityGame withTeams(List<List<String>> teams) =>
       phase == CelebrityPhase.teams ? _copy(teams: List.unmodifiable(teams)) : this;
@@ -124,6 +130,9 @@ final class CelebrityGame {
 
   CelebrityGame startTurn() =>
       phase == CelebrityPhase.handOff ? _copy(phase: CelebrityPhase.playing, turnPoints: 0) : this;
+
+  /// Whether the turn ended because this team emptied the bowl, not the clock.
+  bool get emptiedBowl => phase == CelebrityPhase.turnOver && bowlEmpty;
 
   /// The team guessed the name on screen.
   CelebrityGame gotIt() {
@@ -149,14 +158,27 @@ final class CelebrityGame {
   CelebrityGame timeUp() => phase == CelebrityPhase.playing ? _copy(phase: CelebrityPhase.turnOver) : this;
 
   /// After a turn: the next team's clue-giver, or the next round when the bowl is empty.
-  CelebrityGame nextTurn(Random random) {
+  ///
+  /// A team that empties the bowl with [secondsLeft] on the clock carries on into
+  /// the next round with the same clue-giver and those seconds. The name left on
+  /// screen at time-up is shuffled back in, so the next team doesn't start on a
+  /// name it just heard every clue for.
+  CelebrityGame nextTurn(Random random, {int secondsLeft = 0}) {
     if (phase != CelebrityPhase.turnOver) return this;
-    final givers = [for (final (i, g) in this.givers.indexed) i == team ? g + 1 : g];
-    final nextTeam = (team + 1) % teams.length;
+    final carry = bowlEmpty && !isLastRound && secondsLeft > 0;
+    final givers = [for (final (i, g) in this.givers.indexed) i == team && !carry ? g + 1 : g];
+    final nextTeam = carry ? team : (team + 1) % teams.length;
     if (!bowlEmpty) {
-      return _copy(phase: CelebrityPhase.handOff, team: nextTeam, givers: List.unmodifiable(givers), turnPoints: 0);
+      return _copy(
+        phase: CelebrityPhase.handOff,
+        team: nextTeam,
+        givers: List.unmodifiable(givers),
+        bowl: _reshuffled(random),
+        turnPoints: 0,
+        clearCarry: true,
+      );
     }
-    if (isLastRound) return _copy(phase: CelebrityPhase.finished, givers: List.unmodifiable(givers));
+    if (isLastRound) return _copy(phase: CelebrityPhase.finished, givers: List.unmodifiable(givers), clearCarry: true);
     return _copy(
       phase: CelebrityPhase.roundIntro,
       round: CelebrityRound.values[round.index + 1],
@@ -164,7 +186,17 @@ final class CelebrityGame {
       team: nextTeam,
       givers: List.unmodifiable(givers),
       turnPoints: 0,
+      carrySeconds: carry ? secondsLeft : null,
+      clearCarry: !carry,
     );
+  }
+
+  /// The names left, shuffled, with the one last on screen kept off the top.
+  List<Slip> _reshuffled(Random random) {
+    final last = bowl.first;
+    final next = [...bowl]..shuffle(random);
+    if (next.length > 1 && identical(next.first, last)) next.add(next.removeAt(0));
+    return next;
   }
 
   List<Slip> _shuffled(Random random) => List.unmodifiable([...slips]..shuffle(random));
@@ -178,6 +210,8 @@ final class CelebrityGame {
     List<int>? givers,
     List<List<int>>? scores,
     int? turnPoints,
+    int? carrySeconds,
+    bool clearCarry = false,
   }) => CelebrityGame._(
     slips: slips,
     teams: teams ?? this.teams,
@@ -188,5 +222,6 @@ final class CelebrityGame {
     givers: givers ?? this.givers,
     scores: scores == null ? this.scores : List.unmodifiable(scores),
     turnPoints: turnPoints ?? this.turnPoints,
+    carrySeconds: clearCarry ? null : carrySeconds ?? this.carrySeconds,
   );
 }

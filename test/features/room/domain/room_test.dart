@@ -162,4 +162,60 @@ void main() {
       expect(room.validateHostSecret('messi'), SubmissionError.duplicate);
     });
   });
+
+  group('fairness checks', () {
+    const three = Room(
+      code: 'K7Q4',
+      category: GameCategory.preset(PresetCategory.movies),
+      namesPerPlayer: 3,
+      hostName: 'Mafdy',
+    );
+
+    test('a host part-way through their names is not in yet, and their names wait', () {
+      var room = three
+          .withSubmission(playerId: 'a', name: 'Omar', secrets: ['Up', 'Heat', 'Jaws'])
+          .withSubmission(playerId: 'b', name: 'Nour', secrets: ['Cars', 'Big', 'Coco'])
+          .withHostSecret('Alien');
+      expect(room.canStart, isFalse);
+      expect(room.slips, hasLength(6));
+      room = room.withHostSecret('Rocky').withHostSecret('Ran');
+      expect(room.canStart, isTrue);
+      expect(room.slips, hasLength(9));
+    });
+
+    test('two players cannot share a name, the host’s included', () {
+      final room = empty.withSubmission(playerId: 'a', name: 'Omar', secrets: ['Messi']);
+      expect(room.validate(name: ' omar ', secrets: ['Salah'], playerId: 'b'), SubmissionError.nameTaken);
+      expect(room.validate(name: 'Mafdy', secrets: ['Salah'], playerId: 'b'), SubmissionError.nameTaken);
+      expect(
+        room.validate(name: 'Omar', secrets: ['Salah'], playerId: 'a'),
+        isNull,
+        reason: 'Omar editing his own',
+      );
+    });
+
+    test('names made only of emoji are told apart', () {
+      expect(Room.matchKey('🐱'), isNot(Room.matchKey('🐶')));
+      expect(Room.matchKey('أحمد'), Room.matchKey('احمد'));
+    });
+
+    test('Team race wants at least 12 names and starts at 3 each', () {
+      expect(Room.namesForMode(1, GameMode.celebrity), 3);
+      expect(Room.namesForMode(5, GameMode.classic), 3);
+      expect(Room.maxNamesFor(GameMode.celebrity), 5);
+      var race = const Room(
+        code: 'K7Q4',
+        category: GameCategory.preset(PresetCategory.movies),
+        namesPerPlayer: 2,
+        hostName: 'Mafdy',
+        mode: GameMode.celebrity,
+      );
+      for (final id in ['a', 'b', 'c', 'd']) {
+        race = race.withSubmission(playerId: id, name: id, secrets: ['$id 1', '$id 2']);
+      }
+      expect(race.playersNeeded, 0);
+      expect(race.slipsNeeded, 4);
+      expect(race.canStart, isFalse);
+    });
+  });
 }

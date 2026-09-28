@@ -43,14 +43,26 @@ void main() {
 
     test('needs 3 players for Classic and 2 per team for Team race', () {
       var classic = bowl();
-      var race = bowl(mode: GameMode.celebrity);
+      var race = bowl(mode: GameMode.celebrity, names: 3);
       for (final name in ['A', 'B', 'C']) {
         classic = classic.submit(name: name, secrets: [name]);
-        race = race.submit(name: name, secrets: [name]);
+        race = race.submit(name: name, secrets: ['$name 1', '$name 2', '$name 3']);
       }
       expect(classic.canStart, isTrue);
       expect(race.canStart, isFalse);
-      expect(race.submit(name: 'D', secrets: ['D']).canStart, isTrue);
+      expect(race.submit(name: 'D', secrets: ['D 1', 'D 2', 'D 3']).canStart, isTrue);
+    });
+
+    test('Team race needs 12 names in the bowl, however many play', () {
+      var race = bowl(mode: GameMode.celebrity, names: 2);
+      for (final name in ['A', 'B', 'C', 'D', 'E']) {
+        race = race.submit(name: name, secrets: ['$name 1', '$name 2']);
+      }
+      expect(race.room.slipsNeeded, 2);
+      expect(race.canStart, isFalse);
+      race = race.submit(name: 'F', secrets: ['F 1', 'F 2']);
+      expect(race.room.slipsNeeded, 0);
+      expect(race.canStart, isTrue);
     });
 
     test('a new round keeps everyone, empties the bowl, and a returning name keeps its colour', () {
@@ -84,7 +96,12 @@ void main() {
         ..setMode(mode)
         ..begin();
       for (final name in ['Sara', 'Omar', 'Nour']) {
-        cubit.submit(name: name, secrets: [name]);
+        cubit.submit(
+          name: name,
+          secrets: cubit.state.namesPerPlayer == 1
+              ? [name]
+              : [for (var i = 1; i <= cubit.state.namesPerPlayer; i++) '$name $i'],
+        );
         cubit.next();
       }
       cubit.cancelTurn();
@@ -135,7 +152,7 @@ void main() {
       final cubit = threeIn(mode: GameMode.celebrity);
       cubit
         ..next()
-        ..submit(name: 'Karim', secrets: ['Karim']);
+        ..submit(name: 'Karim', secrets: ['Karim 1', 'Karim 2', 'Karim 3']);
       final args = cubit.celebrityArgs()!;
       expect([for (final p in args.players) p.name], ['Sara', 'Omar', 'Nour', 'Karim']);
       expect(cubit.roundArgs(), isNull);

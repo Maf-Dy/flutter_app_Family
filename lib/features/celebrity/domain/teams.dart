@@ -1,12 +1,15 @@
 import 'dart:math';
 
+/// Fewest players on a team: one gives clues, at least one guesses.
+const minTeamSize = 2;
+
 /// Splits [playerIds] into [count] teams whose sizes differ by at most one.
 ///
 /// [chosen] holds the team each player picked, if any. Picks are kept, then
 /// everyone else is shuffled into the smallest teams. Picks that would leave a
 /// team more than one player larger than another are kept anyway: a friend's
-/// own choice wins over perfect balance, except that no team is left empty
-/// while there are players to go round: the host has no other way to fix it.
+/// own choice wins over perfect balance, except that no team is left with
+/// fewer than [minTeamSize] while other teams can spare a player.
 List<List<String>> splitTeams({
   required List<String> playerIds,
   required int count,
@@ -28,12 +31,14 @@ List<List<String>> splitTeams({
     final smallest = teams.reduce((a, b) => b.length < a.length ? b : a);
     smallest.add(id);
   }
-  // Every friend picked the same team: move the latest picks along.
-  for (final empty in teams) {
-    if (empty.isNotEmpty) continue;
-    final largest = teams.reduce((a, b) => b.length > a.length ? b : a);
-    if (largest.length < 2) break;
-    empty.add(largest.removeLast());
+  // Too many friends picked the same team: move the latest picks along until
+  // every team has a clue-giver and a guesser, when there are players enough.
+  for (final small in teams) {
+    while (small.length < minTeamSize) {
+      final largest = teams.reduce((a, b) => b.length > a.length ? b : a);
+      if (largest.length <= minTeamSize) break;
+      small.add(largest.removeLast());
+    }
   }
   return [for (final team in teams) List.unmodifiable(team)];
 }

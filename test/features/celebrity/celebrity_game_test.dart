@@ -113,4 +113,123 @@ void main() {
     expect(cubit.state.game.phase, CelebrityPhase.roundIntro);
     cubit.close();
   });
+
+  CelebrityCubit cubitFor({int turnSeconds = 60, int seed = 8}) => CelebrityCubit(
+    CelebrityArgs(
+      category: const GameCategory.preset(PresetCategory.famousPeople),
+      slips: slips,
+      players: [for (final id in teams.expand((t) => t)) (id: id, name: id.toUpperCase(), team: null)],
+      setup: TeamSetup(pick: TeamPick.host, turnSeconds: turnSeconds),
+    ),
+    random: Random(seed),
+    runClock: false,
+  );
+
+  test('a team that empties the bowl opens the next round with the seconds it had left', () {
+    var game = started().toHandOff().startTurn();
+    while (game.phase == CelebrityPhase.playing) {
+      game = game.gotIt();
+    }
+    expect(game.emptiedBowl, isTrue);
+    game = game.nextTurn(Random(2), secondsLeft: 20);
+    expect(game.round, CelebrityRound.oneWord);
+    expect(game.team, 0, reason: 'the same team carries on');
+    expect(game.giverId, 'p0', reason: 'with the same clue-giver');
+    expect(game.carrySeconds, 20);
+    // Once that turn ends, turns alternate again and the carry is gone.
+    game = game.toHandOff().startTurn().gotIt().timeUp().nextTurn(Random(3));
+    expect(game.team, 1);
+    expect(game.carrySeconds, isNull);
+  });
+
+  test('no carry when the clock and the bowl run out together, or after the last round', () {
+    var game = started().toHandOff().startTurn();
+    while (game.phase == CelebrityPhase.playing) {
+      game = game.gotIt();
+    }
+    game = game.nextTurn(Random(2));
+    expect(game.team, 1);
+    expect(game.carrySeconds, isNull);
+  });
+
+  test('the name on screen at time-up is shuffled back in, not handed to the next team first', () {
+    for (var seed = 0; seed < 20; seed++) {
+      var game = started().toHandOff().startTurn();
+      final onScreen = game.current!;
+      game = game.timeUp().nextTurn(Random(seed));
+      expect(game.bowl, hasLength(4));
+      expect(identical(game.bowl.first, onScreen), isFalse);
+    }
+  });
+
+  test('a team of one cannot play: someone has to guess', () {
+    final game = CelebrityGame.start(
+      slips: slips,
+      teams: [
+        ['p0'],
+        ['p1', 'p2', 'p3'],
+      ],
+    );
+    expect(game.teamsPlayable, isFalse);
+    expect(game.begin(Random(1)).phase, CelebrityPhase.teams);
+  });
+
+  test('pausing stops the clock and the buttons until the turn carries on', () {
+    final cubit = cubitFor(turnSeconds: 10)
+      ..begin()
+      ..toHandOff()
+      ..startTurn()
+      ..tick()
+      ..pause()
+      ..tick()
+      ..tick();
+    expect(cubit.state.paused, isTrue);
+    expect(cubit.state.secondsLeft, 9);
+    cubit.gotIt();
+    expect(cubit.state.game.turnPoints, 0);
+    cubit
+      ..resume()
+      ..tick()
+      ..gotIt();
+    expect(cubit.state.secondsLeft, 8);
+    expect(cubit.state.game.turnPoints, 1);
+    cubit.close();
+  });
+
+  test('the cubit starts a carried turn with the leftover seconds', () {
+    final cubit = cubitFor(turnSeconds: 30)
+      ..begin()
+      ..toHandOff()
+      ..startTurn();
+    for (var i = 0; i < 5; i++) {
+      cubit.tick();
+    }
+    while (cubit.state.game.phase == CelebrityPhase.playing) {
+      cubit.gotIt();
+    }
+    cubit
+      ..nextTurn()
+      ..toHandOff()
+      ..startTurn();
+    expect(cubit.state.secondsLeft, 25);
+    expect(cubit.state.game.team, 0);
+    cubit.close();
+  });
+
+  test('when friends pick teams, the host can still move someone to fix a short team', () {
+    final cubit = CelebrityCubit(
+      CelebrityArgs(
+        category: const GameCategory.preset(PresetCategory.famousPeople),
+        slips: slips,
+        players: [for (final id in teams.expand((t) => t)) (id: id, name: id.toUpperCase(), team: 0)],
+        setup: const TeamSetup(pick: TeamPick.players),
+      ),
+      random: Random(7),
+      runClock: false,
+    );
+    final before = cubit.state.game.teams;
+    cubit.movePlayer(before[0].first);
+    expect(cubit.state.game.teams, isNot(before));
+    cubit.close();
+  });
 }

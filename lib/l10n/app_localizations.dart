@@ -1112,12 +1112,6 @@ abstract class AppLocalizations {
   /// **'Friends picked their teams; anyone who didn\'t was balanced in.'**
   String get teamsChosenNote;
 
-  /// No description provided for @teamNeedsPlayers.
-  ///
-  /// In en, this message translates to:
-  /// **'Every team needs at least one player.'**
-  String get teamNeedsPlayers;
-
   /// No description provided for @letsPlay.
   ///
   /// In en, this message translates to:
@@ -2005,6 +1999,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Everyone else, listen closely!'**
   String get passReaderDetail;
+
+  /// No description provided for @teamNeedsTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs at least 2 players: one describes, one guesses.'**
+  String get teamNeedsTwo;
+
+  /// No description provided for @pauseTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get pauseTurn;
+
+  /// No description provided for @resumeTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'Carry on'**
+  String get resumeTurn;
+
+  /// No description provided for @turnPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get turnPaused;
+
+  /// No description provided for @turnPausedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The clock is stopped and the name is hidden. Tap Carry on when you\'re ready.'**
+  String get turnPausedBody;
+
+  /// No description provided for @carryOnTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} emptied the bowl, so they start the next round with the {seconds} s they had left.'**
+  String carryOnTurn(String team, int seconds);
+
+  /// No description provided for @carriedTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} starts with {seconds} s left over.'**
+  String carriedTime(String team, int seconds);
+
+  /// No description provided for @howToPlayBowl.
+  ///
+  /// In en, this message translates to:
+  /// **'All the names go into one bowl, and the teams take turns.'**
+  String get howToPlayBowl;
+
+  /// No description provided for @howToPlayTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'On your turn, one of you holds the phone and gets your team to guess as many names as you can before the clock runs out. Every name guessed is a point.'**
+  String get howToPlayTurn;
+
+  /// No description provided for @howToPlaySkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Stuck? Skip it and it goes back in the bowl.'**
+  String get howToPlaySkip;
+
+  /// No description provided for @howToPlayRounds.
+  ///
+  /// In en, this message translates to:
+  /// **'When the bowl is empty, every name goes back in for the next round, with harder clues: describe, then one word, then act it out.'**
+  String get howToPlayRounds;
+
+  /// No description provided for @howToPlayWhy.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s the fun: the same names come back, so remember what was said. By round 3 a tiny gesture is enough.'**
+  String get howToPlayWhy;
+
+  /// No description provided for @howToPlayWin.
+  ///
+  /// In en, this message translates to:
+  /// **'Most points after 3 rounds wins.'**
+  String get howToPlayWin;
+
+  /// No description provided for @teamRaceMoreNames.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Team race needs 1 more name in the bowl} other{Team race needs {count} more names in the bowl}}'**
+  String teamRaceMoreNames(int count);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

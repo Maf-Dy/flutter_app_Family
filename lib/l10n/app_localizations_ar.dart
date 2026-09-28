@@ -35,7 +35,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get hostRoomDetail => 'صحابك يدخلوا من المتصفح. لا تطبيق ولا إنترنت ولا وجع دماغ.';
 
   @override
-  String get howToPlay => 'إزاي نلعب؟';
+  String get howToPlay => 'إزاي نلعب';
 
   @override
   String get howToPlayStep1 => 'كل واحد يعمل سكان للكود ويكتب اسم من الفئة في السر… محدش يبص!';
@@ -598,9 +598,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get teamsChosenNote => 'كل واحد اختار فريقه، واللي ماختارش حطيناه في الفريق الأقل.';
 
   @override
-  String get teamNeedsPlayers => 'كل فريق لازم يبقى فيه حد على الأقل.';
-
-  @override
   String get letsPlay => 'يلا بينا';
 
   @override
@@ -1140,4 +1137,60 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get passReaderDetail => 'الباقي ودانكم معانا!';
+
+  @override
+  String get teamNeedsTwo => 'محتاج اتنين على الأقل: واحد يوصف وواحد يخمّن.';
+
+  @override
+  String get pauseTurn => 'استنى';
+
+  @override
+  String get resumeTurn => 'كمّل';
+
+  @override
+  String get turnPaused => 'واقفين';
+
+  @override
+  String get turnPausedBody => 'الوقت واقف والاسم مستخبي. دوس كمّل لما تبقى جاهز.';
+
+  @override
+  String carryOnTurn(String team, int seconds) {
+    return '$team خلّص البولة، فهيبدأ الدور الجاي بالـ $seconds ثانية اللي كانت فاضلاله.';
+  }
+
+  @override
+  String carriedTime(String team, int seconds) {
+    return '$team يبدأ بالـ $seconds ثانية اللي فضلوا.';
+  }
+
+  @override
+  String get howToPlayBowl => 'كل الأسامي بتتحط في بولة واحدة، والفرق بتلعب بالدور.';
+
+  @override
+  String get howToPlayTurn =>
+      'في دوركم، واحد منكم يمسك الموبايل ويخلّي فريقه يخمّن أكبر عدد من الأسامي قبل ما الوقت يخلص. كل اسم يتخمّن بنقطة.';
+
+  @override
+  String get howToPlaySkip => 'مش عارف توصفه؟ عدّيه ويرجع البولة.';
+
+  @override
+  String get howToPlayRounds =>
+      'لما البولة تخلص، كل الأسامي ترجع تاني للدور اللي بعده بس التلميح أصعب: توصف، بعدين كلمة واحدة، بعدين تمثيل.';
+
+  @override
+  String get howToPlayWhy => 'ودي الحلاوة: نفس الأسامي بترجع، فافتكروا اللي اتقال. في الدور التالت حركة صغيرة تكفي.';
+
+  @override
+  String get howToPlayWin => 'اللي يجمع نقط أكتر بعد 3 أدوار يكسب.';
+
+  @override
+  String teamRaceMoreNames(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'سباق الفرق محتاج $count أسامي كمان في البولة',
+      one: 'سباق الفرق محتاج اسم كمان في البولة',
+    );
+    return '$_temp0';
+  }
 }

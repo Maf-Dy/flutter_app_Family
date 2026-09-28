@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/l10n/l10n.dart';
 import '../../../room/domain/room.dart';
+import '../../domain/teams.dart';
 import '../state/celebrity_cubit.dart';
 import '../../../room/presentation/team_style.dart';
 
@@ -36,7 +37,7 @@ class TeamsScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Text(
-                  pick == TeamPick.host ? l10n.tapToMove : l10n.teamsChosenNote,
+                  pick == TeamPick.host ? l10n.tapToMove : '${l10n.teamsChosenNote} ${l10n.tapToMove}',
                   style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 ),
               ),
@@ -61,14 +62,16 @@ class TeamsScreen extends StatelessWidget {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(12),
-                        child: team.isEmpty
-                            ? Text(l10n.teamNeedsPlayers, style: TextStyle(color: theme.colorScheme.error))
-                            : Wrap(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (team.isNotEmpty)
+                              Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
                                 children: [
                                   for (final id in team)
-                                    if (pick == TeamPick.host)
+                                    if (pick != TeamPick.random)
                                       ActionChip(
                                         avatar: const Icon(Icons.swap_horiz_rounded, size: 18),
                                         label: Text(cubit.nameOf(id)),
@@ -78,6 +81,13 @@ class TeamsScreen extends StatelessWidget {
                                       Chip(label: Text(cubit.nameOf(id))),
                                 ],
                               ),
+                            if (team.length < minTeamSize)
+                              Padding(
+                                padding: EdgeInsets.only(top: team.isEmpty ? 0 : 8),
+                                child: Text(l10n.teamNeedsTwo, style: TextStyle(color: theme.colorScheme.error)),
+                              ),
+                          ],
+                        ),
                       ),
                     ],
                   ),

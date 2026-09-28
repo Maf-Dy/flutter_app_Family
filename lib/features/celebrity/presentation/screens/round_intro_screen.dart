@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../domain/celebrity_game.dart';
 import '../state/celebrity_cubit.dart';
+import '../../../room/presentation/team_style.dart';
+import '../widgets/how_to_play_card.dart';
 import '../widgets/scoreboard.dart';
 
 String roundTitle(AppLocalizations l10n, CelebrityRound round) => switch (round) {
@@ -46,6 +48,15 @@ class RoundIntroScreen extends StatelessWidget {
                   Text(roundTitle(l10n, game.round), textAlign: TextAlign.center, style: theme.textTheme.displaySmall),
                   const SizedBox(height: 8),
                   Text(detail, textAlign: TextAlign.center, style: theme.textTheme.titleMedium),
+                  if (game.carrySeconds case final seconds?) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      l10n.carriedTime(teamName(l10n, game.team), seconds),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.titleMedium?.copyWith(color: teamColor(context, game.team)),
+                    ),
+                  ],
+                  if (game.round == CelebrityRound.describe) ...[const SizedBox(height: 20), const HowToPlayCard()],
                   if (game.round != CelebrityRound.describe) ...[const SizedBox(height: 20), Scoreboard(game: game)],
                 ],
               ),

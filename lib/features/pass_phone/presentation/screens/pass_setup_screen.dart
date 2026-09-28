@@ -93,7 +93,11 @@ class PassSetupScreen extends StatelessWidget {
               const SizedBox(height: 28),
               SectionLabel(l10n.namesPerPlayer),
               const SizedBox(height: 10),
-              NamesPerPlayerCard(count: state.namesPerPlayer, onChanged: cubit.setNamesPerPlayer),
+              NamesPerPlayerCard(
+                count: state.namesPerPlayer,
+                max: Room.maxNamesFor(state.mode),
+                onChanged: cubit.setNamesPerPlayer,
+              ),
               const SizedBox(height: 28),
               SectionLabel(l10n.rules),
               const SizedBox(height: 10),

@@ -77,6 +77,9 @@ enum SubmissionError {
 
   /// A team was chosen that the room doesn't have.
   invalidTeam,
+
+  /// Another player already goes by this name, so the reveal couldn't tell them apart.
+  nameTaken,
 }
 
 /// One name in the bowl.
@@ -132,6 +135,19 @@ final class Room {
 
   static const minPlayers = 3;
   static const maxNamesPerPlayer = 3;
+
+  /// Team race goes through the bowl three times, so it wants more names:
+  /// up to 5 each, 3 each to start with, and at least 12 in the bowl.
+  static const maxTeamRaceNames = 5;
+  static const defaultTeamRaceNames = 3;
+  static const minTeamRaceSlips = 12;
+
+  static int maxNamesFor(GameMode mode) => mode == GameMode.celebrity ? maxTeamRaceNames : maxNamesPerPlayer;
+
+  /// Names each after switching to [mode]: Team race starts at 3 each, the other modes cap it again.
+  static int namesForMode(int current, GameMode mode) => mode == GameMode.celebrity
+      ? current.clamp(defaultTeamRaceNames, maxTeamRaceNames)
+      : current.clamp(1, maxNamesPerPlayer);
   static const maxNameLength = 30;
   static const maxSecretLength = 60;
   static const maxPlayers = 30;
@@ -163,9 +179,12 @@ final class Room {
   final List<Player> players;
 
   bool get isCollecting => phase == RoomPhase.collecting;
+
+  /// Players with all their names in. The host drops names in one at a time,
+  /// so a host part-way through isn't in yet.
   List<Player> get playersIn => [
     for (final p in players)
-      if (p.hasSubmitted) p,
+      if (p.secrets.length >= namesPerPlayer) p,
   ];
   int get slipCount => players.fold(0, (sum, p) => sum + p.secrets.length);
 
@@ -175,8 +194,11 @@ final class Room {
     GameMode.celebrity => teamSetup.count * 2,
     GameMode.family => minPlayers,
   };
-  bool get canStart => playersIn.length >= requiredPlayers;
+  bool get canStart => playersIn.length >= requiredPlayers && slipsNeeded == 0;
   int get playersNeeded => (requiredPlayers - playersIn.length).clamp(0, requiredPlayers);
+
+  /// Names still missing before a team race has enough to go round three times.
+  int get slipsNeeded => mode == GameMode.celebrity ? max(0, minTeamRaceSlips - slips.length) : 0;
 
   /// Whether friends pick their team on the join page.
   bool get playersPickTeams => mode == GameMode.celebrity && teamSetup.pick == TeamPick.players;
@@ -193,8 +215,9 @@ final class Room {
   Player? get host => playerById(Player.hostId);
   int get hostSecretsLeft => namesPerPlayer - (host?.secrets.length ?? 0);
 
+  /// The names that go into the game: only from players who are all in.
   List<Slip> get slips => [
-    for (final p in players)
+    for (final p in playersIn)
       for (final s in p.secrets) Slip(text: s, writerId: p.id, writerName: p.name),
   ];
 
@@ -206,6 +229,7 @@ final class Room {
     final cleanName = tidy(name);
     final cleanSecrets = secrets.map(tidy).toList();
     if (cleanName.isEmpty) return SubmissionError.missingName;
+    if (_nameTaken(cleanName, exceptPlayer: playerId)) return SubmissionError.nameTaken;
     if (cleanSecrets.length != namesPerPlayer || cleanSecrets.any((s) => s.isEmpty)) {
       return SubmissionError.missingSecret;
     }
@@ -226,6 +250,13 @@ final class Room {
       return SubmissionError.duplicate;
     }
     return null;
+  }
+
+  bool _nameTaken(String name, {String? exceptPlayer}) {
+    final key = matchKey(name);
+    if (key.isEmpty) return false;
+    if (matchKey(hostName) == key) return true;
+    return players.any((p) => p.id != exceptPlayer && !p.isHost && matchKey(p.name) == key);
   }
 
   bool _clashes(List<String> secrets, {String? exceptPlayer}) {
@@ -326,7 +357,12 @@ final class Room {
   /// A spelling-tolerant key for spotting the same name twice: ignores case,
   /// spaces, punctuation, Arabic diacritics and the usual Arabic letter variants
   /// (أ إ آ ا, ة ه, ى ي). Real misspellings still count as different names.
-  static String matchKey(String name) => tidy(name)
+  static String matchKey(String name) {
+    final key = _lettersKey(name);
+    return key.isEmpty ? tidy(name) : key;
+  }
+
+  static String _lettersKey(String name) => tidy(name)
       .toLowerCase()
       .replaceAll(RegExp('[ً-ٰٟـ]'), '')
       .replaceAll(RegExp('[آأإٱ]'), 'ا')
