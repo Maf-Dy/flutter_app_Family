@@ -22,10 +22,29 @@ class MainActivity : FlutterActivity() {
             }
             result.success(null)
         }
+        // Keeps the app, and so the game's server, running while a room is open.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, HostingService.CHANNEL).setMethodCallHandler { call, result ->
+            try {
+                when (call.method) {
+                    "start" -> HostingService.start(
+                        applicationContext,
+                        call.argument<String>("title") ?: "",
+                        call.argument<String>("text") ?: "",
+                    )
+                    "stop" -> HostingService.stop(applicationContext)
+                    else -> return@setMethodCallHandler result.notImplemented()
+                }
+                result.success(null)
+            } catch (error: Exception) {
+                // e.g. Android refusing a foreground service: the game still runs while the app is open.
+                result.error("hosting", error.message, null)
+            }
+        }
     }
 
     override fun onDestroy() {
         hotspot?.dispose()
+        if (isFinishing) HostingService.stop(applicationContext)
         super.onDestroy()
     }
 }

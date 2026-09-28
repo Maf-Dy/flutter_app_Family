@@ -1,6 +1,6 @@
 # Progress: expansion work
 
-Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 212 tests pass on this commit.
+Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 214 tests pass on this commit.
 
 ## Done
 
@@ -134,10 +134,12 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 212 te
   - The Classic page going offline, keeping what was typed, coming back and joining.
   - A second "Omar" being refused, then let in after the host took the old entry out.
   - A three-phone Family game with no page errors.
-- **Not done:**
-  - The host app has no Android foreground service, so if Android stops the app in the background the game ends for everyone.
-  - If the host is a player and heads the family on turn, their family can't stand in for them.
-  - Leaving a reading reopens the bowl.
+- **Keeping the room alive (Android):**
+  - While a room is open, a "Hosting a game" foreground service (`HostingService.kt`, `KeepHosting` widget) keeps the app, the CPU and Wi-Fi awake, so a call, the lock screen or another app doesn't end the game.
+  - Android 13+ asks once for notification permission; hosting works without it.
+  - The debug APK now builds in the cloud session. All the Kotlin compiles, including the earlier hotspot, multicast and screenshot-block code, but nothing has run on a phone yet.
+- **The host stepping away:** when the host leaves the app during Family online, they show as offline. A family member then asks for them, as for any friend. Nobody can claim the host's seat.
+- **Not done:** leaving a reading reopens the bowl.
 
 ## Remaining
 1. **On a real device:** play the browser family page on 3+ phones over Wi-Fi and on the app's hotspot (polling, chat, voting, the vibration on your turn). Turn one phone's Wi-Fi off and on mid-game, and open the game in a second browser to take a seat back.

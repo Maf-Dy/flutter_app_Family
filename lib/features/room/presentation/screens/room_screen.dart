@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/motion/shared_axis.dart';
+import '../../../../core/platform/keep_hosting.dart';
 import '../../../../core/widgets/keep_screen_on.dart';
 import '../../domain/network_access.dart';
 import '../../domain/room_beacon.dart';
@@ -69,7 +70,10 @@ class _RoomFlowState extends State<_RoomFlow> {
           position: state.stage.index,
           child: switch (state.stage) {
             RoomStage.setup => const NewRoomScreen(key: ValueKey(RoomStage.setup)),
-            RoomStage.lobby => const KeepScreenOn(key: ValueKey(RoomStage.lobby), child: LobbyScreen()),
+            RoomStage.lobby => const KeepHosting(
+              key: ValueKey(RoomStage.lobby),
+              child: KeepScreenOn(child: LobbyScreen()),
+            ),
           },
         ),
       ),

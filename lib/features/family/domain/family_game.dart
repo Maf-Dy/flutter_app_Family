@@ -400,9 +400,10 @@ final class FamilyGame {
   }
 
   /// Players whose seat someone may ask for: dropped out, and not the host's phone.
+  /// The host's seat is never up for grabs: their phone runs the game.
   List<FamilyPlayer> get claimable => [
     for (final p in players)
-      if (away.contains(p.id)) p,
+      if (away.contains(p.id) && p.id != Player.hostId) p,
   ];
 
   /// [clientId]'s latest ask.
@@ -421,7 +422,11 @@ final class FamilyGame {
   /// ask from the same browser, so each browser has at most one; a browser the
   /// host turned away can't ask for that seat again this game.
   FamilyGame claimSeat(String clientId, String playerId) {
-    if (isOver || player(clientId) != null || !away.contains(playerId) || wasRefused(clientId, playerId)) {
+    if (isOver ||
+        playerId == Player.hostId ||
+        player(clientId) != null ||
+        !away.contains(playerId) ||
+        wasRefused(clientId, playerId)) {
       return this;
     }
     final others = [

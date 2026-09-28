@@ -26,29 +26,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeHeadline => 'Who wrote\nwhat?';
 
   @override
-  String get homeTagline => 'Everyone secretly drops a name in the bowl. Then put the phone down and play.';
+  String get homeTagline =>
+      'Everyone secretly drops a name in the bowl. Then put the phone down and play.';
 
   @override
   String get hostRoom => 'Host a room';
 
   @override
-  String get hostRoomDetail => 'Friends join from their phone\'s browser. No app, no internet needed.';
+  String get hostRoomDetail =>
+      'Friends join from their phone\'s browser. No app, no internet needed.';
 
   @override
   String get howToPlay => 'How to play';
 
   @override
-  String get howToPlayStep1 => 'Everyone scans the QR code and secretly writes a name from the category.';
+  String get howToPlayStep1 =>
+      'Everyone scans the QR code and secretly writes a name from the category.';
 
   @override
-  String get howToPlayStep2 => 'The host reads all the names aloud, once or twice.';
+  String get howToPlayStep2 =>
+      'The host reads all the names aloud, once or twice.';
 
   @override
   String get howToPlayStep3 =>
       'Put the phone down. Take turns asking someone \"Did you write …?\" Guess right and they join your family. The last family standing wins.';
 
   @override
-  String get howToPlayStep4 => 'Afterwards, tap \"Who wrote what?\" to see them all.';
+  String get howToPlayStep4 =>
+      'Afterwards, tap \"Who wrote what?\" to see them all.';
 
   @override
   String get gotIt => 'Got it';
@@ -170,10 +175,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sameNameTwice => 'Same name twice';
 
   @override
-  String get sameNameTwiceOn => 'Allowed. Two people writing the same person makes for a funny round.';
+  String get sameNameTwiceOn =>
+      'Allowed. Two people writing the same person makes for a funny round.';
 
   @override
-  String get sameNameTwiceOff => 'Not allowed. Whoever writes it second is asked to pick someone else.';
+  String get sameNameTwiceOff =>
+      'Not allowed. Whoever writes it second is asked to pick someone else.';
 
   @override
   String get connection => 'Connection';
@@ -188,13 +195,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connected => 'Connected';
 
   @override
-  String get connectedDetail => 'Friends join the same Wi-Fi, or your hotspot, and scan the code.';
+  String get connectedDetail =>
+      'Friends join the same Wi-Fi, or your hotspot, and scan the code.';
 
   @override
   String get hotspotIsOn => 'Hotspot is on';
 
   @override
-  String get hotspotIsOnDetail => 'Friends scan the Wi-Fi code first, then the game code.';
+  String get hotspotIsOnDetail =>
+      'Friends scan the Wi-Fi code first, then the game code.';
 
   @override
   String get startingHotspot => 'Starting hotspot…';
@@ -203,19 +212,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noWifiHere => 'No Wi-Fi here';
 
   @override
-  String get noWifiCanCreate => 'No problem. The app can make its own hotspot for the room.';
+  String get noWifiCanCreate =>
+      'No problem. The app can make its own hotspot for the room.';
 
   @override
-  String get noWifiCannotCreate => 'Turn on Wi-Fi or your phone\'s hotspot. You can do it after opening the room.';
+  String get noWifiCannotCreate =>
+      'Turn on Wi-Fi or your phone\'s hotspot. You can do it after opening the room.';
 
   @override
-  String get connectionNote => 'Checked automatically. Nothing goes over the internet; the room lives on this phone.';
+  String get connectionNote =>
+      'Checked automatically. Nothing goes over the internet; the room lives on this phone.';
 
   @override
   String get openRoom => 'Open room';
 
   @override
-  String get openRoomFailed => 'Couldn\'t open the room. Close other apps that share on Wi-Fi and try again.';
+  String get openRoomFailed =>
+      'Couldn\'t open the room. Close other apps that share on Wi-Fi and try again.';
 
   @override
   String get closeRoom => 'Close room';
@@ -224,7 +237,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get closeRoomTitle => 'Close the room?';
 
   @override
-  String get closeRoomBody => 'Friends\' pages stop working and the names in the bowl are cleared.';
+  String get closeRoomBody =>
+      'Friends\' pages stop working and the names in the bowl are cleared.';
 
   @override
   String get keepOpen => 'Keep open';
@@ -254,7 +268,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get linkNotOpening => 'Link not opening?';
 
   @override
-  String get onWifiNow => 'You\'re on Wi-Fi now. Friends on the hotspot stay connected until you switch.';
+  String get onWifiNow =>
+      'You\'re on Wi-Fi now. Friends on the hotspot stay connected until you switch.';
 
   @override
   String get switchToWifi => 'Switch to Wi-Fi';
@@ -306,7 +321,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dropInBowl => 'Drop in the bowl';
 
   @override
-  String get duplicateHostSecret => 'Someone already put that name in. Pick someone else!';
+  String get duplicateHostSecret =>
+      'Someone already put that name in. Pick someone else!';
 
   @override
   String get nameIn => 'Name in';
@@ -425,14 +441,16 @@ class AppLocalizationsEn extends AppLocalizations {
       'This phone can\'t create a hotspot from an app. Turn on your hotspot in Settings instead.';
 
   @override
-  String get hotspotNoAddress => 'The hotspot started, but the room couldn\'t find it. Tap Check again.';
+  String get hotspotNoAddress =>
+      'The hotspot started, but the room couldn\'t find it. Tap Check again.';
 
   @override
   String get hotspotFailed =>
       'Android couldn\'t start the hotspot. Make sure Wi-Fi and Location are on, then try again.';
 
   @override
-  String get linkHelpSameWifi => 'Friends must be on the same Wi-Fi as this phone, with mobile data not taking over.';
+  String get linkHelpSameWifi =>
+      'Friends must be on the same Wi-Fi as this phone, with mobile data not taking over.';
 
   @override
   String linkHelpTypeExactly(String url) {
@@ -450,7 +468,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leaveRoundTitle => 'Leave this round?';
 
   @override
-  String get leaveRoundBody => 'The names stay in the bowl, and friends can change them again.';
+  String get leaveRoundBody =>
+      'The names stay in the bowl, and friends can change them again.';
 
   @override
   String get stay => 'Stay';
@@ -502,7 +521,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get namesOnTheTable => 'Names on the table';
 
   @override
-  String get boardHint => 'Put the phone down and play. The screen stays on in case anyone forgets a name.';
+  String get boardHint =>
+      'Put the phone down and play. The screen stays on in case anyone forgets a name.';
 
   @override
   String get whoWroteWhat => 'Who wrote what?';
@@ -539,13 +559,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modeClassic => 'Classic';
 
   @override
-  String get modeClassicDetail => 'Read the names aloud, then play at the table.';
+  String get modeClassicDetail =>
+      'Read the names aloud, then play at the table.';
 
   @override
   String get modeCelebrity => 'Team race';
 
   @override
-  String get modeCelebrityDetail => 'Teams race the clock to guess the names: describe, one word, then act it out.';
+  String get modeCelebrityDetail =>
+      'Teams race the clock to guess the names: describe, one word, then act it out.';
 
   @override
   String get teams => 'Teams';
@@ -592,7 +614,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tapToMove => 'Tap a player to move them to the next team.';
 
   @override
-  String get teamsChosenNote => 'Friends picked their teams; anyone who didn\'t was balanced in.';
+  String get teamsChosenNote =>
+      'Friends picked their teams; anyone who didn\'t was balanced in.';
 
   @override
   String get letsPlay => 'Let\'s play';
@@ -632,7 +655,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passPhoneTo => 'Pass the phone to';
 
   @override
-  String get giverHint => 'The rest of the team guesses. Other teams, no peeking!';
+  String get giverHint =>
+      'The rest of the team guesses. Other teams, no peeking!';
 
   @override
   String get imReady => 'I\'m ready';
@@ -701,7 +725,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leaveGameTitle => 'Leave this game?';
 
   @override
-  String get leaveGameBody => 'The scores will be lost, but the names stay in the bowl.';
+  String get leaveGameBody =>
+      'The scores will be lost, but the names stay in the bowl.';
 
   @override
   String get shareCardText => 'From our Family game night';
@@ -727,7 +752,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modeFamily => 'Family online';
 
   @override
-  String get modeFamilyDetail => 'The classic game on everyone\'s phone: guess who wrote what, and your family grows.';
+  String get modeFamilyDetail =>
+      'The classic game on everyone\'s phone: guess who wrote what, and your family grows.';
 
   @override
   String get familyChatSwitch => 'Family chat';
@@ -784,7 +810,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyIdeas => 'Family ideas';
 
   @override
-  String get familyNoIdeas => 'No ideas yet. Pick a person and a name to suggest one.';
+  String get familyNoIdeas =>
+      'No ideas yet. Pick a person and a name to suggest one.';
 
   @override
   String familyIdea(String name, String slip) {
@@ -793,7 +820,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String familyBackers(int count) {
-    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: '$count votes', one: '1 vote');
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count votes',
+      one: '1 vote',
+    );
     return '$_temp0';
   }
 
@@ -843,19 +875,24 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get familyWatching => 'You\'re watching this one: you didn\'t put a name in.';
+  String get familyWatching =>
+      'You\'re watching this one: you didn\'t put a name in.';
 
   @override
-  String get familyLeaveBody => 'The game ends on everyone\'s phone, but the names stay in the bowl.';
+  String get familyLeaveBody =>
+      'The game ends on everyone\'s phone, but the names stay in the bowl.';
 
   @override
-  String get familyErrorNotYourTurn => 'Hold on, it\'s not your family\'s turn.';
+  String get familyErrorNotYourTurn =>
+      'Hold on, it\'s not your family\'s turn.';
 
   @override
-  String get familyErrorNotHead => 'Only the head of your family makes the guess.';
+  String get familyErrorNotHead =>
+      'Only the head of your family makes the guess.';
 
   @override
-  String get familyErrorInvalidTarget => 'You can’t ask that person. Pick someone else.';
+  String get familyErrorInvalidTarget =>
+      'You can’t ask that person. Pick someone else.';
 
   @override
   String get familyErrorInvalidSlip => 'That name is already out.';
@@ -883,7 +920,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get familyAwayTurnHelp => 'Wait for them to come back, or skip their turn.';
+  String get familyAwayTurnHelp =>
+      'Wait for them to come back, or skip their turn.';
 
   @override
   String get familySkipTurn => 'Skip their turn';
@@ -908,10 +946,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyShowCode => 'Show the join code';
 
   @override
-  String get familyShowCodeHelp => 'Anyone who dropped out can scan this to get back in.';
+  String get familyShowCodeHelp =>
+      'Anyone who dropped out can scan this to get back in.';
 
   @override
-  String get familyNoAddress => 'This phone isn\'t on a network right now. Check the Wi-Fi or hotspot.';
+  String get familyNoAddress =>
+      'This phone isn\'t on a network right now. Check the Wi-Fi or hotspot.';
 
   @override
   String get hotspotStopped =>
@@ -966,19 +1006,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanHostCode => 'Scan the host\'s code';
 
   @override
-  String get scanHostCodeDetail => 'Point your camera at the QR code on the host\'s phone.';
+  String get scanHostCodeDetail =>
+      'Point your camera at the QR code on the host\'s phone.';
 
   @override
   String get scanHostCodeHint => 'Fit the host\'s QR code in the square';
 
   @override
-  String get cameraBlocked => 'The camera is blocked for this app. Allow it in Settings, or pick a game from the list.';
+  String get cameraBlocked =>
+      'The camera is blocked for this app. Allow it in Settings, or pick a game from the list.';
 
   @override
-  String get cameraFailed => 'The camera didn\'t start. Pick a game from the list instead.';
+  String get cameraFailed =>
+      'The camera didn\'t start. Pick a game from the list instead.';
 
   @override
-  String get notAGameCode => 'That\'s not a game code. Scan the one on the host\'s lobby screen.';
+  String get notAGameCode =>
+      'That\'s not a game code. Scan the one on the host\'s lobby screen.';
 
   @override
   String get wifiCodeTitle => 'That\'s the host\'s Wi-Fi';
@@ -1022,7 +1066,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passSetupTitle => 'Pass the phone';
 
   @override
-  String get passSetupNote => 'No need to list the players. Everyone types their own name when the phone gets to them.';
+  String get passSetupNote =>
+      'No need to list the players. Everyone types their own name when the phone gets to them.';
 
   @override
   String get passBegin => 'Start';
@@ -1125,7 +1170,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passReaderDetail => 'Everyone else, listen closely!';
 
   @override
-  String get teamNeedsTwo => 'Needs at least 2 players: one describes, one guesses.';
+  String get teamNeedsTwo =>
+      'Needs at least 2 players: one describes, one guesses.';
 
   @override
   String get pauseTurn => 'Pause';
@@ -1137,7 +1183,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get turnPaused => 'Paused';
 
   @override
-  String get turnPausedBody => 'The clock is stopped and the name is hidden. Tap Carry on when you\'re ready.';
+  String get turnPausedBody =>
+      'The clock is stopped and the name is hidden. Tap Carry on when you\'re ready.';
 
   @override
   String carryOnTurn(String team, int seconds) {
@@ -1150,7 +1197,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get howToPlayBowl => 'All the names go into one bowl, and the teams take turns.';
+  String get howToPlayBowl =>
+      'All the names go into one bowl, and the teams take turns.';
 
   @override
   String get howToPlayTurn =>
@@ -1192,4 +1240,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get removePlayer => 'Take out';
+
+  @override
+  String get hostingTitle => 'Hosting a game';
+
+  @override
+  String get hostingText =>
+      'Friends are playing through this phone. Close the room when you\'re done.';
 }

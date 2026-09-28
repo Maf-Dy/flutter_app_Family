@@ -33,6 +33,14 @@ class FamilyCubit extends Cubit<FamilyGame> {
 
   FamilyActionError? unvote() => _move((_, _) => null, (g, me) => g.unvote(me));
 
+  /// The host left the app (a call, another app, the lock screen) or came back.
+  /// While away, a family member asks for them, as for any friend who dropped.
+  void setAway(bool away) {
+    final me = this.me;
+    if (me == null || !isPlaying) return;
+    _table.apply((game) => game.withAway(away ? {...game.away, me} : ({...game.away}..remove(me))));
+  }
+
   /// Passes the turn on from a family whose phones all dropped out. The host decides, even when only watching.
   void skipTurn() => _table.apply((game) => game.skipTurn());
 

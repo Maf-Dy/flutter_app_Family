@@ -56,8 +56,21 @@ class _FamilyViewState extends State<_FamilyView> {
   final _seat = ScrollController();
   final _board = ScrollController();
 
+  /// The host leaving the app counts as stepping away: their family asks for them meanwhile.
+  late final _lifecycle = AppLifecycleListener(
+    onHide: () => context.read<FamilyCubit>().setAway(true),
+    onShow: () => context.read<FamilyCubit>().setAway(false),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle;
+  }
+
   @override
   void dispose() {
+    _lifecycle.dispose();
     _seat.dispose();
     _board.dispose();
     super.dispose();

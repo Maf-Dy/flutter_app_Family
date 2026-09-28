@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:family_game/features/family/domain/family_game.dart';
+import 'package:family_game/features/room/domain/room.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -266,4 +267,37 @@ void main() {
       expect(other.pendingClaims, hasLength(1), reason: 'one open ask per browser');
     });
   });
+
+  test(
+    'when the host heads the family on turn and steps away, a family member asks, and nobody can claim the host',
+    () {
+      var game = FamilyGame.start(
+        players: const [
+          FamilyPlayer(id: Player.hostId, name: 'Mafdy'),
+          FamilyPlayer(id: 'b', name: 'Nour'),
+          FamilyPlayer(id: 'c', name: 'Yara'),
+        ],
+        slips: const [
+          (text: 'Messi', writerId: Player.hostId),
+          (text: 'Fairuz', writerId: 'b'),
+          (text: 'Adele', writerId: 'c'),
+        ],
+        chatEnabled: true,
+        random: Random(1),
+      );
+      // Get Nour into the host's family, with the host's family on turn.
+      while (game.turn != Player.hostId) {
+        final asker = game.turn;
+        final wrong = game.hiddenSlips.firstWhere((s) => s.writerId != Player.hostId && s.writerId != asker);
+        game = game.guess(asker, Player.hostId, wrong.id);
+      }
+      final nourSlip = game.slips.firstWhere((s) => s.writerId == 'b').id;
+      game = game.guess(Player.hostId, 'b', nourSlip);
+      expect(game.headOf('b'), Player.hostId);
+      expect(game.canAsk('b'), isFalse);
+      game = game.withAway({Player.hostId});
+      expect(game.canAsk('b'), isTrue, reason: 'Nour stands in for the host');
+      expect(identical(game.claimSeat('stranger', Player.hostId), game), isTrue);
+    },
+  );
 }

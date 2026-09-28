@@ -743,5 +743,7 @@
     }
   },
   "removePlayerBody": "Their names come out of the bowl. Use this for an old entry left behind when someone joined again on a new phone.",
-  "removePlayer": "Take out"
+  "removePlayer": "Take out",
+  "hostingTitle": "Hosting a game",
+  "hostingText": "Friends are playing through this phone. Close the room when you're done."
 }

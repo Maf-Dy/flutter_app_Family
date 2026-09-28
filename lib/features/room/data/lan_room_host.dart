@@ -275,7 +275,7 @@ class LanRoomHost implements RoomHost {
   }
 
   /// Marks friends whose phones have gone quiet as offline, so the game can
-  /// work around them. The host's own phone is the server, so it never drops.
+  /// work around them.
   @visibleForTesting
   void checkPresence() {
     final game = _room.family;
@@ -283,7 +283,11 @@ class LanRoomHost implements RoomHost {
     final now = _clock();
     final away = <String>{};
     for (final p in game.players) {
-      if (p.id == Player.hostId) continue;
+      // The host's phone is the server, so it never drops; the host app says when they step away.
+      if (p.id == Player.hostId) {
+        if (game.isAway(p.id)) away.add(p.id);
+        continue;
+      }
       final seen = _seen.putIfAbsent(p.id, () => now);
       if (now.difference(seen) > awayAfter) away.add(p.id);
     }

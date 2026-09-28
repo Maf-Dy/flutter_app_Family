@@ -387,6 +387,22 @@ void main() {
         host.checkPresence();
       });
 
+      test(
+        'a host who stepped out of the app stays away until they come back, and nobody can take their seat',
+        () async {
+          host.update((room) => room.reopen().withHostSecret('Heat').startFamily(Random(1)));
+          expect(host.room.family!.player(Player.hostId), isNotNull);
+          host.checkPresence();
+          host.update((room) => room.withFamily(room.family!.withAway({...room.family!.away, Player.hostId})));
+          host.checkPresence();
+          expect(host.room.family!.isAway(Player.hostId), isTrue);
+          expect(host.room.family!.claimable.map((p) => p.id), isNot(contains(Player.hostId)));
+          host.update((room) => room.withFamily(room.family!.withAway({...room.family!.away}..remove(Player.hostId))));
+          host.checkPresence();
+          expect(host.room.family!.isAway(Player.hostId), isFalse);
+        },
+      );
+
       test('a new game gives everyone a fresh start, however long the last round took', () async {
         now = now.add(const Duration(minutes: 5));
         host.update((room) => room.nextRound());

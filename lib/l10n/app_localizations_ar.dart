@@ -26,29 +26,34 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeHeadline => 'مين كتب\nإيه؟';
 
   @override
-  String get homeTagline => 'كل واحد يرمي اسم في الطبق من غير ما حد يشوف… وبعدين سيبوا الموبايل والعبوا.';
+  String get homeTagline =>
+      'كل واحد يرمي اسم في الطبق من غير ما حد يشوف… وبعدين سيبوا الموبايل والعبوا.';
 
   @override
   String get hostRoom => 'افتح قعدة';
 
   @override
-  String get hostRoomDetail => 'صحابك يدخلوا من المتصفح. لا تطبيق ولا إنترنت ولا وجع دماغ.';
+  String get hostRoomDetail =>
+      'صحابك يدخلوا من المتصفح. لا تطبيق ولا إنترنت ولا وجع دماغ.';
 
   @override
   String get howToPlay => 'إزاي نلعب';
 
   @override
-  String get howToPlayStep1 => 'كل واحد يعمل سكان للكود ويكتب اسم من الفئة في السر… محدش يبص!';
+  String get howToPlayStep1 =>
+      'كل واحد يعمل سكان للكود ويكتب اسم من الفئة في السر… محدش يبص!';
 
   @override
-  String get howToPlayStep2 => 'صاحب القعدة يقرا كل الأسامي بصوت عالي، مرة ولا اتنين.';
+  String get howToPlayStep2 =>
+      'صاحب القعدة يقرا كل الأسامي بصوت عالي، مرة ولا اتنين.';
 
   @override
   String get howToPlayStep3 =>
       'سيبوا الموبايل. كل واحد في دوره يسأل حد: \"إنت اللي كتبت …؟\" لو صح، ينضم لعيلتك. آخر عيلة فاضلة هي اللي تكسب.';
 
   @override
-  String get howToPlayStep4 => 'في الآخر دوس على \"مين كتب إيه؟\" واتفرج على الفضايح.';
+  String get howToPlayStep4 =>
+      'في الآخر دوس على \"مين كتب إيه؟\" واتفرج على الفضايح.';
 
   @override
   String get gotIt => 'تمام كده';
@@ -175,7 +180,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sameNameTwiceOn => 'مسموح. اتنين يكتبوا نفس الشخص؟ ده أحلى ضحك.';
 
   @override
-  String get sameNameTwiceOff => 'ممنوع. اللي يكتبه تاني هنقوله يدور على حد غيره.';
+  String get sameNameTwiceOff =>
+      'ممنوع. اللي يكتبه تاني هنقوله يدور على حد غيره.';
 
   @override
   String get connection => 'الاتصال';
@@ -190,13 +196,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get connected => 'متوصل';
 
   @override
-  String get connectedDetail => 'صحابك يدخلوا نفس الواي فاي أو الهوت سبوت بتاعك ويعملوا سكان للكود.';
+  String get connectedDetail =>
+      'صحابك يدخلوا نفس الواي فاي أو الهوت سبوت بتاعك ويعملوا سكان للكود.';
 
   @override
   String get hotspotIsOn => 'الهوت سبوت شغال';
 
   @override
-  String get hotspotIsOnDetail => 'صحابك يعملوا سكان لكود الواي فاي الأول، وبعدين كود اللعبة.';
+  String get hotspotIsOnDetail =>
+      'صحابك يعملوا سكان لكود الواي فاي الأول، وبعدين كود اللعبة.';
 
   @override
   String get startingHotspot => 'بنشغل الهوت سبوت…';
@@ -205,19 +213,23 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noWifiHere => 'مفيش واي فاي هنا';
 
   @override
-  String get noWifiCanCreate => 'ولا يهمك. التطبيق يقدر يعمل هوت سبوت خاص بالقعدة.';
+  String get noWifiCanCreate =>
+      'ولا يهمك. التطبيق يقدر يعمل هوت سبوت خاص بالقعدة.';
 
   @override
-  String get noWifiCannotCreate => 'شغل الواي فاي أو الهوت سبوت بتاع موبايلك. ينفع بعد ما تفتح القعدة كمان.';
+  String get noWifiCannotCreate =>
+      'شغل الواي فاي أو الهوت سبوت بتاع موبايلك. ينفع بعد ما تفتح القعدة كمان.';
 
   @override
-  String get connectionNote => 'بنتشيك لوحدنا. مفيش حاجة بتروح على الإنترنت، القعدة كلها على الموبايل ده.';
+  String get connectionNote =>
+      'بنتشيك لوحدنا. مفيش حاجة بتروح على الإنترنت، القعدة كلها على الموبايل ده.';
 
   @override
   String get openRoom => 'افتح القعدة';
 
   @override
-  String get openRoomFailed => 'القعدة مرضيتش تفتح. اقفل أي تطبيق تاني بيشارك على الواي فاي وجرب تاني.';
+  String get openRoomFailed =>
+      'القعدة مرضيتش تفتح. اقفل أي تطبيق تاني بيشارك على الواي فاي وجرب تاني.';
 
   @override
   String get closeRoom => 'اقفل القعدة';
@@ -256,7 +268,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get linkNotOpening => 'اللينك مش بيفتح؟';
 
   @override
-  String get onWifiNow => 'إنت على الواي فاي دلوقتي. اللي على الهوت سبوت هيفضلوا متوصلين لحد ما تحوّل.';
+  String get onWifiNow =>
+      'إنت على الواي فاي دلوقتي. اللي على الهوت سبوت هيفضلوا متوصلين لحد ما تحوّل.';
 
   @override
   String get switchToWifi => 'حوّل على الواي فاي';
@@ -401,7 +414,8 @@ class AppLocalizationsAr extends AppLocalizations {
       'التطبيق يقدر يعمل هوت سبوت خاص. صحابك يدخلوه بسكان كود. النت هيفصل عندهم وهما عليه، واللعبة مش محتاجاه أصلاً.';
 
   @override
-  String get noWifiAroundCannotCreate => 'شغل الهوت سبوت من الإعدادات وارجع هنا. صحابك يدخلوا عليه ويعملوا سكان للكود.';
+  String get noWifiAroundCannotCreate =>
+      'شغل الهوت سبوت من الإعدادات وارجع هنا. صحابك يدخلوا عليه ويعملوا سكان للكود.';
 
   @override
   String get createHotspot => 'اعمل هوت سبوت';
@@ -414,26 +428,32 @@ class AppLocalizationsAr extends AppLocalizations {
       'أندرويد محتاج إذنك عشان يعمل الهوت سبوت. في موبايلات بيسموه \"الموقع\"، بس متقلقش، التطبيق مش بيعرف إنت فين.';
 
   @override
-  String get hotspotPermissionBlocked => 'الإذن مقفول للعبة العيلة. افتحه من الإعدادات وجرب تاني.';
+  String get hotspotPermissionBlocked =>
+      'الإذن مقفول للعبة العيلة. افتحه من الإعدادات وجرب تاني.';
 
   @override
   String get hotspotIncompatible =>
       'الهوت سبوت بتاعك شغال أصلاً، أو الموبايل مش بيعرف يشغل هوت سبوت تاني وهو على الواي فاي. صحابك يقدروا يدخلوا على الهوت سبوت بتاعك أو الواي فاي: دوس جرب تاني.';
 
   @override
-  String get hotspotNotAllowed => 'الموبايل ده مش بيسمح للتطبيقات تعمل هوت سبوت. شغله إنت من الإعدادات.';
+  String get hotspotNotAllowed =>
+      'الموبايل ده مش بيسمح للتطبيقات تعمل هوت سبوت. شغله إنت من الإعدادات.';
 
   @override
-  String get hotspotUnsupported => 'الموبايل ده مش بيعرف يعمل هوت سبوت من تطبيق. شغله إنت من الإعدادات.';
+  String get hotspotUnsupported =>
+      'الموبايل ده مش بيعرف يعمل هوت سبوت من تطبيق. شغله إنت من الإعدادات.';
 
   @override
-  String get hotspotNoAddress => 'الهوت سبوت اشتغل بس القعدة مش لاقياه. دوس جرب تاني.';
+  String get hotspotNoAddress =>
+      'الهوت سبوت اشتغل بس القعدة مش لاقياه. دوس جرب تاني.';
 
   @override
-  String get hotspotFailed => 'أندرويد معرفش يشغل الهوت سبوت. اتأكد إن الواي فاي والموقع شغالين وجرب تاني.';
+  String get hotspotFailed =>
+      'أندرويد معرفش يشغل الهوت سبوت. اتأكد إن الواي فاي والموقع شغالين وجرب تاني.';
 
   @override
-  String get linkHelpSameWifi => 'لازم صحابك يبقوا على نفس الواي فاي بتاع الموبايل ده، ومن غير ما الداتا تاخد مكانه.';
+  String get linkHelpSameWifi =>
+      'لازم صحابك يبقوا على نفس الواي فاي بتاع الموبايل ده، ومن غير ما الداتا تاخد مكانه.';
 
   @override
   String linkHelpTypeExactly(String url) {
@@ -451,7 +471,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get leaveRoundTitle => 'تسيب الدور ده؟';
 
   @override
-  String get leaveRoundBody => 'الأسامي هتفضل في الطبق، وصحابك يقدروا يغيروها تاني.';
+  String get leaveRoundBody =>
+      'الأسامي هتفضل في الطبق، وصحابك يقدروا يغيروها تاني.';
 
   @override
   String get stay => 'لأ هكمل';
@@ -505,7 +526,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get namesOnTheTable => 'الأسامي على الترابيزة';
 
   @override
-  String get boardHint => 'حطوا الموبايل وانطلقوا. الشاشة هتفضل منورة لو حد نسي اسم.';
+  String get boardHint =>
+      'حطوا الموبايل وانطلقوا. الشاشة هتفضل منورة لو حد نسي اسم.';
 
   @override
   String get whoWroteWhat => 'مين كتب إيه؟';
@@ -542,13 +564,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get modeClassic => 'الكلاسيك';
 
   @override
-  String get modeClassicDetail => 'نقرا الأسامي بصوت عالي، وبعدين نلعب على الترابيزة.';
+  String get modeClassicDetail =>
+      'نقرا الأسامي بصوت عالي، وبعدين نلعب على الترابيزة.';
 
   @override
   String get modeCelebrity => 'سباق الفرق';
 
   @override
-  String get modeCelebrityDetail => 'الفرق بتسابق الوقت وتخمّن الأسامي: وصف، كلمة واحدة، وبعدين تمثيل.';
+  String get modeCelebrityDetail =>
+      'الفرق بتسابق الوقت وتخمّن الأسامي: وصف، كلمة واحدة، وبعدين تمثيل.';
 
   @override
   String get teams => 'الفرق';
@@ -595,7 +619,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get tapToMove => 'دوس على أي حد عشان تنقله للفريق اللي بعده.';
 
   @override
-  String get teamsChosenNote => 'كل واحد اختار فريقه، واللي ماختارش حطيناه في الفريق الأقل.';
+  String get teamsChosenNote =>
+      'كل واحد اختار فريقه، واللي ماختارش حطيناه في الفريق الأقل.';
 
   @override
   String get letsPlay => 'يلا بينا';
@@ -734,7 +759,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get modeFamily => 'العيلة أونلاين';
 
   @override
-  String get modeFamilyDetail => 'اللعبة الأصلية على موبايلات الكل: خمّن مين كتب إيه، وعيلتك تكبر.';
+  String get modeFamilyDetail =>
+      'اللعبة الأصلية على موبايلات الكل: خمّن مين كتب إيه، وعيلتك تكبر.';
 
   @override
   String get familyChatSwitch => 'دردشة العيلة';
@@ -860,7 +886,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get familyWatching => 'انت بتتفرج المرة دي: محطّتش اسم في الطبق.';
 
   @override
-  String get familyLeaveBody => 'اللعبة هتقفل عند الكل، بس الأسامي هتفضل في الطبق.';
+  String get familyLeaveBody =>
+      'اللعبة هتقفل عند الكل، بس الأسامي هتفضل في الطبق.';
 
   @override
   String get familyErrorNotYourTurn => 'استنى، مش دور عيلتك.';
@@ -925,7 +952,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get familyShowCodeHelp => 'اللي فصل يقدر يمسح الكود ده ويرجع.';
 
   @override
-  String get familyNoAddress => 'الموبايل ده مش على شبكة دلوقتي. شوف الواي فاي أو الهوت سبوت.';
+  String get familyNoAddress =>
+      'الموبايل ده مش على شبكة دلوقتي. شوف الواي فاي أو الهوت سبوت.';
 
   @override
   String get hotspotStopped =>
@@ -945,7 +973,8 @@ class AppLocalizationsAr extends AppLocalizations {
       'خليك على نفس الواي فاي أو الهوت سبوت بتاع اللي فاتح القعدة. أو سكان الكود بتاعه بالكاميرا.';
 
   @override
-  String get cannotLookForGames => 'الموبايل ده مش قادر يدور على ألعاب دلوقتي. سكان كود صاحب القعدة بالكاميرا.';
+  String get cannotLookForGames =>
+      'الموبايل ده مش قادر يدور على ألعاب دلوقتي. سكان كود صاحب القعدة بالكاميرا.';
 
   @override
   String nearbyRoomTitle(String host) {
@@ -980,19 +1009,22 @@ class AppLocalizationsAr extends AppLocalizations {
   String get scanHostCode => 'سكان كود صاحب القعدة';
 
   @override
-  String get scanHostCodeDetail => 'وجه الكاميرا على الكود اللي على موبايل صاحب القعدة.';
+  String get scanHostCodeDetail =>
+      'وجه الكاميرا على الكود اللي على موبايل صاحب القعدة.';
 
   @override
   String get scanHostCodeHint => 'خلي الكود جوه المربع';
 
   @override
-  String get cameraBlocked => 'الكاميرا مقفولة للتطبيق ده. افتحها من الإعدادات، أو اختار لعبة من اللستة.';
+  String get cameraBlocked =>
+      'الكاميرا مقفولة للتطبيق ده. افتحها من الإعدادات، أو اختار لعبة من اللستة.';
 
   @override
   String get cameraFailed => 'الكاميرا مشتغلتش. اختار لعبة من اللستة.';
 
   @override
-  String get notAGameCode => 'ده مش كود لعبة. سكان الكود اللي على شاشة صاحب القعدة.';
+  String get notAGameCode =>
+      'ده مش كود لعبة. سكان الكود اللي على شاشة صاحب القعدة.';
 
   @override
   String get wifiCodeTitle => 'ده الواي فاي بتاع صاحب القعدة';
@@ -1036,7 +1068,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get passSetupTitle => 'عدّي الموبايل';
 
   @override
-  String get passSetupNote => 'مش محتاج تكتب أسامي اللعيبة. كل واحد هيكتب اسمه لما الموبايل يوصله.';
+  String get passSetupNote =>
+      'مش محتاج تكتب أسامي اللعيبة. كل واحد هيكتب اسمه لما الموبايل يوصله.';
 
   @override
   String get passBegin => 'يلا نبدأ';
@@ -1151,7 +1184,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get turnPaused => 'واقفين';
 
   @override
-  String get turnPausedBody => 'الوقت واقف والاسم مستخبي. دوس كمّل لما تبقى جاهز.';
+  String get turnPausedBody =>
+      'الوقت واقف والاسم مستخبي. دوس كمّل لما تبقى جاهز.';
 
   @override
   String carryOnTurn(String team, int seconds) {
@@ -1164,7 +1198,8 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get howToPlayBowl => 'كل الأسامي بتتحط في طبق واحد، والفرق بتلعب بالدور.';
+  String get howToPlayBowl =>
+      'كل الأسامي بتتحط في طبق واحد، والفرق بتلعب بالدور.';
 
   @override
   String get howToPlayTurn =>
@@ -1178,7 +1213,8 @@ class AppLocalizationsAr extends AppLocalizations {
       'لما الطبق يفضى، كل الأسامي ترجع تاني للجولة اللي بعدها بس التلميح أصعب: توصف، بعدين كلمة واحدة، بعدين تمثيل.';
 
   @override
-  String get howToPlayWhy => 'ودي الحلاوة: نفس الأسامي بترجع، فافتكروا اللي اتقال. في الجولة التالتة حركة صغيرة تكفي.';
+  String get howToPlayWhy =>
+      'ودي الحلاوة: نفس الأسامي بترجع، فافتكروا اللي اتقال. في الجولة التالتة حركة صغيرة تكفي.';
 
   @override
   String get howToPlayWin => 'اللي يجمع نقط أكتر بعد 3 جولات يكسب.';
@@ -1200,8 +1236,16 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get removePlayerBody => 'أساميه هتطلع من الطبق. استخدمها لو حد دخل تاني من موبايل جديد وفضل اسمه القديم.';
+  String get removePlayerBody =>
+      'أساميه هتطلع من الطبق. استخدمها لو حد دخل تاني من موبايل جديد وفضل اسمه القديم.';
 
   @override
   String get removePlayer => 'طلّعه';
+
+  @override
+  String get hostingTitle => 'إنت فاتح قعدة';
+
+  @override
+  String get hostingText =>
+      'صحابك بيلعبوا من خلال موبايلك. اقفل القعدة لما تخلّصوا.';
 }
