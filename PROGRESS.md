@@ -65,9 +65,15 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 149 te
 - **While it looks:** the bowl gives a shake every couple of seconds, and the line under it rotates through jokes ("Knocking on the neighbours' doors…", "بنسأل طنط مين فاتح قعدة النهارده…"). With reduced motion on, it stays still.
 - Camera permission was added for Android and iOS.
 
+### New app icon and Play Store assets (branch `claude/project-thread-pzjw84`)
+- New icon: a smiling orange bowl with name slips and a "?" on the app's purple, drawn from vector art in `store/tool/make_assets.mjs` (re-run with `node store/tool/make_assets.mjs`).
+- Android: legacy and round icons for every density, adaptive icon layers, and a monochrome layer for Android 13 themed icons. iOS: every AppIcon size.
+- `store/`: the 512x512 Play icon, the 1024x500 feature graphic, and a 1080x1920 phone screenshot frame. Put real screenshots in `store/screenshots/raw/` and re-run the script to get framed `phone_N.png` files.
+
 ## Remaining
 1. **On a real device:** play the browser family page on 3+ phones over Wi-Fi and on the app's hotspot (polling, chat, voting, the vibration on your turn).
 2. **On a real device:** "Join a game" on a second phone, on home Wi-Fi and on the app's hotspot, including scanning both codes; and "Create hotspot" staying on. The Kotlin changes (multicast lock, hotspot stop, Wi-Fi settings) were not compiled in the cloud session.
+3. **Store listing:** take 2 to 8 real phone screenshots and frame them (see `store/README.md`). Check the new icon on a real launcher.
 
 ## Deferred by you
 - Paid app vs in-app purchase: decide later. No code yet.
@@ -78,4 +84,4 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 149 te
   - Leaving the room while a message (like "Link copied") was up during the new room/lobby switch.
   - Flipping quickly between the hotspot's "Join the Wi-Fi" and "Open the game" steps, or the lobby's network card changing and changing back.
   - Found by a random-tapping test (80 sessions of 400 taps, with and without animations); `test/navigation_test.dart` and `test/core/motion/stage_motion_test.dart` cover each one.
-- Hotspot "fails silently" is handled in its own thread.
+- **Fixed:** "Create hotspot" failing silently (see Join a game, and the hotspot fix, above).
