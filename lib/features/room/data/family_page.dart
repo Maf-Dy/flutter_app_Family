@@ -8,8 +8,9 @@ import 'join_strings.dart';
 /// Static markup with ids; the script fills it from `/game` every 1.5 s, and
 /// only ever writes user text with `textContent`, never as HTML.
 String familyBody(JoinStrings s, String Function(String) esc, {required String hostName}) {
-  final strings = jsonEncode(s.family).replaceAll('</', r'<\/');
-  final host = jsonEncode(hostName).replaceAll('</', r'<\/');
+  // JSON is valid script, as long as nothing in it can close the <script> tag or open a comment.
+  final strings = jsonEncode(s.family).replaceAll('<', r'\u003c');
+  final host = jsonEncode(hostName).replaceAll('<', r'\u003c');
   return '''
     <div class="stack fam">
       <div id="net" class="net" role="status" aria-live="polite" hidden></div>
@@ -18,6 +19,7 @@ String familyBody(JoinStrings s, String Function(String) esc, {required String h
         <h2 id="claimTitle"></h2>
         <p class="help" id="claimHelp"></p>
         <div id="claimList" class="chips"></div>
+        <p id="claimErr" class="error" hidden></p>
       </section>
       <section class="card" id="mineCard">
         <h2 id="mineTitle"></h2>
@@ -84,6 +86,7 @@ select{width:100%;height:50px;border-radius:14px;border:1.5px solid var(--line);
 .fam-line b{font-size:15px}
 .net{position:sticky;top:8px;z-index:5;padding:12px 14px;border-radius:14px;background:#B3261E;color:#fff;font-weight:800;text-align:center}
 .net.ok{background:var(--good)}
+.net.over{background:var(--card);color:var(--ink);border:1px solid var(--line)}
 .chip.away,.away{opacity:.6}
 .chip.away{border-style:dashed}
 .chip.pick{cursor:pointer;background:var(--card);border-color:var(--primary);color:var(--primary);font-size:16px;padding:10px 16px}
@@ -95,10 +98,12 @@ button:disabled{opacity:.5}
 const _script = r'''
 (function(){
   var S = FAMILY_STRINGS, st = null, lastV = '', wasMyTurn = false;
-  var fails = 0, offline = false, okTimer = null, outbox = [], sending = false;
+  var fails = 0, offline = false, okTimer = null, outbox = [], sending = false, loading = false, loadAgain = false;
+  var overShown = false;
   function $(id){ return document.getElementById(id); }
   // Each inserted name is isolated, so an English name inside an Arabic sentence (or the reverse) keeps the word order.
-  function t(key, vars){ var s = S[key] || key; for (var k in vars) s = s.split('{' + k + '}').join('\u2068' + vars[k] + '\u2069'); return s; }
+  function t(key, vars){ var s = S[key] || key; for (var k in vars) s = s.split('{' + k + '}').join(iso(vars[k])); return s; }
+  function iso(text){ return '\u2068' + text + '\u2069'; }
   function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function nameOf(id){ for (var i = 0; i < st.players.length; i++) if (st.players[i].id === id) return st.players[i].name; return ''; }
   function slipOf(id){ for (var i = 0; i < st.slips.length; i++) if (st.slips[i].id === id) return st.slips[i]; return null; }
@@ -128,6 +133,7 @@ const _script = r'''
     var net = $('net');
     if (ok) {
       fails = 0;
+      if (overShown) { overShown = false; show(net, false); }
       if (!offline) return;
       offline = false;
       net.className = 'net ok'; net.textContent = S.backOnline; show(net, true);
@@ -137,6 +143,13 @@ const _script = r'''
     }
     fails++;
     if (fails < 2) return;
+    // Once there is a winner, the host closing the room is the expected end, not a lost connection.
+    if (st && st.winner) {
+      overShown = true;
+      clearTimeout(okTimer);
+      net.className = 'net over'; net.textContent = S.gameOverBye; show(net, true);
+      return;
+    }
     offline = true;
     clearTimeout(okTimer);
     net.className = 'net';
@@ -148,10 +161,15 @@ const _script = r'''
   // While offline, a guess can't be sent, so it can't be lost or sent twice.
   function controls(){ $('go').disabled = offline; }
 
-  function post(path, data){
-    var body = new URLSearchParams(data), err = $('err');
+  function post(path, data, err){
+    var body = new URLSearchParams(data);
+    err = err || $('err');
     return send(path, { method: 'POST', body: body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
-      .then(function(r){ return r.json(); })
+      // The phone did answer, so an empty or garbled reply is an error, not a lost connection.
+      .then(function(r){ return r.text().then(function(text){
+        try { var res = JSON.parse(text); if (res && typeof res === 'object') return res; } catch (e) {}
+        return { error: r.ok ? null : 'generic' };
+      }); })
       .then(function(res){
         if (res.error) { err.textContent = S['err_' + res.error] || S.err_generic; show(err, true); }
         else show(err, false);
@@ -161,10 +179,11 @@ const _script = r'''
   }
 
   // Messages typed while offline wait here, in order, and go out once the phone is back.
+  // Each carries its own id, so a resend of one that did arrive isn't posted twice.
   function flush(){
     if (sending || offline || !outbox.length) return;
     sending = true;
-    send('/game/say', { method: 'POST', body: new URLSearchParams({ text: outbox[0] }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+    send('/game/say', { method: 'POST', body: new URLSearchParams({ text: outbox[0].text, cid: outbox[0].cid }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
       .then(function(){ outbox.shift(); sending = false; load(); flush(); }, function(){ sending = false; renderChat(); });
   }
 
@@ -172,22 +191,25 @@ const _script = r'''
     if (!st || !st.me || !st.chatOn) return;
     var chat = $('chat'), atBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 40;
     clear(chat);
-    st.chat.forEach(function(m){ var b = el('div', 'msg' + (m.author === st.me ? ' me' : '')); b.appendChild(el('b', '', nameOf(m.author))); b.appendChild(document.createTextNode(m.text)); chat.appendChild(b); });
-    outbox.forEach(function(text){ var b = el('div', 'msg me pending'); b.appendChild(el('b', '', nameOf(st.me))); b.appendChild(document.createTextNode(text)); b.appendChild(el('i', '', S.sending)); chat.appendChild(b); });
+    // Each message reads in its own direction, whatever the page's.
+    function bubble(cls, author, text){ var b = el('div', cls); b.appendChild(el('b', '', author)).dir = 'auto'; b.appendChild(el('div', '', text)).dir = 'auto'; chat.appendChild(b); return b; }
+    st.chat.forEach(function(m){ bubble('msg' + (m.author === st.me ? ' me' : ''), nameOf(m.author), m.text); });
+    outbox.forEach(function(m){ bubble('msg me pending', nameOf(st.me), m.text).appendChild(el('i', '', S.sending)); });
     if (atBottom) chat.scrollTop = chat.scrollHeight;
   }
 
   function isAway(id){ return st.away.indexOf(id) >= 0; }
   function familyAway(head){ var any = false, all = true; st.players.forEach(function(p){ if (p.head === head) { any = true; if (!isAway(p.id)) all = false; } }); return any && all; }
-  function nameTag(id){ return nameOf(id) + (isAway(id) ? ' · ' + S.offline : ''); }
+  function nameTag(id){ return iso(nameOf(id)) + (isAway(id) ? ' · ' + S.offline : ''); }
 
   function renderClaim(){
     var card = $('claimCard'), mine = st.myClaim;
     var open = !st.me && !st.winner && (st.claimable.length > 0 || !!mine);
     show(card, open);
     if (!open) return;
-    var list = $('claimList'); clear(list);
+    var list = $('claimList'), err = $('claimErr'); clear(list);
     if (mine && mine.status === 'pending') {
+      show(err, false);
       $('claimTitle').textContent = t('claimPending', { host: HOST, name: nameOf(mine.player) });
       show($('claimHelp'), false);
       return;
@@ -198,7 +220,7 @@ const _script = r'''
     st.claimable.forEach(function(p){
       var b = el('button', 'chip pick', p.name);
       b.type = 'button';
-      b.onclick = function(){ post('/game/claim', { player: p.id }); };
+      b.onclick = function(){ post('/game/claim', { player: p.id }, err); };
       list.appendChild(b);
     });
   }
@@ -228,7 +250,7 @@ const _script = r'''
     if (me) {
       $('mineTitle').textContent = me === mine ? S.yourFamily : t('familyOf', { name: nameOf(mine) });
       var box = $('mine'); clear(box);
-      st.players.forEach(function(p){ if (p.head === mine) box.appendChild(el('span', 'chip' + (p.id === mine ? ' head' : '') + (isAway(p.id) ? ' away' : ''), (p.id === mine ? '👑 ' : '') + p.name + (p.id === me ? ' ' + S.youTag : '') + (isAway(p.id) ? ' · ' + S.offline : ''))); });
+      st.players.forEach(function(p){ if (p.head === mine) box.appendChild(el('span', 'chip' + (p.id === mine ? ' head' : '') + (isAway(p.id) ? ' away' : ''), (p.id === mine ? '👑 ' : '') + iso(p.name) + (p.id === me ? ' ' + S.youTag : '') + (isAway(p.id) ? ' · ' + S.offline : ''))); });
 
       fill($('who'), st.players.filter(function(p){ return p.head !== mine && !caught(p.id); }).map(function(p){ return { value: p.id, label: p.name }; }));
       fill($('which'), st.slips.filter(function(x){ return x.writer == null; }).map(function(x){ return { value: String(x.id), label: x.text }; }));
@@ -268,7 +290,7 @@ const _script = r'''
       fams.appendChild(line);
     });
     var names = $('names'); clear(names);
-    st.slips.forEach(function(x){ names.appendChild(el('span', 'chip slip' + (x.writer ? ' done' : ''), x.text + (x.writer ? ' · ' + nameOf(x.writer) : ''))); });
+    st.slips.forEach(function(x){ names.appendChild(el('span', 'chip slip' + (x.writer ? ' done' : ''), iso(x.text) + (x.writer ? ' · ' + iso(nameOf(x.writer)) : ''))); });
     var events = $('events'); clear(events);
     st.events.forEach(function(e){
       var slip = slipOf(e.slip), vars = { asker: nameOf(e.asker), target: nameOf(e.target), slip: slip ? slip.text : '' };
@@ -276,14 +298,28 @@ const _script = r'''
     });
   }
 
+  // One call at a time, so a slow answer can't land after a newer one and draw an older game.
   function load(){
-    return send('/game', { cache: 'no-store' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(s){
+    if (loading) { loadAgain = true; return; }
+    loading = true; loadAgain = false;
+    send('/game', { cache: 'no-store' }).then(function(r){
+      // No game any more: the host went back to the room or started a new round.
+      if (r.status === 404) { location.replace('/'); return null; }
+      return r.ok ? r.json() : null;
+    }).then(function(s){
       if (!s) return;
+      // Answers arrive in order, so an older version means the host started a new game.
+      if (st && s.v < st.v) { location.replace('/'); return; }
       st = s;
       // The claim status is per phone, so it redraws the page too.
       var v = s.v + ':' + (s.me || '') + ':' + (s.myClaim ? s.myClaim.status : '');
       if (v !== lastV) { lastV = v; render(); }
-    }).catch(function(){});
+      // Reachable again: send what's waiting, even if the drop was too short to show as offline.
+      flush();
+    }).catch(function(){}).then(function(){
+      loading = false;
+      if (loadAgain) load();
+    });
   }
 
   $('go').onclick = function(){
@@ -298,7 +334,7 @@ const _script = r'''
     var input = $('msg'), text = input.value.trim();
     if (!text) return;
     input.value = '';
-    outbox.push(text);
+    outbox.push({ text: text, cid: Date.now().toString(36) + Math.random().toString(36).slice(2, 10) });
     renderChat();
     flush();
   };
