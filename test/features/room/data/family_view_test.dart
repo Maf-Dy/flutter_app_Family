@@ -73,4 +73,17 @@ void main() {
     expect(view['chatOn'], isFalse);
     expect(view['chat'], isEmpty);
   });
+
+  test('phones see who dropped out, who asks, and how a seat ask is going', () {
+    final game = midGame().withAway({'a'});
+    final nour = familyViewFor(game, 'b');
+    expect(nour['away'], ['a']);
+    expect(nour['canAsk'], game.turn == 'a', reason: 'Nour asks for Omar while he is away');
+    expect(nour['claimable'], isEmpty, reason: 'players already have a seat');
+
+    final stranger = familyViewFor(game.claimSeat('x', 'a'), 'x');
+    expect(listOf(stranger, 'claimable').single['name'], 'Omar');
+    expect(stranger['myClaim'], {'player': 'a', 'status': 'pending'});
+    expect(familyViewFor(game.claimSeat('x', 'a'), 'y')['myClaim'], isNull, reason: 'each phone sees only its own ask');
+  });
 }

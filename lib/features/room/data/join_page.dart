@@ -104,8 +104,12 @@ abstract final class JoinPage {
 
   /// The family game, played on every friend's phone. Friends who didn't put
   /// names in this round watch the board.
-  static String family(Room room, JoinStrings s, Player? player) =>
-      _layout(room: room, s: s, player: player, body: familyBody(s, _esc));
+  static String family(Room room, JoinStrings s, Player? player) => _layout(
+    room: room,
+    s: s,
+    player: player,
+    body: familyBody(s, _esc, hostName: room.hostName),
+  );
 
   static String full(Room room, JoinStrings s) => _layout(
     room: room,

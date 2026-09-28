@@ -228,4 +228,81 @@ void main() {
       expect(find.text('دور جديد، نفس القعدة'), findsOneWidget);
     });
   }
+
+  group('when phones drop out', () {
+    void away(Set<String> ids) => friendMove((g) => g.withAway(ids));
+
+    testWidgets('the host lets a friend on a new phone back in, and can turn a stranger away', (tester) async {
+      await pumpApp(tester, size: sizes['portrait']!);
+      await openFamilyRoom(tester);
+      away({'a'});
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.wifi_off_rounded), findsWidgets, reason: 'Omar is marked offline');
+
+      friendMove((g) => g.claimSeat('x', 'a'));
+      await tester.pumpAndSettle();
+      expect(find.text('Someone wants back in as Omar'), findsOneWidget);
+      await tapVisible(tester, find.text('Let them in'));
+      expect(host.room.family!.claimOf('x')!.status, ClaimStatus.approved);
+      expect(find.text('Someone wants back in as Omar'), findsNothing);
+
+      friendMove((g) => g.claimSeat('y', 'a'));
+      await tester.pumpAndSettle();
+      await tapVisible(tester, find.text('Not them'));
+      expect(host.room.family!.claimOf('y')!.status, ClaimStatus.denied);
+    });
+
+    testWidgets('a family whose phones all dropped can be skipped, never automatically', (tester) async {
+      await pumpApp(tester, size: sizes['portrait']!);
+      await openFamilyRoom(tester);
+      var game = host.room.family!;
+      if (game.turn == Player.hostId) {
+        // The host asks Omar wrongly, which hands Omar the turn.
+        await pick<String>(tester, 'Omar');
+        await pick<int>(tester, 'Fairuz');
+        await tapVisible(tester, find.text('Ask!'));
+        game = host.room.family!;
+      }
+      final stuck = game.turn;
+      away({stuck});
+      await tester.pumpAndSettle();
+      expect(find.text("${game.nameOf(stuck)}'s family is offline."), findsOneWidget);
+      expect(host.room.family!.turn, stuck, reason: 'nobody is skipped by the app itself');
+      await tapVisible(tester, find.text('Skip their turn'));
+      expect(host.room.family!.turn, isNot(stuck));
+      expect(find.text('Skip their turn'), findsNothing);
+    });
+
+    testWidgets('the host asks for their family while its head is offline', (tester) async {
+      await pumpApp(tester, size: sizes['portrait']!);
+      await openFamilyRoom(tester);
+      // Omar catches the host, so the host is in Omar's family, and it's Omar's turn again.
+      var game = host.room.family!;
+      if (game.turn != 'a') {
+        friendMove((g) => g.guess(g.turn, 'a', slipOf(g.turn == 'b' ? Player.hostId : 'b')));
+        game = host.room.family!;
+      }
+      friendMove((g) => g.guess('a', Player.hostId, slipOf(Player.hostId)));
+      await tester.pumpAndSettle();
+      expect(find.text('Ask!'), findsNothing);
+
+      away({'a'});
+      await tester.pumpAndSettle();
+      expect(find.text("Your family's turn! Omar is offline, so you ask."), findsOneWidget);
+      await pick<String>(tester, 'Nour');
+      await pick<int>(tester, 'Fairuz');
+      await tapVisible(tester, find.text('Ask!'));
+      expect(host.room.family!.isOver, isTrue);
+      expect(host.room.family!.winner, 'a', reason: 'the family is still Omar\'s');
+    });
+
+    testWidgets('the join code is one tap away, for anyone who has to scan back in', (tester) async {
+      await pumpApp(tester, size: sizes['portrait']!);
+      await openFamilyRoom(tester);
+      await tester.tap(find.byTooltip('Show the join code'));
+      await tester.pumpAndSettle();
+      expect(find.text('Anyone who dropped out can scan this to get back in.'), findsOneWidget);
+      expect(find.text(host.room.code), findsOneWidget);
+    });
+  });
 }

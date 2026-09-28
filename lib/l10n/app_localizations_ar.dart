@@ -887,6 +887,50 @@ class AppLocalizationsAr extends AppLocalizations {
   String get familyErrorEmptyMessage => 'اكتب حاجة الأول.';
 
   @override
+  String get familyOffline => 'فاصل';
+
+  @override
+  String familyActingHead(String name) {
+    return 'دور عيلتك! $name فاصل، فانت اللي هتسأل.';
+  }
+
+  @override
+  String familyAwayTurn(String name) {
+    return 'عيلة $name فاصلة.';
+  }
+
+  @override
+  String get familyAwayTurnHelp => 'استنوهم يرجعوا، أو عدّي دورهم.';
+
+  @override
+  String get familySkipTurn => 'عدّي دورهم';
+
+  @override
+  String familyClaimTitle(String name) {
+    return 'في حد عايز يرجع باسم $name';
+  }
+
+  @override
+  String familyClaimBody(String name) {
+    return 'موبايله أو المتصفح اتغيّر. دخّله بس لو هو فعلًا $name.';
+  }
+
+  @override
+  String get familyClaimAllow => 'دخّله';
+
+  @override
+  String get familyClaimDeny => 'مش هو';
+
+  @override
+  String get familyShowCode => 'ورّي كود الدخول';
+
+  @override
+  String get familyShowCodeHelp => 'اللي فصل يقدر يمسح الكود ده ويرجع.';
+
+  @override
+  String get familyNoAddress => 'الموبايل ده مش على شبكة دلوقتي. شوف الواي فاي أو الهوت سبوت.';
+
+  @override
   String get hotspotStopped =>
       'الموبايل قفل الهوت سبوت. ده بيحصل لما تخرج من التطبيق. دوس اعمل هوت سبوت تاني، وصحابك يسكانوا كود الواي فاي الجديد.';
 
@@ -1025,7 +1069,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String passErrorNameTaken(String name) {
-    return '$name موجود خلاص. زوّد حرف، زي \"$name م\".';
+    return '$name موجود خلاص. زوّد حرف، زي «$name م».';
   }
 
   @override
@@ -1035,7 +1079,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get passErrorTooLong => 'ده طويل أوي. اختصر شوية.';
 
   @override
-  String get passErrorFull => 'الطبق اتملى: ٣٠ لاعب بالكتير.';
+  String get passErrorFull => 'الطبق اتملى: 30 لاعب بالكتير.';
 
   @override
   String passNamesIn(String name) {

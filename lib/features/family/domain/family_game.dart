@@ -57,6 +57,22 @@ final class GuessEvent {
   final bool correct;
 }
 
+enum ClaimStatus { pending, approved, denied }
+
+/// Someone on a new phone or browser asking to take back the seat of a player
+/// whose phone dropped out. The host decides.
+@immutable
+final class SeatClaim {
+  const SeatClaim({required this.clientId, required this.playerId, this.status = ClaimStatus.pending});
+
+  /// The browser asking. Never shown to other phones.
+  final String clientId;
+
+  /// The player whose seat they want back.
+  final String playerId;
+  final ClaimStatus status;
+}
+
 enum FamilyActionError {
   gameOver,
   notYourTurn,
@@ -93,6 +109,8 @@ final class FamilyGame {
     required this.events,
     required this.chatEnabled,
     required this.version,
+    this.away = const {},
+    this.claims = const [],
   });
 
   factory FamilyGame.start({
@@ -137,6 +155,14 @@ final class FamilyGame {
   final List<GuessEvent> events;
   final bool chatEnabled;
   final int version;
+
+  /// Players whose phone hasn't been heard from for a few seconds.
+  final Set<String> away;
+
+  /// Requests to take back a dropped player's seat, oldest first.
+  final List<SeatClaim> claims;
+
+  static const maxClaims = 10;
 
   String headOf(String playerId) => heads[playerId] ?? playerId;
 
@@ -185,6 +211,23 @@ final class FamilyGame {
       if (!isCaught(p.id)) p,
   ];
 
+  bool isAway(String playerId) => away.contains(playerId);
+
+  /// Whether everyone in the family headed by [head] has dropped out.
+  bool familyAway(String head) {
+    final members = membersOf(head);
+    return members.isNotEmpty && members.every(away.contains);
+  }
+
+  /// Whether [playerId] makes the guess now: the head on their family's turn,
+  /// or any member still here when the head's phone has dropped out.
+  bool canAsk(String playerId) {
+    if (isOver || player(playerId) == null) return false;
+    final family = headOf(playerId);
+    if (turn != family) return false;
+    return family == playerId || (away.contains(family) && !away.contains(playerId));
+  }
+
   FamilyActionError? _checkPick(String family, String targetId, int slipId) {
     if (isOver) return FamilyActionError.gameOver;
     if (player(targetId) == null || headOf(targetId) == family) return FamilyActionError.invalidTarget;
@@ -195,24 +238,25 @@ final class FamilyGame {
   /// Why [askerId] can't make this guess right now, or null when they can.
   FamilyActionError? checkGuess(String askerId, String targetId, int slipId) {
     if (isOver) return FamilyActionError.gameOver;
-    if (headOf(askerId) != askerId) return FamilyActionError.notHead;
-    if (turn != askerId) return FamilyActionError.notYourTurn;
-    return _checkPick(askerId, targetId, slipId);
+    if (turn != headOf(askerId)) return FamilyActionError.notYourTurn;
+    if (!canAsk(askerId)) return FamilyActionError.notHead;
+    return _checkPick(turn, targetId, slipId);
   }
 
-  /// The head's guess. Check with [checkGuess] first.
+  /// The guess for the family whose turn it is. Check with [checkGuess] first.
   FamilyGame guess(String askerId, String targetId, int slipId) {
     if (checkGuess(askerId, targetId, slipId) != null) return this;
+    final family = turn;
     // Duplicate names are allowed, so any hidden slip with the same text counts.
     final asked = slips[slipId].text.toLowerCase();
     final correct = hiddenSlips.any((s) => s.writerId == targetId && s.text.toLowerCase() == asked);
     final event = GuessEvent(askerId: askerId, targetId: targetId, slipId: slipId, correct: correct);
     if (!correct) {
-      return _copy(turn: headOf(targetId), events: [...events, event], suggestions: {...suggestions}..remove(askerId));
+      return _copy(turn: headOf(targetId), events: [...events, event], suggestions: {...suggestions}..remove(family));
     }
     final caught = headOf(targetId);
     return _copy(
-      heads: {for (final MapEntry(:key, :value) in heads.entries) key: value == caught ? askerId : value},
+      heads: {for (final MapEntry(:key, :value) in heads.entries) key: value == caught ? family : value},
       revealed: {
         ...revealed,
         for (final s in slips)
@@ -221,11 +265,11 @@ final class FamilyGame {
       events: [...events, event],
       // The merged family starts planning afresh, and reads both families' chat.
       suggestions: {...suggestions}
-        ..remove(askerId)
+        ..remove(family)
         ..remove(caught),
       chat: [
         for (final m in chat)
-          m.familyHead == caught ? ChatMessage(id: m.id, familyHead: askerId, authorId: m.authorId, text: m.text) : m,
+          m.familyHead == caught ? ChatMessage(id: m.id, familyHead: family, authorId: m.authorId, text: m.text) : m,
       ],
     );
   }
@@ -307,6 +351,82 @@ final class FamilyGame {
       if (m.familyHead == head) m,
   ];
 
+  /// Who has dropped out. Returns this game unchanged when nothing changed.
+  FamilyGame withAway(Set<String> ids) {
+    final next = {
+      for (final id in ids)
+        if (player(id) != null) id,
+    };
+    if (next.length == away.length && next.every(away.contains)) return this;
+    return _copy(away: next);
+  }
+
+  /// Passes the turn on from a family whose phones have all dropped out.
+  /// Only the host can do this; the game never skips anyone by itself.
+  FamilyGame skipTurn() {
+    if (isOver || !familyAway(turn)) return this;
+    final order = familyHeads;
+    final next = order[(order.indexOf(turn) + 1) % order.length];
+    return _copy(turn: next, suggestions: {...suggestions}..remove(turn));
+  }
+
+  /// Players whose seat someone may ask for: dropped out, and not the host's phone.
+  List<FamilyPlayer> get claimable => [
+    for (final p in players)
+      if (away.contains(p.id)) p,
+  ];
+
+  SeatClaim? claimOf(String clientId) {
+    for (final c in claims) {
+      if (c.clientId == clientId) return c;
+    }
+    return null;
+  }
+
+  /// [clientId] asks to take back [playerId]'s seat. Replaces any earlier ask from the same browser.
+  FamilyGame claimSeat(String clientId, String playerId) {
+    if (isOver || player(clientId) != null || !away.contains(playerId)) return this;
+    final others = [
+      for (final c in claims)
+        if (c.clientId != clientId) c,
+    ];
+    final all = [...others, SeatClaim(clientId: clientId, playerId: playerId)];
+    return _copy(claims: all.length > maxClaims ? all.sublist(all.length - maxClaims) : all);
+  }
+
+  /// The host lets [clientId] back in, or turns them away.
+  FamilyGame resolveClaim(String clientId, {required bool approve}) {
+    final claim = claimOf(clientId);
+    if (claim == null || claim.status != ClaimStatus.pending) return this;
+    return _copy(
+      claims: [
+        for (final c in claims)
+          c.clientId == clientId
+              ? SeatClaim(
+                  clientId: c.clientId,
+                  playerId: c.playerId,
+                  status: approve ? ClaimStatus.approved : ClaimStatus.denied,
+                )
+              : c,
+      ],
+    );
+  }
+
+  /// Forgets [clientId]'s ask, once the seat was handed over.
+  FamilyGame dropClaim(String clientId) => claimOf(clientId) == null
+      ? this
+      : _copy(
+          claims: [
+            for (final c in claims)
+              if (c.clientId != clientId) c,
+          ],
+        );
+
+  List<SeatClaim> get pendingClaims => [
+    for (final c in claims)
+      if (c.status == ClaimStatus.pending) c,
+  ];
+
   FamilyGame _copy({
     Map<String, String>? heads,
     String? turn,
@@ -314,6 +434,8 @@ final class FamilyGame {
     Map<String, List<Suggestion>>? suggestions,
     List<ChatMessage>? chat,
     List<GuessEvent>? events,
+    Set<String>? away,
+    List<SeatClaim>? claims,
   }) => FamilyGame._(
     players: players,
     slips: slips,
@@ -325,5 +447,7 @@ final class FamilyGame {
     events: events == null ? this.events : List.unmodifiable(events),
     chatEnabled: chatEnabled,
     version: version + 1,
+    away: away == null ? this.away : Set.unmodifiable(away),
+    claims: claims == null ? this.claims : List.unmodifiable(claims),
   );
 }

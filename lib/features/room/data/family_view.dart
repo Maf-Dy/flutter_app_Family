@@ -2,14 +2,26 @@ import '../../family/domain/family_game.dart';
 
 /// The family game as one phone may see it: everything public, plus its own
 /// family's ideas and chat. Who wrote a name only shows once it is revealed.
+///
+/// [playerId] is the phone's id; for someone not in the game it is only used
+/// to tell them how their ask for a dropped player's seat is going.
 Map<String, Object?> familyViewFor(FamilyGame game, String? playerId) {
   final inGame = playerId != null && game.player(playerId) != null;
   final myHead = inGame ? game.headOf(playerId) : null;
+  final claim = inGame || playerId == null ? null : game.claimOf(playerId);
   return {
     'v': game.version,
     'me': inGame ? playerId : null,
     'myHead': myHead,
+    'canAsk': inGame && game.canAsk(playerId),
     'turn': game.turn,
+    'away': [...game.away],
+    'claimable': inGame || game.isOver
+        ? const <Object?>[]
+        : [
+            for (final p in game.claimable) {'id': p.id, 'name': p.name},
+          ],
+    'myClaim': claim == null ? null : {'player': claim.playerId, 'status': claim.status.name},
     'winner': game.winner,
     'chatOn': game.chatEnabled,
     'players': [

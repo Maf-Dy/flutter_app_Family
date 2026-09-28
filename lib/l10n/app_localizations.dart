@@ -1580,6 +1580,78 @@ abstract class AppLocalizations {
   /// **'Write something first.'**
   String get familyErrorEmptyMessage;
 
+  /// No description provided for @familyOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'offline'**
+  String get familyOffline;
+
+  /// No description provided for @familyActingHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Your family\'s turn! {name} is offline, so you ask.'**
+  String familyActingHead(String name);
+
+  /// No description provided for @familyAwayTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s family is offline.'**
+  String familyAwayTurn(String name);
+
+  /// No description provided for @familyAwayTurnHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait for them to come back, or skip their turn.'**
+  String get familyAwayTurnHelp;
+
+  /// No description provided for @familySkipTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip their turn'**
+  String get familySkipTurn;
+
+  /// No description provided for @familyClaimTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone wants back in as {name}'**
+  String familyClaimTitle(String name);
+
+  /// No description provided for @familyClaimBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Their phone or browser changed. Only let them in if it\'s really {name}.'**
+  String familyClaimBody(String name);
+
+  /// No description provided for @familyClaimAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Let them in'**
+  String get familyClaimAllow;
+
+  /// No description provided for @familyClaimDeny.
+  ///
+  /// In en, this message translates to:
+  /// **'Not them'**
+  String get familyClaimDeny;
+
+  /// No description provided for @familyShowCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Show the join code'**
+  String get familyShowCode;
+
+  /// No description provided for @familyShowCodeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Anyone who dropped out can scan this to get back in.'**
+  String get familyShowCodeHelp;
+
+  /// No description provided for @familyNoAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'This phone isn\'t on a network right now. Check the Wi-Fi or hotspot.'**
+  String get familyNoAddress;
+
   /// No description provided for @hotspotStopped.
   ///
   /// In en, this message translates to:

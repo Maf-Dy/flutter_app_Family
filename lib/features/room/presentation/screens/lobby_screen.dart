@@ -231,6 +231,15 @@ class LobbyScreen extends StatelessWidget {
             // The host plays only if their own name went in.
             me: (room.host?.hasSubmitted ?? false) ? Player.hostId : null,
             joinOrder: [for (final p in room.players) p.id],
+            joinCodes: (context) => BlocProvider.value(
+              value: cubit,
+              child: BlocBuilder<RoomCubit, RoomState>(
+                builder: (context, state) => switch (state.room) {
+                  final room? => _connectionSection(context, state, room),
+                  null => const SizedBox.shrink(),
+                },
+              ),
+            ),
           ),
         ),
         null => null,

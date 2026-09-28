@@ -164,6 +164,19 @@ final class EnglishJoinStrings extends JoinStrings {
     'err_chatOff': 'Chat is off in this room.',
     'err_emptyMessage': 'Write something first.',
     'err_notPlaying': 'You’re watching this game. Join the next round!',
+    'err_offline': 'Didn’t go through. Check your Wi-Fi and try again.',
+    'offline': 'offline',
+    'reconnecting': 'Reconnecting… Your game is safe.',
+    'stillOffline':
+        'Still can’t reach {host}’s phone. Check you’re on the same Wi-Fi. If {host} changed Wi-Fi, scan the new code.',
+    'backOnline': 'You’re back in the game!',
+    'actingHead': 'Your family’s turn! {name} is offline, so you ask.',
+    'familyAway': '{name}’s family is offline. Waiting for them, or for {host} to skip their turn.',
+    'claimTitle': 'Were you playing? Tap your name.',
+    'claimHelp': '{host} will be asked to let you back in.',
+    'claimPending': 'Waiting for {host} to let you back in as {name}…',
+    'claimDenied': '{host} said no. You can watch this game.',
+    'sending': 'sending…',
   };
 }
 
@@ -290,5 +303,18 @@ final class ArabicJoinStrings extends JoinStrings {
     'err_chatOff': 'الدردشة مقفولة في القعدة دي.',
     'err_emptyMessage': 'اكتب حاجة الأول.',
     'err_notPlaying': 'انت بتتفرج المرة دي. ادخل الدور الجاي!',
+    'err_offline': 'موصلتش. اتأكد من الواي فاي وجرّب تاني.',
+    'offline': 'فاصل',
+    'reconnecting': 'بنرجّع الاتصال… لعبتك في أمان.',
+    'stillOffline':
+        'لسه مش واصلين لموبايل {host}. اتأكد إنك على نفس الواي فاي. لو {host} غيّر الواي فاي، امسح الكود الجديد.',
+    'backOnline': 'رجعت اللعبة تاني!',
+    'actingHead': 'دور عيلتك! {name} فاصل، فانت اللي هتسأل.',
+    'familyAway': 'عيلة {name} فاصلة. مستنيينهم يرجعوا، أو {host} يعدّي دورهم.',
+    'claimTitle': 'كنت بتلعب؟ دوس على اسمك.',
+    'claimHelp': 'هنسأل {host} يدخّلك تاني.',
+    'claimPending': 'مستنيين {host} يرجّعك باسم {name}…',
+    'claimDenied': '{host} قال لأ. تقدر تتفرج على اللعبة دي.',
+    'sending': 'بيتبعت…',
   };
 }

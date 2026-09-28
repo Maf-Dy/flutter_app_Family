@@ -33,6 +33,13 @@ class FamilyCubit extends Cubit<FamilyGame> {
 
   FamilyActionError? unvote() => _move((_, _) => null, (g, me) => g.unvote(me));
 
+  /// Passes the turn on from a family whose phones all dropped out. The host decides, even when only watching.
+  void skipTurn() => _table.apply((game) => game.skipTurn());
+
+  /// Lets someone on a new phone back in as a dropped player, or turns them away.
+  void resolveClaim(String clientId, {required bool approve}) =>
+      _table.apply((game) => game.resolveClaim(clientId, approve: approve));
+
   FamilyActionError? say(String text) => _move((g, me) => g.checkMessage(me, text), (g, me) => g.say(me, text));
 
   FamilyActionError? _move(

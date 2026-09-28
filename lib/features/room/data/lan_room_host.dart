@@ -5,6 +5,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
+import '../../family/domain/family_game.dart';
 import '../domain/room.dart';
 import '../domain/room_host.dart';
 import 'join_page.dart';
@@ -16,16 +17,33 @@ import 'family_view.dart';
 /// Listens on every IPv4 interface, so the same server keeps working when the
 /// phone moves between Wi-Fi, its own hotspot, or the hotspot the app creates.
 class LanRoomHost implements RoomHost {
-  LanRoomHost({this.preferredPort = 8182, Random? random}) : _random = random ?? Random.secure();
+  LanRoomHost({
+    this.preferredPort = 8182,
+    Random? random,
+    DateTime Function()? clock,
+    this.awayAfter = const Duration(seconds: 6),
+    this.presenceTick = const Duration(seconds: 1),
+  }) : _random = random ?? Random.secure(),
+       _clock = clock ?? DateTime.now;
 
   static const cookieName = 'family_id';
   static const _maxBodyBytes = 8 * 1024;
 
   final int preferredPort;
   final Random _random;
+  final DateTime Function() _clock;
+
+  /// How long a friend's phone can go quiet before the game shows them as offline.
+  /// Their page asks for news every 1.5 s, so this is a few missed calls.
+  final Duration awayAfter;
+  final Duration presenceTick;
   final _changes = StreamController<Room>.broadcast();
   HttpServer? _server;
+  Timer? _presence;
   late Room _room;
+
+  /// When each friend's phone was last heard from.
+  final _seen = <String, DateTime>{};
 
   @override
   Room get room => _room;
@@ -39,6 +57,7 @@ class LanRoomHost implements RoomHost {
     final server = await _bind();
     _server = server;
     server.listen(_handle, onError: (Object error) => debugPrint('LanRoomHost: $error'));
+    _presence = Timer.periodic(presenceTick, (_) => checkPresence());
     return server.port;
   }
 
@@ -68,6 +87,8 @@ class LanRoomHost implements RoomHost {
   Future<void> close() async {
     final server = _server;
     _server = null;
+    _presence?.cancel();
+    _presence = null;
     await server?.close(force: true);
     // Not awaited: a broadcast controller's close completes only once every
     // listener has seen "done", and a listener mid-cancel would stall shutdown.
@@ -77,14 +98,12 @@ class LanRoomHost implements RoomHost {
   Future<void> _handle(HttpRequest request) async {
     final response = request.response;
     try {
-      final clientId = _clientIdOf(request);
+      var clientId = _clientIdOf(request);
       if (clientId == null) {
-        response.cookies.add(
-          Cookie(cookieName, _newClientId())
-            ..httpOnly = true
-            ..sameSite = SameSite.lax
-            ..path = '/',
-        );
+        response.cookies.add(_cookie(_newClientId()));
+      } else {
+        clientId = _takeBackSeat(clientId, response);
+        _heardFrom(clientId);
       }
       final player = clientId == null ? null : _room.playerById(clientId);
       final strings = JoinStrings.forAcceptLanguage(request.headers.value(HttpHeaders.acceptLanguageHeader));
@@ -107,6 +126,8 @@ class LanRoomHost implements RoomHost {
           }
         case ('POST', '/game/guess' || '/game/suggest' || '/game/unvote' || '/game/say'):
           await _familyAction(request, clientId, request.uri.pathSegments.last);
+        case ('POST', '/game/claim'):
+          await _claim(request, clientId);
         case ('GET', '/favicon.ico'):
           response.statusCode = HttpStatus.noContent;
         default:
@@ -182,6 +203,61 @@ class LanRoomHost implements RoomHost {
     if (error == null) _set(_room.withFamily(next));
     response.statusCode = error == null ? HttpStatus.ok : HttpStatus.conflict;
     _json(response, {'error': error?.name});
+  }
+
+  Cookie _cookie(String value) => Cookie(cookieName, value)
+    ..httpOnly = true
+    ..sameSite = SameSite.lax
+    ..path = '/';
+
+  /// Once the host lets a new browser back in as a dropped player, it gets that
+  /// player's id, so from now on it simply is them.
+  String _takeBackSeat(String clientId, HttpResponse response) {
+    final game = _room.family;
+    final claim = game?.claimOf(clientId);
+    if (game == null || claim == null || claim.status != ClaimStatus.approved) return clientId;
+    response.cookies.add(_cookie(claim.playerId));
+    _set(_room.withFamily(game.dropClaim(clientId)));
+    return claim.playerId;
+  }
+
+  void _heardFrom(String clientId) {
+    final game = _room.family;
+    if (game == null || game.player(clientId) == null) return;
+    _seen[clientId] = _clock();
+    if (game.isAway(clientId)) _set(_room.withFamily(game.withAway({...game.away}..remove(clientId))));
+  }
+
+  /// Marks friends whose phones have gone quiet as offline, so the game can
+  /// work around them. The host's own phone is the server, so it never drops.
+  @visibleForTesting
+  void checkPresence() {
+    final game = _room.family;
+    if (game == null) return;
+    final now = _clock();
+    final away = <String>{};
+    for (final p in game.players) {
+      if (p.id == Player.hostId) continue;
+      final seen = _seen.putIfAbsent(p.id, () => now);
+      if (now.difference(seen) > awayAfter) away.add(p.id);
+    }
+    final next = game.withAway(away);
+    if (!identical(next, game)) _set(_room.withFamily(next));
+  }
+
+  /// Someone not in the game asks for a dropped player's seat; the host decides.
+  Future<void> _claim(HttpRequest request, String? clientId) async {
+    final response = request.response;
+    final form = await _readForm(request);
+    final game = _room.family;
+    final playerId = form?['player'] ?? '';
+    if (game == null || clientId == null || game.player(clientId) != null || !game.isAway(playerId)) {
+      response.statusCode = HttpStatus.conflict;
+      _json(response, {'error': 'invalidTarget'});
+      return;
+    }
+    _set(_room.withFamily(game.claimSeat(clientId, playerId)));
+    _json(response, {'error': null});
   }
 
   void _json(HttpResponse response, Object? body) {

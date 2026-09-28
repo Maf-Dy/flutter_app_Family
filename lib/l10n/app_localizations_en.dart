@@ -873,6 +873,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyErrorEmptyMessage => 'Write something first.';
 
   @override
+  String get familyOffline => 'offline';
+
+  @override
+  String familyActingHead(String name) {
+    return 'Your family\'s turn! $name is offline, so you ask.';
+  }
+
+  @override
+  String familyAwayTurn(String name) {
+    return '$name\'s family is offline.';
+  }
+
+  @override
+  String get familyAwayTurnHelp => 'Wait for them to come back, or skip their turn.';
+
+  @override
+  String get familySkipTurn => 'Skip their turn';
+
+  @override
+  String familyClaimTitle(String name) {
+    return 'Someone wants back in as $name';
+  }
+
+  @override
+  String familyClaimBody(String name) {
+    return 'Their phone or browser changed. Only let them in if it\'s really $name.';
+  }
+
+  @override
+  String get familyClaimAllow => 'Let them in';
+
+  @override
+  String get familyClaimDeny => 'Not them';
+
+  @override
+  String get familyShowCode => 'Show the join code';
+
+  @override
+  String get familyShowCodeHelp => 'Anyone who dropped out can scan this to get back in.';
+
+  @override
+  String get familyNoAddress => 'This phone isn\'t on a network right now. Check the Wi-Fi or hotspot.';
+
+  @override
   String get hotspotStopped =>
       'The phone turned the hotspot off. This happens when you leave the app. Tap Create hotspot to turn it back on, then friends scan the new Wi-Fi code.';
 

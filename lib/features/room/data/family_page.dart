@@ -7,11 +7,18 @@ import 'join_strings.dart';
 ///
 /// Static markup with ids; the script fills it from `/game` every 1.5 s, and
 /// only ever writes user text with `textContent`, never as HTML.
-String familyBody(JoinStrings s, String Function(String) esc) {
+String familyBody(JoinStrings s, String Function(String) esc, {required String hostName}) {
   final strings = jsonEncode(s.family).replaceAll('</', r'<\/');
+  final host = jsonEncode(hostName).replaceAll('</', r'<\/');
   return '''
     <div class="stack fam">
+      <div id="net" class="net" role="status" aria-live="polite" hidden></div>
       <div id="banner" class="banner" role="status" aria-live="polite"></div>
+      <section class="card" id="claimCard" hidden>
+        <h2 id="claimTitle"></h2>
+        <p class="help" id="claimHelp"></p>
+        <div id="claimList" class="chips"></div>
+      </section>
       <section class="card" id="mineCard">
         <h2 id="mineTitle"></h2>
         <div id="mine" class="chips"></div>
@@ -42,7 +49,7 @@ String familyBody(JoinStrings s, String Function(String) esc) {
         <div id="events" class="list"></div>
       </section>
     </div>
-    <script>var FAMILY_STRINGS = $strings;</script>
+    <script>var FAMILY_STRINGS = $strings, HOST = $host;</script>
     <script>$_script</script>''';
 }
 
@@ -75,13 +82,23 @@ select{width:100%;height:50px;border-radius:14px;border:1.5px solid var(--line);
 .event.ok{color:var(--good);font-weight:700}
 .fam-line{font-size:14px}
 .fam-line b{font-size:15px}
+.net{position:sticky;top:8px;z-index:5;padding:12px 14px;border-radius:14px;background:#B3261E;color:#fff;font-weight:800;text-align:center}
+.net.ok{background:var(--good)}
+.chip.away,.away{opacity:.6}
+.chip.away{border-style:dashed}
+.chip.pick{cursor:pointer;background:var(--card);border-color:var(--primary);color:var(--primary);font-size:16px;padding:10px 16px}
+.msg.pending{opacity:.6}
+.msg.pending i{display:block;font-size:12px}
+button:disabled{opacity:.5}
 ''';
 
 const _script = r'''
 (function(){
-  var S = FAMILY_STRINGS, st = null, lastV = -1, wasMyTurn = false;
+  var S = FAMILY_STRINGS, st = null, lastV = '', wasMyTurn = false;
+  var fails = 0, offline = false, okTimer = null, outbox = [], sending = false;
   function $(id){ return document.getElementById(id); }
-  function t(key, vars){ var s = S[key] || key; for (var k in vars) s = s.split('{' + k + '}').join(vars[k]); return s; }
+  // Each inserted name is isolated, so an English name inside an Arabic sentence (or the reverse) keeps the word order.
+  function t(key, vars){ var s = S[key] || key; for (var k in vars) s = s.split('{' + k + '}').join('\u2068' + vars[k] + '\u2069'); return s; }
   function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function nameOf(id){ for (var i = 0; i < st.players.length; i++) if (st.players[i].id === id) return st.players[i].name; return ''; }
   function slipOf(id){ for (var i = 0; i < st.slips.length; i++) if (st.slips[i].id === id) return st.slips[i]; return null; }
@@ -99,18 +116,91 @@ const _script = r'''
     if (select.value !== keep) select.value = '';
   }
 
+  // A dead Wi-Fi can leave a request hanging for a minute; give up after a few seconds instead.
+  function send(path, opts){
+    var ctl = window.AbortController ? new AbortController() : null, timer = null;
+    if (ctl) { opts.signal = ctl.signal; timer = setTimeout(function(){ ctl.abort(); }, 4000); }
+    return fetch(path, opts).then(function(r){ clearTimeout(timer); connected(true); return r; },
+      function(e){ clearTimeout(timer); connected(false); throw e; });
+  }
+
+  function connected(ok){
+    var net = $('net');
+    if (ok) {
+      fails = 0;
+      if (!offline) return;
+      offline = false;
+      net.className = 'net ok'; net.textContent = S.backOnline; show(net, true);
+      clearTimeout(okTimer); okTimer = setTimeout(function(){ show(net, false); }, 2500);
+      controls(); flush();
+      return;
+    }
+    fails++;
+    if (fails < 2) return;
+    offline = true;
+    clearTimeout(okTimer);
+    net.className = 'net';
+    net.textContent = fails >= 8 ? t('stillOffline', { host: HOST }) : S.reconnecting;
+    show(net, true);
+    controls();
+  }
+
+  // While offline, a guess can't be sent, so it can't be lost or sent twice.
+  function controls(){ $('go').disabled = offline; }
+
   function post(path, data){
-    var body = new URLSearchParams(data);
-    return fetch(path, { method: 'POST', body: body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+    var body = new URLSearchParams(data), err = $('err');
+    return send(path, { method: 'POST', body: body, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
       .then(function(r){ return r.json(); })
       .then(function(res){
-        var err = $('err');
         if (res.error) { err.textContent = S['err_' + res.error] || S.err_generic; show(err, true); }
         else show(err, false);
         load();
         return res;
-      })
-      .catch(function(){});
+      }, function(){ err.textContent = S.err_offline; show(err, true); return null; });
+  }
+
+  // Messages typed while offline wait here, in order, and go out once the phone is back.
+  function flush(){
+    if (sending || offline || !outbox.length) return;
+    sending = true;
+    send('/game/say', { method: 'POST', body: new URLSearchParams({ text: outbox[0] }), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } })
+      .then(function(){ outbox.shift(); sending = false; load(); flush(); }, function(){ sending = false; renderChat(); });
+  }
+
+  function renderChat(){
+    if (!st || !st.me || !st.chatOn) return;
+    var chat = $('chat'), atBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 40;
+    clear(chat);
+    st.chat.forEach(function(m){ var b = el('div', 'msg' + (m.author === st.me ? ' me' : '')); b.appendChild(el('b', '', nameOf(m.author))); b.appendChild(document.createTextNode(m.text)); chat.appendChild(b); });
+    outbox.forEach(function(text){ var b = el('div', 'msg me pending'); b.appendChild(el('b', '', nameOf(st.me))); b.appendChild(document.createTextNode(text)); b.appendChild(el('i', '', S.sending)); chat.appendChild(b); });
+    if (atBottom) chat.scrollTop = chat.scrollHeight;
+  }
+
+  function isAway(id){ return st.away.indexOf(id) >= 0; }
+  function familyAway(head){ var any = false, all = true; st.players.forEach(function(p){ if (p.head === head) { any = true; if (!isAway(p.id)) all = false; } }); return any && all; }
+  function nameTag(id){ return nameOf(id) + (isAway(id) ? ' · ' + S.offline : ''); }
+
+  function renderClaim(){
+    var card = $('claimCard'), mine = st.myClaim;
+    var open = !st.me && !st.winner && (st.claimable.length > 0 || !!mine);
+    show(card, open);
+    if (!open) return;
+    var list = $('claimList'); clear(list);
+    if (mine && mine.status === 'pending') {
+      $('claimTitle').textContent = t('claimPending', { host: HOST, name: nameOf(mine.player) });
+      show($('claimHelp'), false);
+      return;
+    }
+    $('claimTitle').textContent = mine && mine.status === 'denied' ? t('claimDenied', { host: HOST }) : S.claimTitle;
+    $('claimHelp').textContent = t('claimHelp', { host: HOST });
+    show($('claimHelp'), st.claimable.length > 0);
+    st.claimable.forEach(function(p){
+      var b = el('button', 'chip pick', p.name);
+      b.type = 'button';
+      b.onclick = function(){ post('/game/claim', { player: p.id }); };
+      list.appendChild(b);
+    });
   }
 
   function render(){
@@ -121,8 +211,13 @@ const _script = r'''
     banner.textContent = won
       ? (mine === won ? S.youWin : t('familyWins', { name: nameOf(won) }))
       : myTurn
-        ? S.turnYours + ' ' + (me === mine ? S.youDecide : t('headDecides', { name: nameOf(mine) }))
-        : t('turnOther', { name: nameOf(st.turn) });
+        ? (st.canAsk && me !== mine
+            ? t('actingHead', { name: nameOf(mine) })
+            : S.turnYours + ' ' + (me === mine ? S.youDecide : t('headDecides', { name: nameOf(mine) })))
+        : familyAway(st.turn)
+          ? t('familyAway', { name: nameOf(st.turn), host: HOST })
+          : t('turnOther', { name: nameOf(st.turn) });
+    renderClaim();
     if (myTurn && !wasMyTurn) { try { navigator.vibrate && navigator.vibrate([120, 80, 120]); } catch (e) {} }
     wasMyTurn = !!myTurn;
 
@@ -133,13 +228,14 @@ const _script = r'''
     if (me) {
       $('mineTitle').textContent = me === mine ? S.yourFamily : t('familyOf', { name: nameOf(mine) });
       var box = $('mine'); clear(box);
-      st.players.forEach(function(p){ if (p.head === mine) box.appendChild(el('span', 'chip' + (p.id === mine ? ' head' : ''), (p.id === mine ? '👑 ' : '') + p.name + (p.id === me ? ' ' + S.youTag : ''))); });
+      st.players.forEach(function(p){ if (p.head === mine) box.appendChild(el('span', 'chip' + (p.id === mine ? ' head' : '') + (isAway(p.id) ? ' away' : ''), (p.id === mine ? '👑 ' : '') + p.name + (p.id === me ? ' ' + S.youTag : '') + (isAway(p.id) ? ' · ' + S.offline : ''))); });
 
       fill($('who'), st.players.filter(function(p){ return p.head !== mine && !caught(p.id); }).map(function(p){ return { value: p.id, label: p.name }; }));
       fill($('which'), st.slips.filter(function(x){ return x.writer == null; }).map(function(x){ return { value: String(x.id), label: x.text }; }));
       var go = $('go');
-      go.textContent = me === mine && myTurn ? S.ask : S.suggest;
-      go.dataset.action = me === mine && myTurn ? 'guess' : 'suggest';
+      go.textContent = st.canAsk ? S.ask : S.suggest;
+      go.dataset.action = st.canAsk ? 'guess' : 'suggest';
+      controls();
 
       var ideas = $('ideas'); clear(ideas);
       if (!st.ideas.length) ideas.appendChild(el('p', 'help', S.noIdeas));
@@ -152,7 +248,7 @@ const _script = r'''
         vote.type = 'button';
         vote.onclick = function(){ post(idea.mine ? '/game/unvote' : '/game/suggest', { target: idea.target, slip: idea.slip }); };
         row.appendChild(vote);
-        if (me === mine && myTurn) {
+        if (st.canAsk) {
           var use = el('button', '', S.use);
           use.type = 'button';
           use.onclick = function(){ $('who').value = idea.target; $('which').value = String(idea.slip); window.scrollTo({ top: $('actCard').offsetTop - 12, behavior: 'smooth' }); };
@@ -161,19 +257,14 @@ const _script = r'''
         ideas.appendChild(row);
       });
 
-      if (st.chatOn) {
-        var chat = $('chat'), atBottom = chat.scrollHeight - chat.scrollTop - chat.clientHeight < 40;
-        clear(chat);
-        st.chat.forEach(function(m){ var b = el('div', 'msg' + (m.author === me ? ' me' : '')); b.appendChild(el('b', '', nameOf(m.author))); b.appendChild(document.createTextNode(m.text)); chat.appendChild(b); });
-        if (atBottom) chat.scrollTop = chat.scrollHeight;
-      }
+      renderChat();
     }
 
     var fams = $('families'); clear(fams);
     st.families.forEach(function(f){
       var line = el('div', 'fam-line');
       line.appendChild(el('b', '', (f.head === st.turn && !won ? '▶ ' : '') + t('familyOf', { name: nameOf(f.head) }) + ' '));
-      line.appendChild(document.createTextNode(f.members.map(nameOf).join(S.sep)));
+      line.appendChild(document.createTextNode(f.members.map(nameTag).join(S.sep)));
       fams.appendChild(line);
     });
     var names = $('names'); clear(names);
@@ -186,10 +277,12 @@ const _script = r'''
   }
 
   function load(){
-    return fetch('/game', { cache: 'no-store' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(s){
+    return send('/game', { cache: 'no-store' }).then(function(r){ return r.ok ? r.json() : null; }).then(function(s){
       if (!s) return;
       st = s;
-      if (s.v !== lastV) { lastV = s.v; render(); }
+      // The claim status is per phone, so it redraws the page too.
+      var v = s.v + ':' + (s.me || '') + ':' + (s.myClaim ? s.myClaim.status : '');
+      if (v !== lastV) { lastV = v; render(); }
     }).catch(function(){});
   }
 
@@ -205,8 +298,12 @@ const _script = r'''
     var input = $('msg'), text = input.value.trim();
     if (!text) return;
     input.value = '';
-    post('/game/say', { text: text });
+    outbox.push(text);
+    renderChat();
+    flush();
   };
+  // Back from the lock screen or another app: catch up at once instead of on the next tick.
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) load(); });
   load();
   setInterval(load, 1500);
 })();

@@ -19,6 +19,7 @@ import '../widgets/ask_card.dart';
 import '../widgets/family_board.dart';
 import '../widgets/family_chat.dart';
 import '../widgets/ideas_card.dart';
+import '../widgets/table_notices.dart';
 import '../widgets/turn_banner.dart';
 
 /// The host's seat in a family game that friends play in their browsers.
@@ -129,6 +130,33 @@ class _FamilyViewState extends State<_FamilyView> {
     return winner == myHead ? l10n.familyYouWon : l10n.familyWon(game.nameOf(winner));
   }
 
+  void _showJoinCodes() {
+    final builder = widget.args.joinCodes;
+    if (builder == null) return;
+    unawaited(
+      showModalBottomSheet<void>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        builder: (context) => SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(context.l10n.familyShowCode, style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 4),
+                Text(context.l10n.familyShowCodeHelp),
+                const SizedBox(height: 12),
+                builder(context),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<bool> _confirmLeave() async {
     final l10n = context.l10n;
     final leave = await showDialog<bool>(
@@ -153,11 +181,21 @@ class _FamilyViewState extends State<_FamilyView> {
     final me = cubit.isPlaying ? cubit.me : null;
     final myHead = cubit.myHead;
     final over = game.isOver;
-    final canAsk = !over && me != null && me == myHead && game.turn == myHead;
+    final canAsk = me != null && game.canAsk(me);
     final colors = FamilyColors(widget.args.joinOrder, game);
 
     final play = <Widget>[
+      if (!over)
+        for (final claim in game.pendingClaims) ...[
+          ClaimCard(
+            game: game,
+            claim: claim,
+            onResolve: ({required approve}) => cubit.resolveClaim(claim.clientId, approve: approve),
+          ),
+          const SizedBox(height: 10),
+        ],
       TurnBanner(game: game, me: me),
+      if (!over && game.familyAway(game.turn)) AwayTurnCard(onSkip: cubit.skipTurn),
       if (me == null) ...[
         const SizedBox(height: 10),
         Text(
@@ -252,6 +290,12 @@ class _FamilyViewState extends State<_FamilyView> {
             automaticallyImplyLeading: !over,
             title: Text(categoryLabel(l10n, widget.args.category)),
             actions: [
+              if (!over && widget.args.joinCodes != null)
+                IconButton(
+                  tooltip: l10n.familyShowCode,
+                  onPressed: _showJoinCodes,
+                  icon: const Icon(Icons.qr_code_2_rounded),
+                ),
               if (over)
                 IconButton(
                   tooltip: l10n.shareThisNight,

@@ -1,6 +1,6 @@
 # Progress: expansion work
 
-Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 170 tests pass on this commit.
+Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 183 tests pass on this commit.
 
 ## Done
 
@@ -87,14 +87,25 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 170 te
 - **Tests** (21 new): `test/features/pass_phone/` covers the rules, the whole flow, the hold (a tap or a short hold does nothing), slips hiding, the wipe on leaving the app, the name clash, Back, Team race, and Egyptian Arabic in portrait and landscape.
 - **Fixed on the way:** the hold button never filled when the page could scroll (landscape, small phones), because the tap recogniser waited for the scroll to lose. It now listens to the raw press.
 
+### Family online survives Wi-Fi drops (branch `claude/project-thread-jxaml7`)
+- **Friend's page:** after two failed calls (about 3 s) a red "Reconnecting… Your game is safe." bar shows. Ask is disabled so a guess can't be lost or sent twice, and every call gives up after 4 s instead of hanging. When the phone is back it turns green ("You're back in the game!") with no reload. After about 15 s it adds: check the Wi-Fi, and scan the new code if the host changed Wi-Fi. Coming back from the lock screen catches up at once.
+- **Chat typed while offline** waits as "sending…" and goes out in order once the phone is back.
+- **Who's offline:** the host's server marks a friend offline after 6 s without a call (`LanRoomHost.checkPresence`), and back on their next call. Friends' pages show "· offline", the host's chips a Wi-Fi-off icon.
+- **The turn can't get stuck:** if a family's head is offline, any member still here asks for the family (the family stays the head's). If the whole family is offline, everyone sees "Nour's family is offline" and the host gets "Skip their turn". The app never skips anyone by itself.
+- **Back on a new phone or browser** (or after the host's address changed, which loses the cookie): the page shows "Were you playing? Tap your name" with only the offline players. The host gets "Someone wants back in as Nour" with Let them in / Not them. Once let in, that browser gets Nour's id and simply is Nour.
+- **Host:** a QR button on the family screen shows the room's current join codes (the same card as the lobby, hotspot included), so people can scan back in mid-game.
+- **Fixed:** on Arabic phones the "who caught whom" line came out scrambled when names were in English (inserted names are now isolated).
+- **Tests:** rules (stand-in asker, skip, claims), the view, the server (presence with a fake clock, a seat handed over with its cookie), and the host screen (let in, not them, skip, asking for an offline head, join code). Checked in headless Chromium: a phone going offline and back with a queued message, and an Arabic phone coming back in a new browser and getting its seat after approval.
+
 ## Remaining
-1. **On a real device:** play the browser family page on 3+ phones over Wi-Fi and on the app's hotspot (polling, chat, voting, the vibration on your turn).
+1. **On a real device:** play the browser family page on 3+ phones over Wi-Fi and on the app's hotspot (polling, chat, voting, the vibration on your turn). Turn one phone's Wi-Fi off and on mid-game, and open the game in a second browser to take a seat back.
 2. **On a real device:** "Join a game" on a second phone, on home Wi-Fi and on the app's hotspot, including scanning both codes; and "Create hotspot" staying on. The Kotlin changes (multicast lock, hotspot stop, Wi-Fi settings) were not compiled in the cloud session.
 3. **On a real device:** a Pass the phone round with 3+ people; check that Android blocks a screenshot on the typing screen (the Kotlin change was not compiled in the cloud).
 4. **Store listing:** take 2 to 8 real phone screenshots and frame them (see `store/README.md`). Check the new icon on a real launcher.
 
 ## Deferred by you
-- Paid app vs in-app purchase: decide later. No code yet.
+- Paid app vs in-app purchase: one-time purchase agreed (no ads, no subscription); price, what's paid and any player limit still open. No code yet.
+- Team race: the same few names repeat each round with a small bowl. Mafdy picked a bigger bowl (up to 5 names each, 1 round under 15 names) but is rethinking the mode; not built yet.
 
 ## Bugs you mentioned
 - **Fixed:** closing the custom category dialog without a name threw an error (its text box was thrown away while the dialog was still fading out).

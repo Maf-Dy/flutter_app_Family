@@ -32,7 +32,15 @@ class TurnBanner extends StatelessWidget {
         scheme.primary,
         scheme.onPrimary,
         Icons.campaign_rounded,
-        '${l10n.familyTurnYours} ${me == myHead ? l10n.familyYouAsk : l10n.familyHeadAsks(game.nameOf(myHead))}',
+        me != myHead && game.canAsk(me!)
+            ? l10n.familyActingHead(game.nameOf(myHead))
+            : '${l10n.familyTurnYours} ${me == myHead ? l10n.familyYouAsk : l10n.familyHeadAsks(game.nameOf(myHead))}',
+      ),
+      null when game.familyAway(game.turn) => (
+        scheme.surfaceContainerHigh,
+        scheme.onSurface,
+        Icons.wifi_off_rounded,
+        l10n.familyAwayTurn(game.nameOf(game.turn)),
       ),
       null => (
         scheme.surfaceContainerHigh,

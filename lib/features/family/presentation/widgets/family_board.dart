@@ -24,17 +24,24 @@ class FamilyMembers extends StatelessWidget {
       runSpacing: 8,
       children: [
         for (final id in members)
-          Chip(
-            avatar: PlayerAvatar(name: game.nameOf(id), joinIndex: colors.indexOf(id), size: 24),
-            label: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(child: Text(id == me ? l10n.youSuffix(game.nameOf(id)) : game.nameOf(id))),
-                if (id == head) ...[
-                  const SizedBox(width: 4),
-                  Icon(Icons.workspace_premium_rounded, size: 18, semanticLabel: l10n.familyHead),
+          Opacity(
+            opacity: game.isAway(id) ? 0.6 : 1,
+            child: Chip(
+              avatar: PlayerAvatar(name: game.nameOf(id), joinIndex: colors.indexOf(id), size: 24),
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(child: Text(id == me ? l10n.youSuffix(game.nameOf(id)) : game.nameOf(id))),
+                  if (id == head) ...[
+                    const SizedBox(width: 4),
+                    Icon(Icons.workspace_premium_rounded, size: 18, semanticLabel: l10n.familyHead),
+                  ],
+                  if (game.isAway(id)) ...[
+                    const SizedBox(width: 4),
+                    Icon(Icons.wifi_off_rounded, size: 16, semanticLabel: l10n.familyOffline),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
       ],
