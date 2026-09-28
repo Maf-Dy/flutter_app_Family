@@ -14,9 +14,7 @@ void main() {
       ..physicalSize = const Size(360, 800)
       ..devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(
-      testApp(network: network, createHost: FakeRoomHost.new, reducedMotion: reducedMotion),
-    );
+    await tester.pumpWidget(testApp(network: network, createHost: FakeRoomHost.new, reducedMotion: reducedMotion));
     await tester.pumpAndSettle();
   }
 
@@ -59,9 +57,7 @@ void main() {
   testWidgets('flipping between the hotspot steps quickly keeps the codes drawn', (tester) async {
     network = FakeNetwork();
     // Motion on, as on a real phone. Looping animations never settle, so step frames.
-    await tester.pumpWidget(
-      testApp(network: network, createHost: FakeRoomHost.new, reducedMotion: false),
-    );
+    await tester.pumpWidget(testApp(network: network, createHost: FakeRoomHost.new, reducedMotion: false));
     Future<void> frames(int count) async {
       for (var i = 0; i < count; i++) {
         await tester.pump(const Duration(milliseconds: 50));

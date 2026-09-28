@@ -10,11 +10,16 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   Widget stage(String name, {VoidCallback? onTap}) => Scaffold(
     key: ValueKey(name),
-    body: Center(child: TextButton(onPressed: onTap, child: Text(name))),
+    body: Center(
+      child: TextButton(onPressed: onTap, child: Text(name)),
+    ),
   );
 
-  Future<void> pumpStage(WidgetTester tester, int position, Widget child) =>
-      tester.pumpWidget(MaterialApp(home: StageSwitcher(position: position, child: child)));
+  Future<void> pumpStage(WidgetTester tester, int position, Widget child) => tester.pumpWidget(
+    MaterialApp(
+      home: StageSwitcher(position: position, child: child),
+    ),
+  );
 
   testWidgets('a stage can come back while its old copy is still leaving', (tester) async {
     await pumpStage(tester, 0, stage('setup'));

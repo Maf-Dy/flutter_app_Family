@@ -8,6 +8,7 @@ import 'core/theme/app_theme.dart';
 import 'features/room/domain/network_access.dart';
 import 'features/room/domain/room_beacon.dart';
 import 'features/room/domain/room_host.dart';
+import 'features/room/presentation/screens/scan_screen.dart';
 import 'features/room/presentation/state/nearby_rooms_cubit.dart';
 import 'features/settings/domain/app_settings.dart';
 import 'features/settings/presentation/state/settings_cubit.dart';
@@ -20,6 +21,7 @@ class FamilyApp extends StatelessWidget {
     required this.beacon,
     required this.finder,
     required this.openRoomLink,
+    required this.openWifiSettings,
     required this.settingsStore,
     required this.settings,
   });
@@ -29,6 +31,7 @@ class FamilyApp extends StatelessWidget {
   final RoomBeacon beacon;
   final RoomFinder finder;
   final OpenRoomLink openRoomLink;
+  final OpenWifiSettings openWifiSettings;
   final SettingsStore settingsStore;
 
   /// Loaded before the first frame, so the right language shows from the start.
@@ -43,6 +46,8 @@ class FamilyApp extends StatelessWidget {
         RepositoryProvider<RoomBeacon>.value(value: beacon),
         RepositoryProvider<RoomFinder>.value(value: finder),
         RepositoryProvider<OpenRoomLink>.value(value: openRoomLink),
+        RepositoryProvider<OpenWifiSettings>.value(value: openWifiSettings),
+        RepositoryProvider<ScanJoinCode>.value(value: scanWithCamera),
       ],
       child: BlocProvider(
         create: (_) => SettingsCubit(settingsStore, settings),

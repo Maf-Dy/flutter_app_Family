@@ -2,6 +2,7 @@ package com.mafdy.familygame
 
 import android.annotation.TargetApi
 import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.SoftApConfiguration
@@ -9,6 +10,7 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.net.Inet4Address
@@ -29,6 +31,7 @@ class LocalHotspot(context: Context, private val channel: MethodChannel) :
         const val CHANNEL = "family_game/hotspot"
     }
 
+    private val appContext = context.applicationContext
     private val wifi = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
     private val connectivity =
         context.applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -40,6 +43,10 @@ class LocalHotspot(context: Context, private val channel: MethodChannel) :
             "sdkInt" -> result.success(Build.VERSION.SDK_INT)
             "wifiAddress" -> result.success(wifiAddress())
             "start" -> start(result)
+            "openWifiSettings" -> {
+                val intent = Intent(Settings.ACTION_WIFI_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                result.success(runCatching { appContext.startActivity(intent) }.isSuccess)
+            }
             "lockMulticast" -> {
                 multicast.acquire()
                 result.success(null)

@@ -1645,6 +1645,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t open the browser. Open {url} yourself.'**
   String cannotOpenRoom(String url);
+
+  /// No description provided for @scanHostCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the host\'s code'**
+  String get scanHostCode;
+
+  /// No description provided for @scanHostCodeDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Point your camera at the QR code on the host\'s phone.'**
+  String get scanHostCodeDetail;
+
+  /// No description provided for @scanHostCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit the host\'s QR code in the square'**
+  String get scanHostCodeHint;
+
+  /// No description provided for @cameraBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'The camera is blocked for this app. Allow it in Settings, or pick a game from the list.'**
+  String get cameraBlocked;
+
+  /// No description provided for @cameraFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The camera didn\'t start. Pick a game from the list instead.'**
+  String get cameraFailed;
+
+  /// No description provided for @notAGameCode.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s not a game code. Scan the one on the host\'s lobby screen.'**
+  String get notAGameCode;
+
+  /// No description provided for @wifiCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s the host\'s Wi-Fi'**
+  String get wifiCodeTitle;
+
+  /// No description provided for @wifiCodeDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Join the Wi-Fi \"{ssid}\" in Settings, come back, and scan the game code or pick the room below.'**
+  String wifiCodeDetail(String ssid);
+
+  /// No description provided for @copyPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy password'**
+  String get copyPassword;
+
+  /// No description provided for @passwordCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Password copied'**
+  String get passwordCopied;
+
+  /// No description provided for @openWifiSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Wi-Fi settings'**
+  String get openWifiSettings;
+
+  /// No description provided for @gamesOnThisWifi.
+  ///
+  /// In en, this message translates to:
+  /// **'Games on this Wi-Fi'**
+  String get gamesOnThisWifi;
+
+  /// No description provided for @searchingJoke1.
+  ///
+  /// In en, this message translates to:
+  /// **'Shaking the bowl to see who falls out…'**
+  String get searchingJoke1;
+
+  /// No description provided for @searchingJoke2.
+  ///
+  /// In en, this message translates to:
+  /// **'Knocking on the neighbours\' doors…'**
+  String get searchingJoke2;
+
+  /// No description provided for @searchingJoke3.
+  ///
+  /// In en, this message translates to:
+  /// **'Asking auntie who\'s hosting tonight…'**
+  String get searchingJoke3;
+
+  /// No description provided for @searchingJoke4.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking under the sofa cushions…'**
+  String get searchingJoke4;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

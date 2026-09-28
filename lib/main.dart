@@ -20,6 +20,7 @@ Future<void> main() async {
       beacon: UdpRoomBeacon(),
       finder: UdpRoomFinder(onListen: DeviceNetwork.holdMulticastLock, onCancel: DeviceNetwork.releaseMulticastLock),
       openRoomLink: (url) => launchUrl(url, mode: LaunchMode.externalApplication),
+      openWifiSettings: DeviceNetwork.openWifiSettings,
       settingsStore: settingsStore,
       settings: await settingsStore.load(),
     ),

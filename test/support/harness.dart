@@ -4,6 +4,7 @@ import 'package:family_game/core/theme/app_theme.dart';
 import 'package:family_game/features/room/domain/network_access.dart';
 import 'package:family_game/features/room/domain/room_beacon.dart';
 import 'package:family_game/features/room/domain/room_host.dart';
+import 'package:family_game/features/room/presentation/screens/scan_screen.dart';
 import 'package:family_game/features/room/presentation/state/nearby_rooms_cubit.dart';
 import 'package:family_game/features/settings/domain/app_settings.dart';
 import 'package:family_game/features/settings/presentation/state/settings_cubit.dart';
@@ -33,6 +34,8 @@ Widget testApp({
   RoomBeacon? beacon,
   RoomFinder? finder,
   OpenRoomLink? openRoomLink,
+  ScanJoinCode? scan,
+  OpenWifiSettings? openWifiSettings,
   SettingsStore? settingsStore,
   AppSettings settings = const AppSettings(hostName: 'Mafdy'),
   Locale locale = const Locale('en'),
@@ -48,6 +51,8 @@ Widget testApp({
       RepositoryProvider<RoomBeacon>.value(value: beacon ?? FakeRoomBeacon()),
       RepositoryProvider<RoomFinder>.value(value: finder ?? FakeRoomFinder()),
       RepositoryProvider<OpenRoomLink>.value(value: openRoomLink ?? (_) async => true),
+      RepositoryProvider<ScanJoinCode>.value(value: scan ?? (_) async => null),
+      RepositoryProvider<OpenWifiSettings>.value(value: openWifiSettings ?? () async {}),
     ],
     child: BlocProvider(
       create: (_) => SettingsCubit(settingsStore ?? FakeSettingsStore(), settings),

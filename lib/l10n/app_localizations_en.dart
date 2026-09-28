@@ -920,4 +920,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String cannotOpenRoom(String url) {
     return 'Couldn\'t open the browser. Open $url yourself.';
   }
+
+  @override
+  String get scanHostCode => 'Scan the host\'s code';
+
+  @override
+  String get scanHostCodeDetail => 'Point your camera at the QR code on the host\'s phone.';
+
+  @override
+  String get scanHostCodeHint => 'Fit the host\'s QR code in the square';
+
+  @override
+  String get cameraBlocked => 'The camera is blocked for this app. Allow it in Settings, or pick a game from the list.';
+
+  @override
+  String get cameraFailed => 'The camera didn\'t start. Pick a game from the list instead.';
+
+  @override
+  String get notAGameCode => 'That\'s not a game code. Scan the one on the host\'s lobby screen.';
+
+  @override
+  String get wifiCodeTitle => 'That\'s the host\'s Wi-Fi';
+
+  @override
+  String wifiCodeDetail(String ssid) {
+    return 'Join the Wi-Fi \"$ssid\" in Settings, come back, and scan the game code or pick the room below.';
+  }
+
+  @override
+  String get copyPassword => 'Copy password';
+
+  @override
+  String get passwordCopied => 'Password copied';
+
+  @override
+  String get openWifiSettings => 'Open Wi-Fi settings';
+
+  @override
+  String get gamesOnThisWifi => 'Games on this Wi-Fi';
+
+  @override
+  String get searchingJoke1 => 'Shaking the bowl to see who falls out…';
+
+  @override
+  String get searchingJoke2 => 'Knocking on the neighbours\' doors…';
+
+  @override
+  String get searchingJoke3 => 'Asking auntie who\'s hosting tonight…';
+
+  @override
+  String get searchingJoke4 => 'Checking under the sofa cushions…';
 }

@@ -164,11 +164,14 @@ class DeviceNetwork implements NetworkAccess {
   Future<void> openPermissionSettings() => openAppSettings();
 
   /// Keeps Android's Wi-Fi from dropping broadcasts while the app listens for rooms.
-  static Future<void> holdMulticastLock() => _multicast('lockMulticast');
+  static Future<void> holdMulticastLock() => _call('lockMulticast');
 
-  static Future<void> releaseMulticastLock() => _multicast('unlockMulticast');
+  static Future<void> releaseMulticastLock() => _call('unlockMulticast');
 
-  static Future<void> _multicast(String method) async {
+  /// So a friend can join the host's hotspot after scanning its Wi-Fi code.
+  static Future<void> openWifiSettings() => _call('openWifiSettings');
+
+  static Future<void> _call(String method) async {
     if (!Platform.isAndroid) return;
     try {
       await _channel.invokeMethod<void>(method);

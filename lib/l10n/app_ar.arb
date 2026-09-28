@@ -258,5 +258,21 @@
   "nearbyRoomPlayers": "{count, plural, =0{لسه محدش دخل} =1{لاعب واحد جوه} =2{لاعبين جوه} other{{count} لاعبين جوه}}",
   "nearbyRoomPlaying": "اللعب بدأ",
   "joinRoomButton": "ادخل",
-  "cannotOpenRoom": "المتصفح مفتحش. افتح {url} بنفسك."
+  "cannotOpenRoom": "المتصفح مفتحش. افتح {url} بنفسك.",
+  "scanHostCode": "سكان كود صاحب القعدة",
+  "scanHostCodeDetail": "وجه الكاميرا على الكود اللي على موبايل صاحب القعدة.",
+  "scanHostCodeHint": "خلي الكود جوه المربع",
+  "cameraBlocked": "الكاميرا مقفولة للتطبيق ده. افتحها من الإعدادات، أو اختار لعبة من اللستة.",
+  "cameraFailed": "الكاميرا مشتغلتش. اختار لعبة من اللستة.",
+  "notAGameCode": "ده مش كود لعبة. سكان الكود اللي على شاشة صاحب القعدة.",
+  "wifiCodeTitle": "ده الواي فاي بتاع صاحب القعدة",
+  "wifiCodeDetail": "ادخل على واي فاي \"{ssid}\" من الإعدادات، وارجع سكان كود اللعبة أو اختار القعدة من تحت.",
+  "copyPassword": "انسخ الباسورد",
+  "passwordCopied": "الباسورد اتنسخ",
+  "openWifiSettings": "افتح إعدادات الواي فاي",
+  "gamesOnThisWifi": "ألعاب على الواي فاي ده",
+  "searchingJoke1": "بنرج البولة نشوف مين هيقع…",
+  "searchingJoke2": "بنخبط على الجيران…",
+  "searchingJoke3": "بنسأل طنط مين فاتح قعدة النهارده…",
+  "searchingJoke4": "بندور تحت مخدات الكنبة…"
 }

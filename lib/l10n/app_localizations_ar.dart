@@ -934,4 +934,54 @@ class AppLocalizationsAr extends AppLocalizations {
   String cannotOpenRoom(String url) {
     return 'المتصفح مفتحش. افتح $url بنفسك.';
   }
+
+  @override
+  String get scanHostCode => 'سكان كود صاحب القعدة';
+
+  @override
+  String get scanHostCodeDetail => 'وجه الكاميرا على الكود اللي على موبايل صاحب القعدة.';
+
+  @override
+  String get scanHostCodeHint => 'خلي الكود جوه المربع';
+
+  @override
+  String get cameraBlocked => 'الكاميرا مقفولة للتطبيق ده. افتحها من الإعدادات، أو اختار لعبة من اللستة.';
+
+  @override
+  String get cameraFailed => 'الكاميرا مشتغلتش. اختار لعبة من اللستة.';
+
+  @override
+  String get notAGameCode => 'ده مش كود لعبة. سكان الكود اللي على شاشة صاحب القعدة.';
+
+  @override
+  String get wifiCodeTitle => 'ده الواي فاي بتاع صاحب القعدة';
+
+  @override
+  String wifiCodeDetail(String ssid) {
+    return 'ادخل على واي فاي \"$ssid\" من الإعدادات، وارجع سكان كود اللعبة أو اختار القعدة من تحت.';
+  }
+
+  @override
+  String get copyPassword => 'انسخ الباسورد';
+
+  @override
+  String get passwordCopied => 'الباسورد اتنسخ';
+
+  @override
+  String get openWifiSettings => 'افتح إعدادات الواي فاي';
+
+  @override
+  String get gamesOnThisWifi => 'ألعاب على الواي فاي ده';
+
+  @override
+  String get searchingJoke1 => 'بنرج البولة نشوف مين هيقع…';
+
+  @override
+  String get searchingJoke2 => 'بنخبط على الجيران…';
+
+  @override
+  String get searchingJoke3 => 'بنسأل طنط مين فاتح قعدة النهارده…';
+
+  @override
+  String get searchingJoke4 => 'بندور تحت مخدات الكنبة…';
 }

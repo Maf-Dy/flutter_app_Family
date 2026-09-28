@@ -1,6 +1,6 @@
 # Progress: expansion work
 
-Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 125 tests pass on this commit.
+Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 149 tests pass on this commit.
 
 ## Done
 
@@ -56,9 +56,18 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 125 te
   - When Android turns the hotspot off (usually on leaving the app), the lobby says so.
   - A hotspot that stopped before it started no longer leaves "Starting hotspot" spinning forever.
 
+### Join a game: camera scan and a funnier wait
+- **Scan the host's code** at the top of "Join a game" opens the camera (`mobile_scanner`, `scan_screen.dart`) and closes on the first QR code:
+  - The game link opens the room in the browser.
+  - The app hotspot's Wi-Fi code shows the network name and password, with Copy and "Open Wi-Fi settings". Then you scan the game code, or pick the room from the list.
+  - Any other code says it isn't a game code. A blocked camera says how to allow it.
+- The **list of games on this Wi-Fi** stays under the scan button and keeps updating.
+- **While it looks:** the bowl gives a shake every couple of seconds, and the line under it rotates through jokes ("Knocking on the neighbours' doors…", "بنسأل طنط مين فاتح قعدة النهارده…"). With reduced motion on, it stays still.
+- Camera permission was added for Android and iOS.
+
 ## Remaining
 1. **On a real device:** play the browser family page on 3+ phones over Wi-Fi and on the app's hotspot (polling, chat, voting, the vibration on your turn).
-2. **On a real device:** "Join a game" on a second phone, on home Wi-Fi and on the app's hotspot; and "Create hotspot" staying on. The Kotlin changes (multicast lock, hotspot stop) were not compiled in the cloud session.
+2. **On a real device:** "Join a game" on a second phone, on home Wi-Fi and on the app's hotspot, including scanning both codes; and "Create hotspot" staying on. The Kotlin changes (multicast lock, hotspot stop, Wi-Fi settings) were not compiled in the cloud session.
 
 ## Deferred by you
 - Paid app vs in-app purchase: decide later. No code yet.

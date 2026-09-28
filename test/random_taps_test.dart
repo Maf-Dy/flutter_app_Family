@@ -65,18 +65,25 @@ void main() {
             }
             // Sharing needs the platform plugin, which tests do not have.
             candidates.removeWhere(
-              (e) => find
-                  .descendant(of: find.byElementPredicate((x) => x == e), matching: find.byIcon(Icons.share_rounded))
-                  .evaluate()
-                  .isNotEmpty ||
+              (e) =>
                   find
-                  .descendant(of: find.byElementPredicate((x) => x == e), matching: find.byIcon(Icons.ios_share_rounded))
-                  .evaluate()
-                  .isNotEmpty ||
+                      .descendant(
+                        of: find.byElementPredicate((x) => x == e),
+                        matching: find.byIcon(Icons.share_rounded),
+                      )
+                      .evaluate()
+                      .isNotEmpty ||
                   find
-                  .descendant(of: find.byElementPredicate((x) => x == e), matching: find.text('Share'))
-                  .evaluate()
-                  .isNotEmpty,
+                      .descendant(
+                        of: find.byElementPredicate((x) => x == e),
+                        matching: find.byIcon(Icons.ios_share_rounded),
+                      )
+                      .evaluate()
+                      .isNotEmpty ||
+                  find
+                      .descendant(of: find.byElementPredicate((x) => x == e), matching: find.text('Share'))
+                      .evaluate()
+                      .isNotEmpty,
             );
             if (candidates.isEmpty) {
               await frames(3);

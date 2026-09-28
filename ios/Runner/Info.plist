@@ -6,6 +6,8 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Scan the host's code to join their game.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Family Game hosts the room on your local network so friends can join from their phones.</string>
 	<key>CFBundleDisplayName</key>
