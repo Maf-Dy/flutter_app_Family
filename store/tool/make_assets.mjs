@@ -27,98 +27,76 @@ const res = path.join(root, 'android/app/src/main/res');
 const iosDir = path.join(root, 'ios/Runner/Assets.xcassets/AppIcon.appiconset');
 const storeDir = path.join(root, 'store');
 
-// Colours follow lib/core/theme/app_theme.dart.
+// Colours and fonts are the app's own: lib/core/theme/app_theme.dart and game_colors.dart.
 const C = {
-  bgTop: '#6A5CF0',
-  bgBottom: '#3A2FB0',
-  ink: '#1D1A33',
-  bowl: '#F26B21',
-  bowlDark: '#C4470C',
-  bowlInside: '#8A2F06',
-  paper: '#FFF8EC',
-  paperEdge: '#E9DCC5',
   primary: '#4A3FCF',
-  yellow: '#FFC83D',
-  pink: '#FF5C8A',
-  mint: '#3DDC97',
+  primaryContainer: '#E3E0FF',
+  tertiary: '#D9480F',
+  surface: '#F2F1F8',
+  ink: '#1D1A33',
+  inkSoft: '#625E7A',
+  slipPaper: '#FFE7A0',
+  slipEdge: '#E9C868',
+  slipInk: '#2A2440',
 };
+
+const fontFile = (f) => `url(data:font/ttf;base64,${fs.readFileSync(path.join(root, 'assets/fonts', f)).toString('base64')})`;
+const fontFaces = `
+  @font-face{font-family:'Bricolage Grotesque';font-weight:800;src:${fontFile('BricolageGrotesque-ExtraBold.ttf')}}
+  @font-face{font-family:'Nunito';font-weight:700;src:${fontFile('Nunito-Bold.ttf')}}
+  @font-face{font-family:'Kalam';font-weight:700;src:${fontFile('Kalam-Bold.ttf')}}
+  @font-face{font-family:'Baloo Bhaijaan 2';font-weight:800;src:${fontFile('BalooBhaijaan2-ExtraBold.ttf')}}`;
 
 // ---- Artwork, all in a 108x108 box (the Android adaptive icon grid). ----
 // Everything important sits inside the 66-unit safe circle around (54,54).
 
 const background = `
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
-      <stop offset="0" stop-color="${C.bgTop}"/>
-      <stop offset="1" stop-color="${C.bgBottom}"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="${C.primaryContainer}"/>
     </linearGradient>
-    <radialGradient id="glow" cx="0.5" cy="0.42" r="0.5">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.22"/>
-      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
-    </radialGradient>
   </defs>
-  <rect width="108" height="108" fill="url(#bg)"/>
-  <circle cx="54" cy="50" r="40" fill="url(#glow)"/>`;
+  <rect width="108" height="108" fill="url(#bg)"/>`;
 
-function slip(x, y, w, h, angle, content = '') {
-  return `
-  <g transform="rotate(${angle} ${x + w / 2} ${y + h})">
-    <rect x="${x}" y="${y + 1.2}" width="${w}" height="${h}" rx="2" fill="${C.ink}" opacity="0.18"/>
-    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2" fill="${C.paper}"/>
-    <path d="M${x + w - 5} ${y} h5 v5 z" fill="${C.paperEdge}"/>
-    ${content}
-  </g>`;
+// The home screen bowl (lib/core/widgets/bowl.dart), in its 200x132 box.
+// x, y, width, height, tilt: the same four slips as the app.
+const slips = [
+  [52, 22, 44, 26, -18],
+  [86, 8, 44, 26, 8],
+  [112, 26, 44, 26, 22],
+  [74, 34, 44, 26, -4],
+];
+
+function bowlArt({ mono = false, withQuestion = true } = {}) {
+  const paper = mono ? '#FFFFFF' : C.slipPaper;
+  const bowl = mono ? '#FFFFFF' : C.primary;
+  // Slips are drawn mid-bob (lifted 5, as the app animates them) so more paper shows.
+  const slipsSvg = slips.map(([x, y0, w, h, tilt], i) => {
+    const y = y0 - 5;
+    const cx = x + w / 2, cy = y + h / 2;
+    const front = i === 1; // the top slip, fully above the rim
+    const writing = mono ? '' : front && withQuestion
+      ? `<text x="${cx}" y="${cy + 10}" text-anchor="middle" font-family="Kalam" font-weight="700" font-size="30" fill="${C.slipInk}">?</text>`
+      : `<path d="M${x + 8} ${cy + 1} q6 -5 12 0 t12 0" stroke="${C.slipEdge}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+    return `<g transform="rotate(${tilt} ${cx} ${cy})">
+      <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2" fill="${paper}" ${mono ? '' : `stroke="${C.slipEdge}" stroke-width="1"`}/>
+      ${writing}
+    </g>`;
+  }).join('');
+  const shine = mono ? '' : `
+    <ellipse cx="100" cy="58" rx="80" ry="5.5" fill="#FFFFFF" opacity="0.18"/>
+    <path d="M40 80 C50 98 70 110 92 112" stroke="#FFFFFF" stroke-opacity="0.2" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+  return `${slipsSvg}
+    <path d="M14 58 L186 58 C186 96 148 126 100 126 C52 126 14 96 14 58 Z" fill="${bowl}"/>
+    <ellipse cx="100" cy="58" rx="86" ry="9" fill="${bowl}"/>
+    ${shine}`;
 }
 
 // mono=true draws the single-colour silhouette for Android 13 themed icons.
 function foreground({ mono = false } = {}) {
-  const fill = (c) => (mono ? '#FFFFFF' : c);
-  const lines = (x, y) => mono ? '' : `
-    <rect x="${x}" y="${y}" width="9" height="1.6" rx="0.8" fill="${C.paperEdge}"/>
-    <rect x="${x}" y="${y + 4}" width="6" height="1.6" rx="0.8" fill="${C.paperEdge}"/>`;
-  const question = mono ? '' : `
-    <text x="54" y="46.5" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif"
-          font-weight="bold" font-size="17" fill="${C.primary}">?</text>`;
-  const confetti = mono ? '' : `
-    <circle cx="30" cy="36" r="2.2" fill="${C.yellow}"/>
-    <rect x="76" y="31" width="4" height="4" rx="1" fill="${C.mint}" transform="rotate(25 78 33)"/>
-    <circle cx="80" cy="47" r="1.8" fill="${C.pink}"/>
-    <rect x="25" y="48" width="3.6" height="3.6" rx="1" fill="${C.pink}" transform="rotate(-20 27 50)"/>
-    <path d="M70 24 l1.6 3.4 3.6 .5 -2.6 2.5 .6 3.6 -3.2 -1.7 -3.2 1.7 .6 -3.6 -2.6 -2.5 3.6 -.5z" fill="${C.yellow}"/>`;
-
-  // Slips are drawn in a mono-safe way: in mono mode they are cut out of the bowl
-  // with a mask so the silhouette still reads as "papers in a bowl".
-  const slips = mono ? `
-    <g fill="#FFFFFF">
-      <rect x="33" y="36" width="15" height="24" rx="2" transform="rotate(-18 40.5 60)"/>
-      <rect x="45.5" y="29" width="17" height="30" rx="2"/>
-      <rect x="60" y="36" width="15" height="24" rx="2" transform="rotate(16 67.5 60)"/>
-    </g>` : `
-    ${slip(33, 36, 15, 24, -18, lines(35.5, 42))}
-    ${slip(60, 36, 15, 24, 16, lines(62.5, 42))}
-    ${slip(45.5, 29, 17, 30, 0, question)}`;
-
-  return `
-  ${confetti}
-  <!-- bowl inside (behind the slips) -->
-  <ellipse cx="54" cy="58" rx="27" ry="6.5" fill="${fill(C.bowlInside)}"/>
-  ${slips}
-  <!-- foot, then bowl body -->
-  <rect x="44" y="78" width="20" height="6" rx="2.5" fill="${fill(C.bowlDark)}"/>
-  <!-- bowl body -->
-  <path d="M27 58 h54 c0 14 -11.5 23.5 -27 23.5 s-27 -9.5 -27 -23.5 z" fill="${fill(C.bowl)}"/>
-  ${mono ? '' : `<path d="M27 58 h54 c0 3 -.6 5.8 -1.6 8.4 c-6 3.2 -15 5 -25.4 5 s-19.4 -1.8 -25.4 -5 c-1 -2.6 -1.6 -5.4 -1.6 -8.4 z" fill="#FFFFFF" opacity="0.12"/>`}
-  <!-- rim -->
-  <path d="M26 58 a28 7 0 0 0 56 0 a28 7 0 0 1 -56 0" fill="${fill(C.bowlDark)}"/>
-  <rect x="25" y="55.8" width="58" height="4.4" rx="2.2" fill="${fill(C.bowlDark)}"/>
-  ${mono ? '' : `<rect x="29" y="56.6" width="20" height="1.4" rx="0.7" fill="#FFFFFF" opacity="0.35"/>`}
-  <!-- a smile on the bowl -->
-  ${mono ? '' : `
-  <circle cx="46" cy="67" r="1.9" fill="${C.ink}"/>
-  <circle cx="62" cy="67" r="1.9" fill="${C.ink}"/>
-  <path d="M48.5 71.5 q5.5 4.5 11 0" stroke="${C.ink}" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-  <circle cx="42" cy="71" r="2.4" fill="${C.pink}" opacity="0.55"/>
-  <circle cx="66" cy="71" r="2.4" fill="${C.pink}" opacity="0.55"/>`}`;
+  // Scale the 200x132 bowl to 70 units wide, centred on the grid.
+  return `<g transform="translate(19 32) scale(0.35)">${bowlArt({ mono })}</g>`;
 }
 
 const svg = (viewBox, body, extra = '') =>
@@ -135,6 +113,7 @@ const page = await browser.newPage();
 async function renderHtml(file, w, h, html, { transparent = false } = {}) {
   await page.setViewportSize({ width: w, height: h });
   await page.setContent(`<!doctype html><html><head><meta charset="utf-8"><style>
+    ${fontFaces}
     html,body{margin:0;padding:0;background:${transparent ? 'transparent' : '#fff'}}
     body>svg{display:block;width:${w}px;height:${h}px}
   </style></head><body>${html}</body></html>`);
@@ -189,47 +168,47 @@ try {
   console.warn('Pillow not found: play_icon_512.png stays 24-bit.');
 }
 
-const fonts = `font-family: 'DejaVu Sans', 'FreeSans', Arial, sans-serif;`;
-const arabicFont = `font-family: 'FreeSerif', 'DejaVu Sans', serif;`;
+const display = `font-family:'Bricolage Grotesque';font-weight:800;`;
+const body = `font-family:'Nunito';font-weight:700;`;
+const arabic = `font-family:'Baloo Bhaijaan 2';font-weight:800;`;
+const bowlSvg = (w) => svg('0 0 200 132', bowlArt(), `width="${w}" height="${w * 132 / 200}"`);
+const wordmark = (size) => `<span style="${display}font-size:${size}px;letter-spacing:-1px;color:${C.ink}">family</span><span
+  style="display:inline-block;width:${size * 0.27}px;height:${size * 0.27}px;border-radius:50%;background:${C.tertiary};margin-left:3px"></span>`;
 
-// 1024x500 feature graphic.
+// 1024x500 feature graphic, in the app's light home-screen look.
 await renderHtml(path.join(storeDir, 'feature_graphic_1024x500.png'), 1024, 500, `
-<div style="position:relative;width:1024px;height:500px;overflow:hidden;
-  background:linear-gradient(120deg, ${C.bgTop}, ${C.bgBottom});${fonts}">
-  <div style="position:absolute;left:40px;top:30px;width:440px;height:440px">
-    ${svg('10 10 88 88', background.replace('<rect width="108" height="108" fill="url(#bg)"/>', '') + foreground(), 'width="440" height="440"')}
-  </div>
-  <div style="position:absolute;left:490px;top:70px;width:510px;color:#fff">
-    <div style="font-size:30px;letter-spacing:4px;opacity:.8;font-weight:bold">FAMILY GAME</div>
-    <div style="font-size:78px;font-weight:bold;line-height:1.02;margin-top:10px">Who wrote<br>what?</div>
-    <div dir="rtl" style="${arabicFont}font-size:52px;font-weight:bold;margin-top:18px;color:${C.yellow};text-align:left">مين كتب إيه؟</div>
-    <div style="font-size:21px;margin-top:18px;opacity:.9;line-height:1.35">Drop a name in the bowl. Guess who wrote it.</div>
+<div style="position:relative;width:1024px;height:500px;overflow:hidden;background:${C.surface}">
+  <div style="position:absolute;left:-60px;top:40px;width:560px;height:560px;border-radius:50%;background:${C.primaryContainer}"></div>
+  <div style="position:absolute;left:50px;top:120px">${bowlSvg(400)}</div>
+  <div style="position:absolute;left:500px;top:60px;width:490px">
+    <div>${wordmark(40)}</div>
+    <div style="${display}font-size:86px;line-height:1;letter-spacing:-2px;color:${C.ink};margin-top:14px">Who wrote<br>what?</div>
+    <div dir="rtl" style="${arabic}font-size:56px;line-height:1.3;color:${C.primary};margin-top:10px;text-align:left">مين كتب إيه؟</div>
+    <div style="${body}font-size:22px;color:${C.inkSoft};margin-top:8px;line-height:1.35">Drop a name in the bowl. Guess who wrote it.</div>
   </div>
 </div>`);
 
 // Phone screenshot frame template, 1080x1920 (9:16, inside Play's 320-3840 px and 2:1 limits).
 // The screen hole is transparent: put a 900x1600 app screenshot underneath, or re-run this script
 // with PNGs in store/screenshots/raw/ to frame each one.
-const frame = (caption, arabic) => `
-<div style="position:relative;width:1080px;height:1920px;overflow:hidden;${fonts}">
+const frame = (caption, arabicCaption) => `
+<div style="position:relative;width:1080px;height:1920px;overflow:hidden">
   <svg width="1080" height="1920" style="position:absolute;left:0;top:0">
     <defs>
-      <linearGradient id="g" x1="0" y1="0" x2="0.3" y2="1">
-        <stop offset="0" stop-color="${C.bgTop}"/><stop offset="1" stop-color="${C.bgBottom}"/>
-      </linearGradient>
       <mask id="hole">
         <rect width="1080" height="1920" fill="#fff"/>
-        <rect x="90" y="300" width="900" height="1600" rx="44" fill="#000"/>
+        <rect x="90" y="330" width="900" height="1600" rx="44" fill="#000"/>
       </mask>
     </defs>
     <g mask="url(#hole)">
-      <rect width="1080" height="1920" fill="url(#g)"/>
-      <rect x="70" y="280" width="940" height="1700" rx="64" fill="${C.ink}"/>
+      <rect width="1080" height="1920" fill="${C.surface}"/>
+      <circle cx="980" cy="120" r="260" fill="${C.primaryContainer}"/>
+      <rect x="70" y="310" width="940" height="1700" rx="64" fill="${C.ink}"/>
     </g>
   </svg>
-  <div style="position:absolute;top:70px;width:100%;text-align:center;color:#fff">
-    <div style="font-size:64px;font-weight:bold">${caption}</div>
-    <div dir="rtl" style="${arabicFont}font-size:52px;font-weight:bold;color:${C.yellow};margin-top:14px">${arabic}</div>
+  <div style="position:absolute;top:60px;width:100%;text-align:center">
+    <div style="${display}font-size:68px;letter-spacing:-1.5px;color:${C.ink}">${caption}</div>
+    <div dir="rtl" style="${arabic}font-size:56px;color:${C.primary};margin-top:6px">${arabicCaption}</div>
   </div>
 </div>`;
 const frameCaptions = [
@@ -251,7 +230,7 @@ if (fs.existsSync(rawDir)) {
     const mime = f.toLowerCase().endsWith('png') ? 'image/png' : 'image/jpeg';
     await renderHtml(path.join(storeDir, `screenshots/phone_${i + 1}.png`), 1080, 1920, `
       <div style="position:relative;width:1080px;height:1920px">
-        <img src="data:${mime};base64,${data}" style="position:absolute;left:90px;top:300px;width:900px;height:1600px;object-fit:cover;object-position:top">
+        <img src="data:${mime};base64,${data}" style="position:absolute;left:90px;top:330px;width:900px;height:1600px;object-fit:cover;object-position:top">
         <div style="position:absolute;left:0;top:0">${frame(en, ar)}</div>
       </div>`);
   }
