@@ -100,7 +100,7 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 214 te
 ### Rules and Wi-Fi check of every mode (branch `claude/project-thread-jxaml7`)
 - **Team race:**
   - Starts at 3 names each (up to 5) and needs 12 names in the bowl.
-  - A team that empties the bowl carries its leftover seconds into the next round.
+  - When a team empties the bowl, the next team starts the next round with a full clock (no carried-over seconds: in play-testing one quick clue-giver played all three rounds alone).
   - The name on screen at time-up is shuffled back in, not handed to the next team.
   - Every team needs 2 players; the host can move people even when friends picked teams.
   - The clock pauses (and hides the name) when the app is hidden, on Back, or with Pause.

@@ -14,7 +14,6 @@ class TurnOverScreen extends StatelessWidget {
     final cubit = context.read<CelebrityCubit>();
     final state = context.watch<CelebrityCubit>().state;
     final game = state.game;
-    final carries = game.bowlEmpty && !game.isLastRound && state.secondsLeft > 0;
     final theme = Theme.of(context);
     final l10n = context.l10n;
     final next = !game.bowlEmpty
@@ -39,14 +38,6 @@ class TurnOverScreen extends StatelessWidget {
                 style: theme.textTheme.displaySmall?.copyWith(color: teamColor(context, game.team)),
               ),
             ),
-            if (carries) ...[
-              const SizedBox(height: 12),
-              Text(
-                l10n.carryOnTurn(teamName(l10n, game.team), state.secondsLeft),
-                textAlign: TextAlign.center,
-                style: theme.textTheme.titleMedium,
-              ),
-            ],
             const SizedBox(height: 20),
             Scoreboard(game: game),
           ],

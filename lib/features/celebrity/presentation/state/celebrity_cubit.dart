@@ -87,7 +87,7 @@ class CelebrityCubit extends Cubit<CelebrityState> {
   void startTurn() {
     final game = state.game.startTurn();
     if (identical(game, state.game)) return;
-    emit(state.copyWith(game: game, secondsLeft: state.game.carrySeconds ?? _args.setup.turnSeconds, paused: false));
+    emit(state.copyWith(game: game, secondsLeft: _args.setup.turnSeconds, paused: false));
     _runTicks();
   }
 
@@ -131,7 +131,7 @@ class CelebrityCubit extends Cubit<CelebrityState> {
     emit(state.copyWith(game: state.game.timeUp(), secondsLeft: 0));
   }
 
-  void nextTurn() => emit(state.copyWith(game: state.game.nextTurn(_random, secondsLeft: state.secondsLeft)));
+  void nextTurn() => emit(state.copyWith(game: state.game.nextTurn(_random)));
 
   void _stopClock() {
     _clock?.cancel();

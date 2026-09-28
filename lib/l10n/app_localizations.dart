@@ -2036,18 +2036,6 @@ abstract class AppLocalizations {
   /// **'The clock is stopped and the name is hidden. Tap Carry on when you\'re ready.'**
   String get turnPausedBody;
 
-  /// No description provided for @carryOnTurn.
-  ///
-  /// In en, this message translates to:
-  /// **'{team} emptied the bowl, so they start the next round with the {seconds} s they had left.'**
-  String carryOnTurn(String team, int seconds);
-
-  /// No description provided for @carriedTime.
-  ///
-  /// In en, this message translates to:
-  /// **'{team} starts with {seconds} s left over.'**
-  String carriedTime(String team, int seconds);
-
   /// No description provided for @howToPlayBowl.
   ///
   /// In en, this message translates to:
@@ -2069,7 +2057,7 @@ abstract class AppLocalizations {
   /// No description provided for @howToPlayRounds.
   ///
   /// In en, this message translates to:
-  /// **'When the bowl is empty, every name goes back in for the next round, with harder clues: describe, then one word, then act it out.'**
+  /// **'When the bowl is empty, every name goes back in and the next team starts the next round, with harder clues: describe, then one word, then act it out.'**
   String get howToPlayRounds;
 
   /// No description provided for @howToPlayWhy.

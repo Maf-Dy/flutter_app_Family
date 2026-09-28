@@ -1188,16 +1188,6 @@ class AppLocalizationsAr extends AppLocalizations {
       'الوقت واقف والاسم مستخبي. دوس كمّل لما تبقى جاهز.';
 
   @override
-  String carryOnTurn(String team, int seconds) {
-    return '$team فضّى الطبق، فهيبدأ الجولة اللي بعدها بالـ $seconds ثانية اللي كانت فاضلاله.';
-  }
-
-  @override
-  String carriedTime(String team, int seconds) {
-    return '$team يبدأ بالـ $seconds ثانية اللي فضلوا.';
-  }
-
-  @override
   String get howToPlayBowl =>
       'كل الأسامي بتتحط في طبق واحد، والفرق بتلعب بالدور.';
 
@@ -1210,7 +1200,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get howToPlayRounds =>
-      'لما الطبق يفضى، كل الأسامي ترجع تاني للجولة اللي بعدها بس التلميح أصعب: توصف، بعدين كلمة واحدة، بعدين تمثيل.';
+      'لما الطبق يفضى، كل الأسامي ترجع تاني والفريق اللي عليه الدور يبدأ الجولة اللي بعدها بس التلميح أصعب: توصف، بعدين كلمة واحدة، بعدين تمثيل.';
 
   @override
   String get howToPlayWhy =>

@@ -1187,16 +1187,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'The clock is stopped and the name is hidden. Tap Carry on when you\'re ready.';
 
   @override
-  String carryOnTurn(String team, int seconds) {
-    return '$team emptied the bowl, so they start the next round with the $seconds s they had left.';
-  }
-
-  @override
-  String carriedTime(String team, int seconds) {
-    return '$team starts with $seconds s left over.';
-  }
-
-  @override
   String get howToPlayBowl =>
       'All the names go into one bowl, and the teams take turns.';
 
@@ -1209,7 +1199,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get howToPlayRounds =>
-      'When the bowl is empty, every name goes back in for the next round, with harder clues: describe, then one word, then act it out.';
+      'When the bowl is empty, every name goes back in and the next team starts the next round, with harder clues: describe, then one word, then act it out.';
 
   @override
   String get howToPlayWhy =>

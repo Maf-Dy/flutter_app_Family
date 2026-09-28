@@ -125,31 +125,26 @@ void main() {
     runClock: false,
   );
 
-  test('a team that empties the bowl opens the next round with the seconds it had left', () {
+  test('emptying the bowl early passes the next round to the other team', () {
     var game = started().toHandOff().startTurn();
+    final firstGiver = game.giverId;
     while (game.phase == CelebrityPhase.playing) {
       game = game.gotIt();
     }
     expect(game.emptiedBowl, isTrue);
-    game = game.nextTurn(Random(2), secondsLeft: 20);
+    game = game.nextTurn(Random(2));
     expect(game.round, CelebrityRound.oneWord);
-    expect(game.team, 0, reason: 'the same team carries on');
-    expect(game.giverId, 'p0', reason: 'with the same clue-giver');
-    expect(game.carrySeconds, 20);
-    // Once that turn ends, turns alternate again and the carry is gone.
-    game = game.toHandOff().startTurn().gotIt().timeUp().nextTurn(Random(3));
-    expect(game.team, 1);
-    expect(game.carrySeconds, isNull);
-  });
-
-  test('no carry when the clock and the bowl run out together, or after the last round', () {
-    var game = started().toHandOff().startTurn();
+    expect(game.team, 1, reason: 'the other team opens the next round');
+    expect(game.bowl, hasLength(slips.length), reason: 'every name goes back in');
+    // Round 3 opens with team 0 again, but its next clue-giver, not the same one.
+    game = game.toHandOff().startTurn();
     while (game.phase == CelebrityPhase.playing) {
       game = game.gotIt();
     }
-    game = game.nextTurn(Random(2));
-    expect(game.team, 1);
-    expect(game.carrySeconds, isNull);
+    game = game.nextTurn(Random(3));
+    expect(game.round, CelebrityRound.actOut);
+    expect(game.team, 0);
+    expect(game.giverId, isNot(firstGiver));
   });
 
   test('the name on screen at time-up is shuffled back in, not handed to the next team first', () {
@@ -196,7 +191,7 @@ void main() {
     cubit.close();
   });
 
-  test('the cubit starts a carried turn with the leftover seconds', () {
+  test('the cubit gives every turn the full clock, even after a team empties the bowl early', () {
     final cubit = cubitFor(turnSeconds: 30)
       ..begin()
       ..toHandOff()
@@ -211,8 +206,8 @@ void main() {
       ..nextTurn()
       ..toHandOff()
       ..startTurn();
-    expect(cubit.state.secondsLeft, 25);
-    expect(cubit.state.game.team, 0);
+    expect(cubit.state.secondsLeft, 30);
+    expect(cubit.state.game.team, 1);
     cubit.close();
   });
 

@@ -698,32 +698,10 @@
   "resumeTurn": "Carry on",
   "turnPaused": "Paused",
   "turnPausedBody": "The clock is stopped and the name is hidden. Tap Carry on when you're ready.",
-  "carryOnTurn": "{team} emptied the bowl, so they start the next round with the {seconds} s they had left.",
-  "@carryOnTurn": {
-    "placeholders": {
-      "team": {
-        "type": "String"
-      },
-      "seconds": {
-        "type": "int"
-      }
-    }
-  },
-  "carriedTime": "{team} starts with {seconds} s left over.",
-  "@carriedTime": {
-    "placeholders": {
-      "team": {
-        "type": "String"
-      },
-      "seconds": {
-        "type": "int"
-      }
-    }
-  },
   "howToPlayBowl": "All the names go into one bowl, and the teams take turns.",
   "howToPlayTurn": "On your turn, one of you holds the phone and gets your team to guess as many names as you can before the clock runs out. Every name guessed is a point.",
   "howToPlaySkip": "Stuck? Skip it and it goes back in the bowl.",
-  "howToPlayRounds": "When the bowl is empty, every name goes back in for the next round, with harder clues: describe, then one word, then act it out.",
+  "howToPlayRounds": "When the bowl is empty, every name goes back in and the next team starts the next round, with harder clues: describe, then one word, then act it out.",
   "howToPlayWhy": "That's the fun: the same names come back, so remember what was said. By round 3 a tiny gesture is enough.",
   "howToPlayWin": "Most points after 3 rounds wins.",
   "teamRaceMoreNames": "{count, plural, =1{Team race needs 1 more name in the bowl} other{Team race needs {count} more names in the bowl}}",
