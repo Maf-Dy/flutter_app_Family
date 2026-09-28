@@ -140,7 +140,7 @@ for (const [name, scale] of Object.entries(densities)) {
   await renderSvg(path.join(dir, 'ic_launcher_monochrome.png'), layer, svg('0 0 108 108', foreground({ mono: true })), { transparent: true });
 }
 fs.writeFileSync(path.join(res, 'values/ic_launcher_background.xml'),
-  `<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">${C.bgBottom}</color>\n</resources>\n`);
+  `<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">${C.primaryContainer}</color>\n</resources>\n`);
 // A flat colour behind the foreground would lose the gradient, so use a bitmap layer.
 for (const [name, scale] of Object.entries(densities)) {
   await renderSvg(path.join(res, `mipmap-${name}`, 'ic_launcher_background.png'),

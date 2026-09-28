@@ -68,6 +68,7 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 149 te
 ### New app icon and Play Store assets (branch `claude/project-thread-pzjw84`)
 - New icon: the home-screen bowl (app purple, yellow paper slips, a handwritten "?") on a light lavender background, in the app's own colours and fonts, drawn from vector art in `store/tool/make_assets.mjs` (re-run with `node store/tool/make_assets.mjs`).
 - Android: legacy and round icons for every density, adaptive icon layers, and a monochrome layer for Android 13 themed icons. iOS: every AppIcon size.
+- Fixed an Android build break (`mergeDebugResources`: "Invalid <color>"): the script wrote `undefined` into `ic_launcher_background.xml`. It now writes the lavender `#E3E0FF`.
 - `store/`: the 512x512 Play icon, the 1024x500 feature graphic, and a 1080x1920 phone screenshot frame. Put real screenshots in `store/screenshots/raw/` and re-run the script to get framed `phone_N.png` files.
 
 ## Remaining
