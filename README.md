@@ -34,7 +34,7 @@ The app speaks English and Egyptian Arabic (right to left). It follows the phone
 Pick **Team race** when opening a room. Everyone writes names as usual, then:
 
 1. **Teams.** 2–4 teams, made one of three ways: the app shuffles (with Reshuffle), friends pick on the join page, or the host taps players to move them.
-2. **Three rounds** with the same names: *describe it* (anything but the name), *one word*, then *act it out*.
+2. **One round.** Describe each name (anything but the name itself). Each name is guessed once, and the game ends when the bowl is empty.
 3. **Turns.** The phone goes to each team's next clue-giver. Tap *Got it!* for every name the team guesses, or *Skip* to put it back, before the clock (30–90 s) runs out.
 4. **Results** with confetti. *Share this night* makes a picture of the scores for the family group; the classic mode's *Who wrote what?* has one too.
 

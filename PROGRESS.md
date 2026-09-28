@@ -12,7 +12,7 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 214 te
 - "Same name twice" is a room option. It is allowed by default, and when it's off the app blocks the same name even when it's spelled differently.
 
 ### Step 2: Team race, share card, team picking (commit 45609e2)
-- Team race (Celebrity) mode: 2–4 teams, a 30/45/60/90 s timer, and three rounds (describe, one word, act it out).
+- Team race (Celebrity) mode: 2–4 teams, a 30/45/60/90 s timer, one round: describe each name, and the game ends when the bowl is empty.
 - Teams can be random, picked by players on the join page, or arranged by the host.
 - A shareable end-of-night picture card for team race results and for the classic who-wrote-what reveal.
 
@@ -100,7 +100,7 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 214 te
 ### Rules and Wi-Fi check of every mode (branch `claude/project-thread-jxaml7`)
 - **Team race:**
   - Starts at 3 names each (up to 5) and needs 12 names in the bowl.
-  - When a team empties the bowl, the next team starts the next round with a full clock (no carried-over seconds: in play-testing one quick clue-giver played all three rounds alone).
+  - One round only (Mafdy's pick after play-testing 2026-09-28: repeating the same names over 3 rounds felt wrong). Each name is guessed once; the bowl emptying ends the game. Every turn gets the full clock.
   - The name on screen at time-up is shuffled back in, not handed to the next team.
   - Every team needs 2 players; the host can move people even when friends picked teams.
   - The clock pauses (and hides the name) when the app is hidden, on Back, or with Pause.
@@ -149,7 +149,7 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 214 te
 
 ## Deferred by you
 - Paid app vs in-app purchase: one-time purchase agreed (no ads, no subscription); price, what's paid and any player limit still open. No code yet.
-- Team race: built as bigger bowl + 3 rounds + How to play (12 names minimum, 3 each by default). Mafdy to try it.
+- Team race: one round + How to play (12 names minimum, 3 each by default). Mafdy to try it.
 
 ## Bugs you mentioned
 - **Fixed:** closing the custom category dialog without a name threw an error (its text box was thrown away while the dialog was still fading out).

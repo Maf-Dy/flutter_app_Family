@@ -18,29 +18,21 @@ void main() {
 
   CelebrityGame started() => CelebrityGame.start(slips: slips, teams: teams).begin(Random(1));
 
-  test('plays three rounds with the same names, alternating teams and clue-givers', () {
+  test('one round: each name is guessed once, teams alternate, and the game ends when the bowl is empty', () {
     var game = started();
-    expect(game.phase, CelebrityPhase.roundIntro);
-    for (final round in CelebrityRound.values) {
-      expect(game.round, round);
-      expect(game.bowl, hasLength(4));
-      game = game.toHandOff().startTurn();
-      // Team guesses everything in one turn.
-      while (game.phase == CelebrityPhase.playing) {
-        game = game.gotIt();
-      }
-      expect(game.phase, CelebrityPhase.turnOver);
-      expect(game.bowlEmpty, isTrue);
-      game = game.nextTurn(Random(2));
-    }
+    expect(game.phase, CelebrityPhase.intro);
+    game = game.toHandOff().startTurn().gotIt().timeUp().nextTurn(Random(2));
+    expect(game.team, 1);
+    game = game.startTurn().gotIt().gotIt().timeUp().nextTurn(Random(3));
+    expect(game.team, 0);
+    game = game.startTurn().gotIt();
+    expect(game.phase, CelebrityPhase.turnOver);
+    expect(game.bowlEmpty, isTrue);
+    game = game.nextTurn(Random(4));
     expect(game.phase, CelebrityPhase.finished);
-    // Teams alternate: round 1 team 0, round 2 team 1, round 3 team 0.
-    expect(game.scores, [
-      [4, 0, 4],
-      [0, 4, 0],
-    ]);
-    expect(game.totals, [8, 4]);
-    expect(game.leaders, [0]);
+    expect(game.totals, [2, 2]);
+    expect(game.totals.reduce((a, b) => a + b), slips.length, reason: 'every name counted once');
+    expect(game.leaders, [0, 1]);
   });
 
   test('time running out passes the turn with the rest of the bowl', () {
@@ -110,7 +102,7 @@ void main() {
     );
     expect(cubit.state.game.teamsPlayable, isTrue);
     cubit.begin();
-    expect(cubit.state.game.phase, CelebrityPhase.roundIntro);
+    expect(cubit.state.game.phase, CelebrityPhase.intro);
     cubit.close();
   });
 
@@ -125,26 +117,16 @@ void main() {
     runClock: false,
   );
 
-  test('emptying the bowl early passes the next round to the other team', () {
+  test('emptying the bowl ends the game, with no second round', () {
     var game = started().toHandOff().startTurn();
-    final firstGiver = game.giverId;
     while (game.phase == CelebrityPhase.playing) {
       game = game.gotIt();
     }
     expect(game.emptiedBowl, isTrue);
     game = game.nextTurn(Random(2));
-    expect(game.round, CelebrityRound.oneWord);
-    expect(game.team, 1, reason: 'the other team opens the next round');
-    expect(game.bowl, hasLength(slips.length), reason: 'every name goes back in');
-    // Round 3 opens with team 0 again, but its next clue-giver, not the same one.
-    game = game.toHandOff().startTurn();
-    while (game.phase == CelebrityPhase.playing) {
-      game = game.gotIt();
-    }
-    game = game.nextTurn(Random(3));
-    expect(game.round, CelebrityRound.actOut);
-    expect(game.team, 0);
-    expect(game.giverId, isNot(firstGiver));
+    expect(game.phase, CelebrityPhase.finished);
+    expect(game.totals, [4, 0]);
+    expect(game.leaders, [0]);
   });
 
   test('the name on screen at time-up is shuffled back in, not handed to the next team first', () {
@@ -191,7 +173,7 @@ void main() {
     cubit.close();
   });
 
-  test('the cubit gives every turn the full clock, even after a team empties the bowl early', () {
+  test('the cubit gives every turn the full clock', () {
     final cubit = cubitFor(turnSeconds: 30)
       ..begin()
       ..toHandOff()
@@ -199,12 +181,14 @@ void main() {
     for (var i = 0; i < 5; i++) {
       cubit.tick();
     }
+    cubit
+      ..gotIt()
+      ..skip();
     while (cubit.state.game.phase == CelebrityPhase.playing) {
-      cubit.gotIt();
+      cubit.tick();
     }
     cubit
       ..nextTurn()
-      ..toHandOff()
       ..startTurn();
     expect(cubit.state.secondsLeft, 30);
     expect(cubit.state.game.team, 1);

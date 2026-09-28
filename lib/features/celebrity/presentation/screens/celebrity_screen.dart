@@ -10,7 +10,7 @@ import '../../domain/celebrity_game.dart';
 import '../state/celebrity_cubit.dart';
 import 'hand_off_screen.dart';
 import 'results_screen.dart';
-import 'round_intro_screen.dart';
+import 'intro_screen.dart';
 import 'teams_screen.dart';
 import 'turn_over_screen.dart';
 import 'turn_screen.dart';
@@ -63,7 +63,7 @@ class _Flow extends StatelessWidget {
           position: step,
           child: switch (phase) {
             CelebrityPhase.teams => TeamsScreen(key: ValueKey(step)),
-            CelebrityPhase.roundIntro => RoundIntroScreen(key: ValueKey(step)),
+            CelebrityPhase.intro => IntroScreen(key: ValueKey(step)),
             CelebrityPhase.handOff => HandOffScreen(key: ValueKey(step)),
             CelebrityPhase.playing => TurnScreen(key: ValueKey(step), turnSeconds: args.setup.turnSeconds),
             CelebrityPhase.turnOver => TurnOverScreen(key: ValueKey(step)),

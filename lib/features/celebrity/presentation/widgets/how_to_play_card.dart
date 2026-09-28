@@ -14,8 +14,6 @@ class HowToPlayCard extends StatelessWidget {
       (Icons.emoji_food_beverage_rounded, l10n.howToPlayBowl),
       (Icons.timer_rounded, l10n.howToPlayTurn),
       (Icons.redo_rounded, l10n.howToPlaySkip),
-      (Icons.replay_rounded, l10n.howToPlayRounds),
-      (Icons.psychology_rounded, l10n.howToPlayWhy),
       (Icons.emoji_events_rounded, l10n.howToPlayWin),
     ];
     return Card(

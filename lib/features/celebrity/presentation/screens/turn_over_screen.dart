@@ -16,11 +16,7 @@ class TurnOverScreen extends StatelessWidget {
     final game = state.game;
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final next = !game.bowlEmpty
-        ? l10n.nextTeam
-        : game.isLastRound
-        ? l10n.seeResults
-        : l10n.nextRound;
+    final next = game.bowlEmpty ? l10n.seeResults : l10n.nextTeam;
     return Scaffold(
       appBar: AppBar(automaticallyImplyLeading: false, title: Text(game.bowlEmpty ? l10n.bowlEmptied : l10n.timesUp)),
       body: SafeArea(

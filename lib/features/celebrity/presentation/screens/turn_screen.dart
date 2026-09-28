@@ -9,7 +9,6 @@ import '../../../round/presentation/widgets/paper_slip.dart';
 import '../state/celebrity_cubit.dart';
 import '../../../room/presentation/team_style.dart';
 import '../widgets/timer_ring.dart';
-import 'round_intro_screen.dart';
 
 /// The clue-giver's screen: the clock, the name, and two big buttons.
 class TurnScreen extends StatelessWidget {
@@ -28,7 +27,7 @@ class TurnScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text(roundTitle(l10n, game.round)),
+        title: Text(l10n.roundDescribe),
         actions: [
           IconButton(
             tooltip: state.paused ? l10n.resumeTurn : l10n.pauseTurn,

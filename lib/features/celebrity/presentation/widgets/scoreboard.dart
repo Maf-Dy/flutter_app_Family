@@ -4,7 +4,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../domain/celebrity_game.dart';
 import '../../../room/presentation/team_style.dart';
 
-/// Points per team, per round, and in total. The leading team is highlighted.
+/// Points per team. The leading team is highlighted.
 class Scoreboard extends StatelessWidget {
   const Scoreboard({super.key, required this.game});
 
@@ -36,15 +36,6 @@ class Scoreboard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    for (final points in game.scores[i])
-                      SizedBox(
-                        width: 30,
-                        child: Text(
-                          '$points',
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                        ),
-                      ),
                     SizedBox(
                       width: 44,
                       child: Text(

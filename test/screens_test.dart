@@ -318,17 +318,16 @@ void main() {
         await tapVisible(tester, find.text("Let's play"));
         expect(find.text('How to play'), findsOneWidget);
 
-        for (var round = 0; round < 3; round++) {
-          expect(find.text('Round ${round + 1} of 3'), findsOneWidget);
-          await tapVisible(tester, find.text('Start'));
-          expect(find.text('Pass the phone to'), findsOneWidget);
-          await tapVisible(tester, find.text("I'm ready"));
-          for (var i = 0; i < 12; i++) {
-            await tapVisible(tester, find.text('Got it!'));
-          }
-          expect(find.text('The bowl is empty!'), findsOneWidget);
-          await tapVisible(tester, find.text(round == 2 ? 'See results' : 'Next round'));
+        // One round: the bowl empties and the game ends.
+        expect(find.text('Describe it'), findsOneWidget);
+        await tapVisible(tester, find.text('Start'));
+        expect(find.text('Pass the phone to'), findsOneWidget);
+        await tapVisible(tester, find.text("I'm ready"));
+        for (var i = 0; i < 12; i++) {
+          await tapVisible(tester, find.text('Got it!'));
         }
+        expect(find.text('The bowl is empty!'), findsOneWidget);
+        await tapVisible(tester, find.text('See results'));
         expect(find.textContaining('wins!'), findsOneWidget);
         await tapVisible(tester, find.byTooltip('Share this night'));
         expect(find.text('Share'), findsWidgets);

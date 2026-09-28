@@ -305,7 +305,7 @@
   "modeClassic": "Classic",
   "modeClassicDetail": "Read the names aloud, then play at the table.",
   "modeCelebrity": "Team race",
-  "modeCelebrityDetail": "Teams race the clock to guess the names: describe, one word, then act it out.",
+  "modeCelebrityDetail": "Teams race the clock to guess every name in the bowl.",
   "teams": "Teams",
   "teamCount": "Number of teams",
   "teamPickLabel": "Making teams",
@@ -329,20 +329,8 @@
   "tapToMove": "Tap a player to move them to the next team.",
   "teamsChosenNote": "Friends picked their teams; anyone who didn't was balanced in.",
   "letsPlay": "Let's play",
-  "roundOf": "Round {round} of 3",
-  "@roundOf": {
-    "placeholders": {
-      "round": {
-        "type": "int"
-      }
-    }
-  },
   "roundDescribe": "Describe it",
   "roundDescribeDetail": "Say anything except the name itself.",
-  "roundOneWord": "One word",
-  "roundOneWordDetail": "Just one word per name. Choose it well!",
-  "roundActOut": "Act it out",
-  "roundActOutDetail": "No words at all. Only acting and sounds.",
   "startRound": "Start",
   "teamTurn": "{team}'s turn",
   "@teamTurn": {
@@ -387,7 +375,6 @@
     }
   },
   "nextTeam": "Next team",
-  "nextRound": "Next round",
   "seeResults": "See results",
   "winnerIs": "{team} wins!",
   "@winnerIs": {
@@ -701,9 +688,7 @@
   "howToPlayBowl": "All the names go into one bowl, and the teams take turns.",
   "howToPlayTurn": "On your turn, one of you holds the phone and gets your team to guess as many names as you can before the clock runs out. Every name guessed is a point.",
   "howToPlaySkip": "Stuck? Skip it and it goes back in the bowl.",
-  "howToPlayRounds": "When the bowl is empty, every name goes back in and the next team starts the next round, with harder clues: describe, then one word, then act it out.",
-  "howToPlayWhy": "That's the fun: the same names come back, so remember what was said. By round 3 a tiny gesture is enough.",
-  "howToPlayWin": "Most points after 3 rounds wins.",
+  "howToPlayWin": "When the bowl is empty the game ends. The team with the most names wins.",
   "teamRaceMoreNames": "{count, plural, =1{Team race needs 1 more name in the bowl} other{Team race needs {count} more names in the bowl}}",
   "@teamRaceMoreNames": {
     "placeholders": {
