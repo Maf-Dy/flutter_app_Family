@@ -858,7 +858,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyErrorNotHead => 'Only the head of your family makes the guess.';
 
   @override
-  String get familyErrorInvalidTarget => 'That person is already in your family.';
+  String get familyErrorInvalidTarget => 'You can’t ask that person. Pick someone else.';
 
   @override
   String get familyErrorInvalidSlip => 'That name is already out.';

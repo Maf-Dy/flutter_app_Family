@@ -524,7 +524,7 @@
   "familyLeaveBody": "The game ends on everyone's phone, but the names stay in the bowl.",
   "familyErrorNotYourTurn": "Hold on, it's not your family's turn.",
   "familyErrorNotHead": "Only the head of your family makes the guess.",
-  "familyErrorInvalidTarget": "That person is already in your family.",
+  "familyErrorInvalidTarget": "You can’t ask that person. Pick someone else.",
   "familyErrorInvalidSlip": "That name is already out.",
   "familyErrorGameOver": "The game is over.",
   "familyErrorChatOff": "Chat is off in this room.",
