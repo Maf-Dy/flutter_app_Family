@@ -56,9 +56,15 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 125 te
   - When Android turns the hotspot off (usually on leaving the app), the lobby says so.
   - A hotspot that stopped before it started no longer leaves "Starting hotspot" spinning forever.
 
+### New app icon and Play Store assets (branch `claude/project-thread-pzjw84`)
+- New icon: a smiling orange bowl with name slips and a "?" on the app's purple, drawn from vector art in `store/tool/make_assets.mjs` (re-run with `node store/tool/make_assets.mjs`).
+- Android: legacy and round icons for every density, adaptive icon layers, and a monochrome layer for Android 13 themed icons. iOS: every AppIcon size.
+- `store/`: the 512x512 Play icon, the 1024x500 feature graphic, and a 1080x1920 phone screenshot frame. Put real screenshots in `store/screenshots/raw/` and re-run the script to get framed `phone_N.png` files.
+
 ## Remaining
 1. **On a real device:** play the browser family page on 3+ phones over Wi-Fi and on the app's hotspot (polling, chat, voting, the vibration on your turn).
 2. **On a real device:** "Join a game" on a second phone, on home Wi-Fi and on the app's hotspot; and "Create hotspot" staying on. The Kotlin changes (multicast lock, hotspot stop) were not compiled in the cloud session.
+3. **Store listing:** take 2 to 8 real phone screenshots and frame them (see `store/README.md`). Check the new icon on a real launcher.
 
 ## Deferred by you
 - Paid app vs in-app purchase: decide later. No code yet.
