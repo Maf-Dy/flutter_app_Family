@@ -55,7 +55,11 @@ void main() {
     );
     // With motion on, the home bowl bobs forever, so there is nothing to settle.
     reducedMotion ? await tester.pumpAndSettle() : await tester.pump(const Duration(milliseconds: 500));
-    await tester.tap(find.text(locale.languageCode == 'ar' ? 'ادخل لعبة' : 'Join a game'));
+    // Three ways to play: on a short screen the last one is below the fold.
+    final join = find.text(locale.languageCode == 'ar' ? 'ادخل لعبة' : 'Join a game');
+    await tester.ensureVisible(join);
+    await tester.pump();
+    await tester.tap(join);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
   }

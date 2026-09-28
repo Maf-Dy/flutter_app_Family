@@ -984,4 +984,116 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get searchingJoke4 => 'بندور تحت مخدات الكنبة…';
+
+  @override
+  String get passPhone => 'عدّي الموبايل';
+
+  @override
+  String get passPhoneDetail => 'موبايل واحد للكل. من غير واي فاي.';
+
+  @override
+  String get passSetupTitle => 'عدّي الموبايل';
+
+  @override
+  String get passSetupNote => 'مش محتاج تكتب أسامي اللعيبة. كل واحد هيكتب اسمه لما الموبايل يوصله.';
+
+  @override
+  String get passBegin => 'يلا نبدأ';
+
+  @override
+  String get passYourTurn => 'دورك';
+
+  @override
+  String get passPrivate => 'محدش غيرك يبص!';
+
+  @override
+  String get passSecretNames => 'أساميك السرية';
+
+  @override
+  String passSecretN(int n) {
+    return 'الاسم $n';
+  }
+
+  @override
+  String get passTapYourName => 'لعبت قبل كده؟ دوس على اسمك';
+
+  @override
+  String get passIntoBowl => 'ارميهم في الطبق';
+
+  @override
+  String get passErrorMissingName => 'اكتب اسمك الأول.';
+
+  @override
+  String passErrorNameTaken(String name) {
+    return '$name موجود خلاص. زوّد حرف، زي \"$name م\".';
+  }
+
+  @override
+  String get passErrorMissingSecret => 'املا كل الأسامي.';
+
+  @override
+  String get passErrorTooLong => 'ده طويل أوي. اختصر شوية.';
+
+  @override
+  String get passErrorFull => 'الطبق اتملى: ٣٠ لاعب بالكتير.';
+
+  @override
+  String passNamesIn(String name) {
+    return 'أسامي $name في الطبق!';
+  }
+
+  @override
+  String get passToNext => 'عدّي الموبايل للي بعدك';
+
+  @override
+  String get passImNext => 'الدور عليا';
+
+  @override
+  String passNeedMore(int count, int needed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count كتبوا. محتاجين $needed على الأقل.',
+      one: 'واحد كتب. محتاجين $needed على الأقل.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passHoldToStart => 'اضغط كتير عشان نبدأ';
+
+  @override
+  String get passHoldHint => 'اضغط وسيب صباعك';
+
+  @override
+  String get passEveryoneInTitle => 'كله كتب؟';
+
+  @override
+  String passEveryoneInBody(int count) {
+    return '$count لعيبة. أول ما نبدأ محدش يقدر يزوّد أسامي.';
+  }
+
+  @override
+  String get passYesStart => 'أيوه، يلا نلعب';
+
+  @override
+  String get passKeepPassing => 'لأ، كمّلوا لف';
+
+  @override
+  String get passStopTitle => 'نوقف اللف؟';
+
+  @override
+  String get passStopBody => 'الأسامي اللي في الطبق هتضيع.';
+
+  @override
+  String get passStop => 'وقّف';
+
+  @override
+  String get passKeepGoing => 'كمّل';
+
+  @override
+  String get passReaderTitle => 'ادّي الموبايل للي هيقرا الأسامي';
+
+  @override
+  String get passReaderDetail => 'الباقي ودانكم معانا!';
 }

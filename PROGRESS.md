@@ -1,6 +1,6 @@
 # Progress: expansion work
 
-Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 149 tests pass on this commit.
+Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 170 tests pass on this commit.
 
 ## Done
 
@@ -71,10 +71,27 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 149 te
 - Fixed an Android build break (`mergeDebugResources`: "Invalid <color>"): the script wrote `undefined` into `ic_launcher_background.xml`. It now writes the lavender `#E3E0FF`.
 - `store/`: the 512x512 Play icon, the 1024x500 feature graphic, and a 1080x1920 phone screenshot frame. Put real screenshots in `store/screenshots/raw/` and re-run the script to get framed `phone_N.png` files.
 
+### Pass the phone (branch `claude/pass-the-phone-mode-0auij5`)
+- **The idea:** one phone, no Wi-Fi. The phone goes round the table and each person types their own name and secret names in private. Nobody types a list of players. Design mockups: https://claude.ai/artifact/JSJfDcCM19HdAAzBezcV8G
+- **Home:** a third tile, "Pass the phone" / "عدّي الموبايل", drawn as a paper slip. The home bowl is smaller on short screens so all three tiles fit.
+- **Setup:** Classic or Team race (the family game needs everyone's phone), teams random or arranged by the host, category, names each, "Same name twice". Shared widgets moved to `room_options.dart`.
+- **Your turn** (`your_turn_screen.dart`): your name (the owner's saved name for the first turn), then the secret names on paper slips. A slip hides itself when you move to the next box. After a round, earlier players tap their name to keep their colour.
+  - Same checks as the join page, plus two players can't share a name ("Sara is already in. Add a letter").
+- **Keeping names secret:**
+  - After "Into the bowl" the names are never shown again until the reading.
+  - The hand-off screen shows only who is in, and Back from a turn returns to the hand-off, never to the last person's slips.
+  - Leaving the app mid-turn wipes the typed secret names.
+  - Android blocks screenshots and the recent-apps preview on the typing screen (`FLAG_SECURE` via `family_game/secure_screen`). iOS has no equivalent block.
+- **Not starting by mistake:** from 3 players (4 for Team race), "Hold to start the game" needs a 2-second press and hold, then "Is everyone in?" lists the players with "Yes, start the game" / "No, keep passing". Back while passing asks "Stop passing?".
+- **Then:** Classic shows "Give the phone to whoever reads the names out", then the usual read-aloud and reveal. Team race goes straight to the teams. "New round" keeps everyone and empties the bowl; "End game" goes home.
+- **Tests** (21 new): `test/features/pass_phone/` covers the rules, the whole flow, the hold (a tap or a short hold does nothing), slips hiding, the wipe on leaving the app, the name clash, Back, Team race, and Egyptian Arabic in portrait and landscape.
+- **Fixed on the way:** the hold button never filled when the page could scroll (landscape, small phones), because the tap recogniser waited for the scroll to lose. It now listens to the raw press.
+
 ## Remaining
 1. **On a real device:** play the browser family page on 3+ phones over Wi-Fi and on the app's hotspot (polling, chat, voting, the vibration on your turn).
 2. **On a real device:** "Join a game" on a second phone, on home Wi-Fi and on the app's hotspot, including scanning both codes; and "Create hotspot" staying on. The Kotlin changes (multicast lock, hotspot stop, Wi-Fi settings) were not compiled in the cloud session.
-3. **Store listing:** take 2 to 8 real phone screenshots and frame them (see `store/README.md`). Check the new icon on a real launcher.
+3. **On a real device:** a Pass the phone round with 3+ people; check that Android blocks a screenshot on the typing screen (the Kotlin change was not compiled in the cloud).
+4. **Store listing:** take 2 to 8 real phone screenshots and frame them (see `store/README.md`). Check the new icon on a real launcher.
 
 ## Deferred by you
 - Paid app vs in-app purchase: decide later. No code yet.

@@ -970,4 +970,116 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchingJoke4 => 'Checking under the sofa cushions…';
+
+  @override
+  String get passPhone => 'Pass the phone';
+
+  @override
+  String get passPhoneDetail => 'One phone for everyone. No Wi-Fi needed.';
+
+  @override
+  String get passSetupTitle => 'Pass the phone';
+
+  @override
+  String get passSetupNote => 'No need to list the players. Everyone types their own name when the phone gets to them.';
+
+  @override
+  String get passBegin => 'Start';
+
+  @override
+  String get passYourTurn => 'Your turn';
+
+  @override
+  String get passPrivate => 'Nobody else should see this.';
+
+  @override
+  String get passSecretNames => 'Your secret names';
+
+  @override
+  String passSecretN(int n) {
+    return 'Name $n';
+  }
+
+  @override
+  String get passTapYourName => 'Played already? Tap your name';
+
+  @override
+  String get passIntoBowl => 'Into the bowl';
+
+  @override
+  String get passErrorMissingName => 'Type your name first.';
+
+  @override
+  String passErrorNameTaken(String name) {
+    return '$name is already in. Add a letter, like \"$name M\".';
+  }
+
+  @override
+  String get passErrorMissingSecret => 'Fill in every name.';
+
+  @override
+  String get passErrorTooLong => 'That\'s too long. Keep it shorter.';
+
+  @override
+  String get passErrorFull => 'The bowl is full: 30 players at most.';
+
+  @override
+  String passNamesIn(String name) {
+    return '$name\'s names are in the bowl!';
+  }
+
+  @override
+  String get passToNext => 'Pass the phone to the next person';
+
+  @override
+  String get passImNext => 'I\'m next';
+
+  @override
+  String passNeedMore(int count, int needed) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count in. At least $needed needed to play.',
+      one: '1 in. At least $needed needed to play.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get passHoldToStart => 'Hold to start the game';
+
+  @override
+  String get passHoldHint => 'Press and hold';
+
+  @override
+  String get passEveryoneInTitle => 'Is everyone in?';
+
+  @override
+  String passEveryoneInBody(int count) {
+    return '$count players. Once you start, nobody can add names.';
+  }
+
+  @override
+  String get passYesStart => 'Yes, start the game';
+
+  @override
+  String get passKeepPassing => 'No, keep passing';
+
+  @override
+  String get passStopTitle => 'Stop passing?';
+
+  @override
+  String get passStopBody => 'The names in the bowl will be lost.';
+
+  @override
+  String get passStop => 'Stop';
+
+  @override
+  String get passKeepGoing => 'Keep going';
+
+  @override
+  String get passReaderTitle => 'Give the phone to whoever reads the names out';
+
+  @override
+  String get passReaderDetail => 'Everyone else, listen closely!';
 }

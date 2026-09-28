@@ -583,5 +583,75 @@
   "searchingJoke1": "Shaking the bowl to see who falls out…",
   "searchingJoke2": "Knocking on the neighbours' doors…",
   "searchingJoke3": "Asking auntie who's hosting tonight…",
-  "searchingJoke4": "Checking under the sofa cushions…"
+  "searchingJoke4": "Checking under the sofa cushions…",
+  "passPhone": "Pass the phone",
+  "passPhoneDetail": "One phone for everyone. No Wi-Fi needed.",
+  "passSetupTitle": "Pass the phone",
+  "passSetupNote": "No need to list the players. Everyone types their own name when the phone gets to them.",
+  "passBegin": "Start",
+  "passYourTurn": "Your turn",
+  "passPrivate": "Nobody else should see this.",
+  "passSecretNames": "Your secret names",
+  "passSecretN": "Name {n}",
+  "@passSecretN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "passTapYourName": "Played already? Tap your name",
+  "passIntoBowl": "Into the bowl",
+  "passErrorMissingName": "Type your name first.",
+  "passErrorNameTaken": "{name} is already in. Add a letter, like \"{name} M\".",
+  "@passErrorNameTaken": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "passErrorMissingSecret": "Fill in every name.",
+  "passErrorTooLong": "That's too long. Keep it shorter.",
+  "passErrorFull": "The bowl is full: 30 players at most.",
+  "passNamesIn": "{name}'s names are in the bowl!",
+  "@passNamesIn": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "passToNext": "Pass the phone to the next person",
+  "passImNext": "I'm next",
+  "passNeedMore": "{count, plural, =1{1 in. At least {needed} needed to play.} other{{count} in. At least {needed} needed to play.}}",
+  "@passNeedMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "needed": {
+        "type": "int"
+      }
+    }
+  },
+  "passHoldToStart": "Hold to start the game",
+  "passHoldHint": "Press and hold",
+  "passEveryoneInTitle": "Is everyone in?",
+  "passEveryoneInBody": "{count} players. Once you start, nobody can add names.",
+  "@passEveryoneInBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "passYesStart": "Yes, start the game",
+  "passKeepPassing": "No, keep passing",
+  "passStopTitle": "Stop passing?",
+  "passStopBody": "The names in the bowl will be lost.",
+  "passStop": "Stop",
+  "passKeepGoing": "Keep going",
+  "passReaderTitle": "Give the phone to whoever reads the names out",
+  "passReaderDetail": "Everyone else, listen closely!"
 }

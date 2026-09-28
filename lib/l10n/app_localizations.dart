@@ -1741,6 +1741,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Checking under the sofa cushions…'**
   String get searchingJoke4;
+
+  /// No description provided for @passPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass the phone'**
+  String get passPhone;
+
+  /// No description provided for @passPhoneDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'One phone for everyone. No Wi-Fi needed.'**
+  String get passPhoneDetail;
+
+  /// No description provided for @passSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass the phone'**
+  String get passSetupTitle;
+
+  /// No description provided for @passSetupNote.
+  ///
+  /// In en, this message translates to:
+  /// **'No need to list the players. Everyone types their own name when the phone gets to them.'**
+  String get passSetupNote;
+
+  /// No description provided for @passBegin.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get passBegin;
+
+  /// No description provided for @passYourTurn.
+  ///
+  /// In en, this message translates to:
+  /// **'Your turn'**
+  String get passYourTurn;
+
+  /// No description provided for @passPrivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody else should see this.'**
+  String get passPrivate;
+
+  /// No description provided for @passSecretNames.
+  ///
+  /// In en, this message translates to:
+  /// **'Your secret names'**
+  String get passSecretNames;
+
+  /// No description provided for @passSecretN.
+  ///
+  /// In en, this message translates to:
+  /// **'Name {n}'**
+  String passSecretN(int n);
+
+  /// No description provided for @passTapYourName.
+  ///
+  /// In en, this message translates to:
+  /// **'Played already? Tap your name'**
+  String get passTapYourName;
+
+  /// No description provided for @passIntoBowl.
+  ///
+  /// In en, this message translates to:
+  /// **'Into the bowl'**
+  String get passIntoBowl;
+
+  /// No description provided for @passErrorMissingName.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your name first.'**
+  String get passErrorMissingName;
+
+  /// No description provided for @passErrorNameTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is already in. Add a letter, like \"{name} M\".'**
+  String passErrorNameTaken(String name);
+
+  /// No description provided for @passErrorMissingSecret.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in every name.'**
+  String get passErrorMissingSecret;
+
+  /// No description provided for @passErrorTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s too long. Keep it shorter.'**
+  String get passErrorTooLong;
+
+  /// No description provided for @passErrorFull.
+  ///
+  /// In en, this message translates to:
+  /// **'The bowl is full: 30 players at most.'**
+  String get passErrorFull;
+
+  /// No description provided for @passNamesIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}\'s names are in the bowl!'**
+  String passNamesIn(String name);
+
+  /// No description provided for @passToNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass the phone to the next person'**
+  String get passToNext;
+
+  /// No description provided for @passImNext.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m next'**
+  String get passImNext;
+
+  /// No description provided for @passNeedMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 in. At least {needed} needed to play.} other{{count} in. At least {needed} needed to play.}}'**
+  String passNeedMore(int count, int needed);
+
+  /// No description provided for @passHoldToStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to start the game'**
+  String get passHoldToStart;
+
+  /// No description provided for @passHoldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Press and hold'**
+  String get passHoldHint;
+
+  /// No description provided for @passEveryoneInTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Is everyone in?'**
+  String get passEveryoneInTitle;
+
+  /// No description provided for @passEveryoneInBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} players. Once you start, nobody can add names.'**
+  String passEveryoneInBody(int count);
+
+  /// No description provided for @passYesStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, start the game'**
+  String get passYesStart;
+
+  /// No description provided for @passKeepPassing.
+  ///
+  /// In en, this message translates to:
+  /// **'No, keep passing'**
+  String get passKeepPassing;
+
+  /// No description provided for @passStopTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop passing?'**
+  String get passStopTitle;
+
+  /// No description provided for @passStopBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The names in the bowl will be lost.'**
+  String get passStopBody;
+
+  /// No description provided for @passStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get passStop;
+
+  /// No description provided for @passKeepGoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep going'**
+  String get passKeepGoing;
+
+  /// No description provided for @passReaderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the phone to whoever reads the names out'**
+  String get passReaderTitle;
+
+  /// No description provided for @passReaderDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone else, listen closely!'**
+  String get passReaderDetail;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

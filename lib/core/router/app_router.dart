@@ -10,11 +10,15 @@ import '../../features/celebrity/celebrity_route.dart';
 import '../../features/celebrity/presentation/screens/celebrity_screen.dart';
 import '../../features/family/family_route.dart';
 import '../../features/family/presentation/screens/family_screen.dart';
+import '../../features/pass_phone/presentation/screens/pass_phone_screen.dart';
 
 abstract final class AppRoutes {
   static const home = '/';
   static const room = '/room';
   static const join = '/join';
+
+  /// One phone passed round the table instead of a Wi-Fi room.
+  static const passPhone = '/pass-phone';
 
   /// Expects [RoundArgs]; pops with a [GameExit] or null.
   static const round = '/round';
@@ -29,6 +33,7 @@ abstract final class AppRoutes {
     (home, _) => MaterialPageRoute(settings: settings, builder: (_) => const HomeScreen()),
     (room, _) => MaterialPageRoute(settings: settings, builder: (_) => const RoomScreen()),
     (join, _) => MaterialPageRoute(settings: settings, builder: (_) => const JoinScreen()),
+    (passPhone, _) => MaterialPageRoute(settings: settings, builder: (_) => const PassPhoneScreen()),
     (round, final RoundArgs args) => MaterialPageRoute<GameExit>(
       settings: settings,
       builder: (_) => RoundScreen(args: args),

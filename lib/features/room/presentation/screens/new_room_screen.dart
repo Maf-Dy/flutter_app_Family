@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/l10n/l10n.dart';
-import '../../../../core/router/safe_pop.dart';
 import '../../../../core/theme/game_colors.dart';
 import '../../../settings/domain/app_settings.dart';
 import '../../../settings/presentation/state/settings_cubit.dart';
 import '../../domain/room.dart';
 import '../category_label.dart';
 import '../state/room_cubit.dart';
+import '../widgets/room_options.dart';
 import '../widgets/section_label.dart';
 import '../widgets/select_chip.dart';
 
@@ -39,7 +39,7 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
   Future<void> _pickCustomCategory(GameCategory current) async {
     final text = await showDialog<String>(
       context: context,
-      builder: (context) => _CustomCategoryDialog(initial: current.custom ?? ''),
+      builder: (context) => CustomCategoryDialog(initial: current.custom ?? ''),
     );
     final clean = Room.tidy(text ?? '');
     if (clean.isNotEmpty && mounted) context.read<RoomCubit>().selectCategory(GameCategory.custom(clean));
@@ -83,7 +83,7 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
               ])
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: _ModeOption(
+                  child: ModeOption(
                     title: title,
                     detail: detail,
                     icon: icon,
@@ -95,7 +95,7 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
                 const SizedBox(height: 16),
                 SectionLabel(l10n.teams),
                 const SizedBox(height: 10),
-                _TeamSettings(setup: state.teamSetup, onChanged: cubit.setTeamSetup),
+                TeamSettings(setup: state.teamSetup, onChanged: cubit.setTeamSetup),
               ],
               if (state.mode == GameMode.family) ...[
                 const SizedBox(height: 8),
@@ -132,44 +132,7 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
               const SizedBox(height: 28),
               SectionLabel(l10n.namesPerPlayer),
               const SizedBox(height: 10),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(16, 6, 6, 6),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          l10n.namesPerPlayerDetail,
-                          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                        ),
-                      ),
-                      IconButton.filledTonal(
-                        tooltip: l10n.fewerNames,
-                        onPressed: state.namesPerPlayer > 1
-                            ? () => cubit.setNamesPerPlayer(state.namesPerPlayer - 1)
-                            : null,
-                        icon: const Icon(Icons.remove_rounded),
-                      ),
-                      SizedBox(
-                        width: 40,
-                        child: Text(
-                          '${state.namesPerPlayer}',
-                          textAlign: TextAlign.center,
-                          semanticsLabel: l10n.namesPerPlayerValue(state.namesPerPlayer),
-                          style: theme.textTheme.headlineSmall,
-                        ),
-                      ),
-                      IconButton.filledTonal(
-                        tooltip: l10n.moreNames,
-                        onPressed: state.namesPerPlayer < Room.maxNamesPerPlayer
-                            ? () => cubit.setNamesPerPlayer(state.namesPerPlayer + 1)
-                            : null,
-                        icon: const Icon(Icons.add_rounded),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              NamesPerPlayerCard(count: state.namesPerPlayer, onChanged: cubit.setNamesPerPlayer),
               const SizedBox(height: 28),
               SectionLabel(l10n.rules),
               const SizedBox(height: 10),
@@ -204,182 +167,6 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
                 ? const SizedBox.square(dimension: 20, child: CircularProgressIndicator(strokeWidth: 2))
                 : Text(l10n.openRoom),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Owns its text controller, so the field can still draw while the dialog
-/// fades out after it has been closed.
-class _CustomCategoryDialog extends StatefulWidget {
-  const _CustomCategoryDialog({required this.initial});
-
-  final String initial;
-
-  @override
-  State<_CustomCategoryDialog> createState() => _CustomCategoryDialogState();
-}
-
-class _CustomCategoryDialogState extends State<_CustomCategoryDialog> {
-  late final _controller = TextEditingController(text: widget.initial);
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return AlertDialog(
-      title: Text(l10n.customCategoryTitle),
-      content: TextField(
-        controller: _controller,
-        autofocus: true,
-        maxLength: GameCategory.maxCustomLength,
-        textCapitalization: TextCapitalization.sentences,
-        decoration: InputDecoration(hintText: l10n.customCategoryHint, counterText: ''),
-        onSubmitted: (value) => context.popRoute(value),
-      ),
-      actions: [
-        TextButton(onPressed: () => context.popRoute(), child: Text(l10n.cancel)),
-        TextButton(onPressed: () => context.popRoute(_controller.text), child: Text(l10n.use)),
-      ],
-    );
-  }
-}
-
-class _ModeOption extends StatelessWidget {
-  const _ModeOption({
-    required this.title,
-    required this.detail,
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String title;
-  final String detail;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    return Semantics(
-      selected: selected,
-      button: true,
-      child: Material(
-        color: selected ? scheme.primaryContainer : scheme.surfaceContainerLowest,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
-          side: BorderSide(color: selected ? scheme.primary : scheme.outlineVariant, width: selected ? 2 : 1),
-        ),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(18),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                Icon(icon, color: selected ? scheme.onPrimaryContainer : scheme.onSurfaceVariant),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(title, style: theme.textTheme.titleMedium),
-                      Text(detail, style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TeamSettings extends StatelessWidget {
-  const _TeamSettings({required this.setup, required this.onChanged});
-
-  final TeamSetup setup;
-  final ValueChanged<TeamSetup> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(child: Text(l10n.teamCount, style: theme.textTheme.titleMedium)),
-                IconButton.filledTonal(
-                  tooltip: l10n.fewerTeams,
-                  onPressed: setup.count > TeamSetup.minTeams
-                      ? () => onChanged(setup.copyWith(count: setup.count - 1))
-                      : null,
-                  icon: const Icon(Icons.remove_rounded),
-                ),
-                SizedBox(
-                  width: 36,
-                  child: Text('${setup.count}', textAlign: TextAlign.center, style: theme.textTheme.headlineSmall),
-                ),
-                IconButton.filledTonal(
-                  tooltip: l10n.moreTeams,
-                  onPressed: setup.count < TeamSetup.maxTeams
-                      ? () => onChanged(setup.copyWith(count: setup.count + 1))
-                      : null,
-                  icon: const Icon(Icons.add_rounded),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Text(l10n.teamPickLabel, style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final (pick, label) in [
-                  (TeamPick.random, l10n.teamPickRandom),
-                  (TeamPick.players, l10n.teamPickPlayers),
-                  (TeamPick.host, l10n.teamPickHost),
-                ])
-                  SelectChip(
-                    label: label,
-                    selected: setup.pick == pick,
-                    onTap: () => onChanged(setup.copyWith(pick: pick)),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Text(l10n.turnLength, style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final seconds in TeamSetup.turnChoices)
-                  SelectChip(
-                    label: l10n.secondsShort(seconds),
-                    selected: setup.turnSeconds == seconds,
-                    onTap: () => onChanged(setup.copyWith(turnSeconds: seconds)),
-                  ),
-              ],
-            ),
-          ],
         ),
       ),
     );

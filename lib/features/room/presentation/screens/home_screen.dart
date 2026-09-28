@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/router/app_router.dart';
+import '../../../../core/theme/game_colors.dart';
 import '../../../../core/widgets/bowl.dart';
 import '../widgets/how_to_play_sheet.dart';
 import '../../../../core/l10n/l10n.dart';
@@ -44,7 +45,8 @@ class HomeScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Center(child: Bowl()),
+                        // Smaller on short screens, so all three ways to play fit without scrolling.
+                        Center(child: Bowl(width: MediaQuery.sizeOf(context).height < 860 ? 120 : 200)),
                         const SizedBox(height: 16),
                         Text(l10n.homeHeadline, textAlign: TextAlign.center, style: theme.textTheme.displaySmall),
                         const SizedBox(height: 10),
@@ -55,6 +57,8 @@ class HomeScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 24),
                         const _HostButton(),
+                        const SizedBox(height: 12),
+                        const _PassButton(),
                         const SizedBox(height: 12),
                         const _JoinButton(),
                       ],
@@ -136,6 +140,62 @@ class _HostButton extends StatelessWidget {
                 ),
               ),
               Icon(Icons.chevron_right_rounded, color: scheme.onPrimary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One phone for everyone, drawn as a paper slip like the old game.
+class _PassButton extends StatelessWidget {
+  const _PassButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final game = context.gameColors;
+    return Material(
+      color: game.slipPaper,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(22),
+        side: BorderSide(color: game.slipEdge, width: 1.5),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(22),
+        onTap: () => Navigator.of(context).pushNamed(AppRoutes.passPhone),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: game.slipInk.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(Icons.phone_android_rounded, color: game.slipInk),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(context.l10n.passPhone, style: theme.textTheme.titleLarge?.copyWith(color: game.slipInk)),
+                    const SizedBox(height: 2),
+                    Text(
+                      context.l10n.passPhoneDetail,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: game.slipInk.withValues(alpha: 0.8),
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: game.slipInk),
             ],
           ),
         ),
