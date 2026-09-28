@@ -100,7 +100,11 @@ class LanRoomHost implements RoomHost {
     try {
       var clientId = _clientIdOf(request);
       if (clientId == null) {
-        response.cookies.add(_cookie(_newClientId()));
+        final fresh = _newClientId();
+        response.cookies.add(_cookie(fresh));
+        // A first visit that posts straight away (cookies were cleared, or the
+        // page came from another address) still gets its names in.
+        if (request.method == 'POST' && request.uri.path == '/') clientId = fresh;
       } else {
         clientId = _takeBackSeat(clientId, response);
         _heardFrom(clientId);
@@ -157,14 +161,20 @@ class LanRoomHost implements RoomHost {
       response.statusCode = HttpStatus.requestEntityTooLarge;
       return;
     }
+    // A page left open from an earlier room on this address: show this room's form instead.
+    final code = form['code'];
+    if (code != null && code != _room.code) {
+      response
+        ..statusCode = HttpStatus.seeOther
+        ..headers.set(HttpHeaders.locationHeader, '/');
+      return;
+    }
     final name = form['name'] ?? '';
     final secrets = [for (var i = 0; i < _room.namesPerPlayer; i++) form['s$i'] ?? ''];
     final team = int.tryParse(form['team'] ?? '');
     final error = _room.playersPickTeams && team == null
         ? SubmissionError.invalidTeam
         : _room.validate(name: name, secrets: secrets, playerId: clientId, team: team);
-    // Without a cookie there is no stable identity yet; the cookie set on this
-    // response makes the next attempt stick.
     if (error != null || clientId == null) {
       response.statusCode = error == SubmissionError.roomClosed ? HttpStatus.conflict : HttpStatus.badRequest;
       _html(
@@ -205,7 +215,9 @@ class LanRoomHost implements RoomHost {
     _json(response, {'error': error?.name});
   }
 
+  /// Lasts a whole evening, so closing the browser doesn't turn a friend into a stranger.
   Cookie _cookie(String value) => Cookie(cookieName, value)
+    ..maxAge = const Duration(hours: 12).inSeconds
     ..httpOnly = true
     ..sameSite = SameSite.lax
     ..path = '/';

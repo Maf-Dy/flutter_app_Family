@@ -1180,4 +1180,16 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String removePlayerTitle(String name) {
+    return 'Take $name out of the room?';
+  }
+
+  @override
+  String get removePlayerBody =>
+      'Their names come out of the bowl. Use this for an old entry left behind when someone joined again on a new phone.';
+
+  @override
+  String get removePlayer => 'Take out';
 }

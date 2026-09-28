@@ -2083,6 +2083,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{Team race needs 1 more name in the bowl} other{Team race needs {count} more names in the bowl}}'**
   String teamRaceMoreNames(int count);
+
+  /// No description provided for @removePlayerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Take {name} out of the room?'**
+  String removePlayerTitle(String name);
+
+  /// No description provided for @removePlayerBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Their names come out of the bowl. Use this for an old entry left behind when someone joined again on a new phone.'**
+  String get removePlayerBody;
+
+  /// No description provided for @removePlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Take out'**
+  String get removePlayer;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

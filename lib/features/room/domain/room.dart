@@ -309,6 +309,19 @@ final class Room {
     );
   }
 
+  /// The host takes a friend out of the room, e.g. an old entry left behind when
+  /// their phone lost its cookie and they joined again. Only before the reading.
+  Room withoutPlayer(String playerId) {
+    final player = playerById(playerId);
+    if (!isCollecting || player == null || player.isHost) return this;
+    return _copy(
+      players: [
+        for (final p in players)
+          if (p.id != playerId) p,
+      ],
+    );
+  }
+
   Room startReading() => _copy(phase: RoomPhase.reading);
 
   /// Closes the bowl and deals the names into a [FamilyGame] everyone plays on their phone.

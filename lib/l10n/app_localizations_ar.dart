@@ -1193,4 +1193,15 @@ class AppLocalizationsAr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String removePlayerTitle(String name) {
+    return 'نطلّع $name من القعدة؟';
+  }
+
+  @override
+  String get removePlayerBody => 'أساميه هتطلع من البولة. استخدمها لو حد دخل تاني من موبايل جديد وفضل اسمه القديم.';
+
+  @override
+  String get removePlayer => 'طلّعه';
 }

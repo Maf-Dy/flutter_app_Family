@@ -733,5 +733,15 @@
         "type": "int"
       }
     }
-  }
+  },
+  "removePlayerTitle": "Take {name} out of the room?",
+  "@removePlayerTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "removePlayerBody": "Their names come out of the bowl. Use this for an old entry left behind when someone joined again on a new phone.",
+  "removePlayer": "Take out"
 }

@@ -30,6 +30,12 @@ sealed class JoinStrings {
   String get readingStarted;
   String get yoursIsIn;
   String get missedRound;
+  String get raceOn;
+  String get raceWatch;
+  String get lobbyReconnecting;
+  String lobbyStillOffline(String host);
+  String get lobbyBack;
+  String get lobbyOfflineSubmit;
   String get roomFull;
   String get askHost;
   String error(SubmissionError error, int namesPerPlayer);
@@ -103,6 +109,19 @@ final class EnglishJoinStrings extends JoinStrings {
   @override
   String get missedRound => 'You missed this round. You can join the next one from this page.';
   @override
+  String get raceOn => 'The team race is on!';
+  @override
+  String get raceWatch => 'Gather round the host’s phone and play with your team.';
+  @override
+  String get lobbyReconnecting => 'Reconnecting… Your names are safe with the host.';
+  @override
+  String lobbyStillOffline(String host) =>
+      'Still can’t reach $host’s phone. Check you’re on the same Wi-Fi. If $host changed Wi-Fi, scan the new code.';
+  @override
+  String get lobbyBack => 'Connected again.';
+  @override
+  String get lobbyOfflineSubmit => 'You’re offline. What you typed is kept here: send it when you’re connected again.';
+  @override
   String get roomFull => 'This room is full';
   @override
   String get askHost => 'Ask the host to start a new room.';
@@ -115,7 +134,8 @@ final class EnglishJoinStrings extends JoinStrings {
     SubmissionError.tooLong => 'That is a bit long. Names can be up to ${Room.maxSecretLength} letters.',
     SubmissionError.duplicate => 'Someone already put that name in the bowl. Pick someone else!',
     SubmissionError.invalidTeam => 'Pick one of the teams.',
-    SubmissionError.nameTaken => 'Someone here already goes by that name. Add a letter so everyone can tell you apart.',
+    SubmissionError.nameTaken =>
+      'Someone here already goes by that name. Add a letter, or if that was you on another phone, ask the host to take the old one out.',
   };
   @override
   String get hostYourOwn => 'Want to host your own game?';
@@ -242,6 +262,19 @@ final class ArabicJoinStrings extends JoinStrings {
   @override
   String get missedRound => 'الدور ده فاتك. تقدر تدخل الدور الجاي من نفس الصفحة.';
   @override
+  String get raceOn => 'سباق الفرق بدأ!';
+  @override
+  String get raceWatch => 'اتلمّوا حوالين موبايل صاحب القعدة والعبوا مع فريقكم.';
+  @override
+  String get lobbyReconnecting => 'بنرجّع الاتصال… أساميك في أمان عند صاحب القعدة.';
+  @override
+  String lobbyStillOffline(String host) =>
+      'لسه مش واصلين لموبايل $host. اتأكد إنك على نفس الواي فاي، ولو $host غيّر الواي فاي امسح الكود الجديد.';
+  @override
+  String get lobbyBack => 'رجع الاتصال.';
+  @override
+  String get lobbyOfflineSubmit => 'إنت مش متوصل دلوقتي. اللي كتبته محفوظ هنا: ابعته أول ما النت يرجع.';
+  @override
   String get roomFull => 'القعدة كاملة';
   @override
   String get askHost => 'قول لصاحب القعدة يفتح قعدة جديدة.';
@@ -254,7 +287,8 @@ final class ArabicJoinStrings extends JoinStrings {
     SubmissionError.tooLong => 'طولت شوية! الاسم آخره ${Room.maxSecretLength} حرف.',
     SubmissionError.duplicate => 'حد سبقك بالاسم ده 😅 اكتب حد تاني!',
     SubmissionError.invalidTeam => 'اختار فريق من دول.',
-    SubmissionError.nameTaken => 'فيه حد هنا بنفس الاسم. زوّد حرف عشان نعرف نفرّق بينكم.',
+    SubmissionError.nameTaken =>
+      'فيه حد هنا بنفس الاسم. زوّد حرف، ولو ده إنت من موبايل تاني قول لصاحب القعدة يطلّع القديم.',
   };
   @override
   String get hostYourOwn => 'عايز تعمل قعدتك؟';

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../domain/room.dart';
 import 'join_strings.dart';
 import 'family_page.dart';
@@ -10,8 +12,10 @@ abstract final class JoinPage {
 
   /// Changes whenever this friend's page should look different, so the page's
   /// poller knows when to reload.
+  /// The room code and name count are in it too, so a page left open from an
+  /// earlier room on the same address reloads instead of sending names to this one.
   static String versionFor(Room room, Player? player) =>
-      '${room.phase.name}-${room.round}-${player?.hasSubmitted ?? false}';
+      '${room.code.toLowerCase()}-${room.namesPerPlayer}-${room.phase.name}-${room.round}-${player?.hasSubmitted ?? false}';
 
   static String form(
     Room room,
@@ -47,7 +51,8 @@ abstract final class JoinPage {
       player: player,
       body:
           '''
-    <form method="post" action="/" class="stack">
+    <form id="join" method="post" action="/" class="stack">
+      <input type="hidden" name="code" value="${_esc(room.code)}">
       <div>
         <span class="label">${_esc(s.categoryLabel)}</span>
         <h1>${_esc(s.category(room.category))}</h1>
@@ -85,6 +90,9 @@ abstract final class JoinPage {
 
   static String reading(Room room, JoinStrings s, Player? player) {
     final isIn = player?.hasSubmitted ?? false;
+    final race = room.mode == GameMode.celebrity;
+    final title = race ? s.raceOn : (isIn ? s.lookUp : s.readingStarted);
+    final detail = race ? (isIn ? s.raceWatch : s.missedRound) : (isIn ? s.yoursIsIn : s.missedRound);
     return _layout(
       room: room,
       s: s,
@@ -94,13 +102,17 @@ abstract final class JoinPage {
       body:
           '''
     <div class="center stack">
-      <div class="megaphone" aria-hidden="true">📣</div>
-      <h1 class="${isIn ? 'big' : ''}">${_esc(isIn ? s.lookUp : s.readingStarted)}</h1>
-      <p class="muted">${_esc(isIn ? s.yoursIsIn : s.missedRound)}</p>
+      <div class="megaphone" aria-hidden="true">${race ? '⏱️' : '📣'}</div>
+      <h1 class="${isIn ? 'big' : ''}">${_esc(title)}</h1>
+      <p class="muted">${_esc(detail)}</p>
     </div>
-    ${isIn ? '<script>try{navigator.vibrate && navigator.vibrate([200, 100, 200]);}catch(e){}</script>' : ''}''',
+    ${isIn ? _buzzOnce('${room.code}-${room.round}') : ''}''',
     );
   }
+
+  /// Buzzes once per round, not on every reload of the page.
+  static String _buzzOnce(String key) =>
+      '<script>try{var k=${_jsString('buzz-${key.toLowerCase()}')};if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,1);navigator.vibrate&&navigator.vibrate([200,100,200]);}}catch(e){}</script>';
 
   /// The family game, played on every friend's phone. Friends who didn't put
   /// names in this round watch the board.
@@ -209,13 +221,69 @@ $familyCss@media (prefers-reduced-motion: reduce){*{animation:none!important}}
 <script>
 (function(){
   var version = ${_jsString(versionFor(room, player))};
-  setInterval(function(){
-    fetch('/status', {cache: 'no-store'}).then(function(r){ return r.json(); }).then(function(s){
+  var S = ${_jsonString({'rec': s.lobbyReconnecting, 'still': s.lobbyStillOffline(room.hostName), 'back': s.lobbyBack, 'offSubmit': s.lobbyOfflineSubmit})};
+  var draftKey = ${_jsString('draft-${room.code.toLowerCase()}')};
+  var fails = 0, busy = false, okTimer = null;
+  // The family page has its own connection bar.
+  var own = !document.getElementById('net');
+  var net = document.createElement('p');
+  net.className = 'net'; net.setAttribute('role', 'status'); net.hidden = true;
+  var main = document.querySelector('main');
+  if (own) main.insertBefore(net, main.children[1]);
+  var form = document.getElementById('join');
+  function say(text, ok){ if (!own) return; clearTimeout(okTimer); net.className = ok ? 'net ok' : 'net'; net.textContent = text; net.hidden = false; }
+  function connected(ok){
+    if (ok) {
+      if (fails >= 2) { say(S.back, true); okTimer = setTimeout(function(){ net.hidden = true; }, 2500); }
+      fails = 0;
+      return;
+    }
+    fails++;
+    if (fails >= 2) say(fails >= 6 ? S.still : S.rec, false);
+  }
+  // Keep what the friend typed, so a lost page or a failed send doesn't wipe it.
+  function save(){
+    if (!form) return;
+    try {
+      var d = {};
+      for (var i = 0; i < form.elements.length; i++) {
+        var f = form.elements[i];
+        if (f.name && f.type !== 'hidden' && f.type !== 'radio' && f.type !== 'submit') d[f.name] = f.value;
+      }
+      sessionStorage.setItem(draftKey, JSON.stringify(d));
+    } catch (e) {}
+  }
+  if (form) {
+    try {
+      var d = JSON.parse(sessionStorage.getItem(draftKey) || 'null');
+      if (d) for (var n in d) { var f = form.elements[n]; if (f && !f.value) f.value = d[n]; }
+    } catch (e) {}
+    form.addEventListener('input', save);
+    form.addEventListener('submit', function(e){
+      save();
+      if (fails >= 2) { e.preventDefault(); say(S.offSubmit, false); }
+    });
+  } else if (${player?.hasSubmitted ?? false}) {
+    try { sessionStorage.removeItem(draftKey); } catch (e) {}
+  }
+  function poll(){
+    if (busy) return;
+    busy = true;
+    var ctl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function(){ if (ctl) ctl.abort(); }, 4000);
+    fetch('/status', {cache: 'no-store', signal: ctl ? ctl.signal : undefined}).then(function(r){
+      if (!r.ok) throw new Error('status ' + r.status);
+      return r.json();
+    }).then(function(st){
+      connected(true);
       var count = document.getElementById('count');
-      if (count) count.textContent = s.count;
-      if (s.version !== version && !document.activeElement.matches('input')) location.replace('/');
-    }).catch(function(){});
-  }, 4000);
+      if (count) count.textContent = st.count;
+      var typing = document.activeElement && document.activeElement.matches && document.activeElement.matches('input');
+      if (st.version !== version && !typing) location.replace('/');
+    }).catch(function(){ connected(false); }).then(function(){ clearTimeout(timer); busy = false; });
+  }
+  setInterval(poll, 3000);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) poll(); });
 })();
 </script>
 </body>
@@ -229,4 +297,7 @@ $familyCss@media (prefers-reduced-motion: reduce){*{animation:none!important}}
       .replaceAll("'", '&#39;');
 
   static String _jsString(String value) => "'${value.replaceAll(RegExp(r'[^a-z0-9-]'), '')}'";
+
+  /// A JSON value safe to drop inside a script tag.
+  static String _jsonString(Object value) => jsonEncode(value).replaceAll('<', r'\u003c');
 }

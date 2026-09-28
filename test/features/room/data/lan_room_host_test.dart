@@ -90,10 +90,43 @@ void main() {
     expect(host.room.players, isEmpty);
   });
 
-  test('a submission without an id cookie is not accepted', () async {
+  test('a submission without an id cookie still gets in, under the id it is given', () async {
     final post = await send('POST', '/', form: 'name=Omar&s0=Messi', withCookie: false);
-    expect(post.status, HttpStatus.badRequest);
+    expect(post.status, HttpStatus.seeOther);
+    final set = post.headers[HttpHeaders.setCookieHeader]!.single;
+    final id = RegExp('${LanRoomHost.cookieName}=([0-9a-f]{32})').firstMatch(set)!.group(1);
+    expect(host.room.players.single.id, id);
+    expect(set.toLowerCase(), contains('max-age=43200'), reason: 'the id outlives a closed browser');
+  });
+
+  test('a form left open from an earlier room reloads instead of joining this one', () async {
+    final post = await send('POST', '/', form: 'code=ZZZZ&name=Omar&s0=Messi');
+    expect(post.status, HttpStatus.seeOther);
     expect(host.room.players, isEmpty);
+    expect((await send('POST', '/', form: 'code=K7Q4&name=Omar&s0=Messi')).status, HttpStatus.seeOther);
+    expect(host.room.players.single.name, 'Omar');
+  });
+
+  test('the join page keeps typed names and shows a reconnecting bar', () async {
+    final page = (await send('GET', '/')).body;
+    expect(page, contains('name="code" value="K7Q4"'));
+    expect(page, contains('sessionStorage'));
+    expect(page, contains('Reconnecting… Your names are safe with the host.'));
+  });
+
+  test('a team race tells friends to gather round, not that names are being read', () async {
+    host.update(
+      (room) => Room(
+        code: room.code,
+        category: room.category,
+        namesPerPlayer: 1,
+        hostName: 'Mafdy',
+        mode: GameMode.celebrity,
+      ).withSubmission(playerId: '0123456789abcdef0123456789abcdef', name: 'Omar', secrets: ['Messi']).startReading(),
+    );
+    final page = (await send('GET', '/')).body;
+    expect(page, contains('The team race is on!'));
+    expect(page, isNot(contains('The host is reading the names')));
   });
 
   test('once reading starts, the bowl is closed', () async {

@@ -233,6 +233,8 @@ class RoomCubit extends Cubit<RoomState> {
     return error;
   }
 
+  void removePlayer(String playerId) => _host?.update((room) => room.withoutPlayer(playerId));
+
   /// Locks the bowl and returns its slips, or null when the room cannot start yet.
   List<Slip>? startReading() {
     final host = _host;

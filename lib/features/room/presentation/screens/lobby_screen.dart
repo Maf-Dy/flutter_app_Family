@@ -370,7 +370,7 @@ class _BowlSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        PlayersList(room: room),
+        PlayersList(room: room, onRemove: context.read<RoomCubit>().removePlayer),
         if (room.hostSecretsLeft > 0 && room.isCollecting) ...[
           const SizedBox(height: 14),
           HostSecretField(

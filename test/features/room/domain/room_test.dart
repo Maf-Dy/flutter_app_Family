@@ -218,4 +218,11 @@ void main() {
       expect(race.canStart, isFalse);
     });
   });
+
+  test('the host can take a stale friend out before the reading, never after', () {
+    final room = empty.withSubmission(playerId: 'a', name: 'Omar', secrets: ['Messi']).withHostSecret('Adele');
+    expect(room.withoutPlayer('a').players.map((p) => p.id), [Player.hostId]);
+    expect(room.withoutPlayer(Player.hostId).players, hasLength(2), reason: 'the host stays');
+    expect(room.startReading().withoutPlayer('a').players, hasLength(2));
+  });
 }
