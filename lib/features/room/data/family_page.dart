@@ -23,10 +23,6 @@ String familyBody(JoinStrings s, String Function(String) esc, {required String h
         <p id="pendErr" class="error" hidden></p>
         <div id="pendBtns" class="row"></div>
       </section>
-      <section class="card wanted" id="wantedCard" hidden>
-        <h2 id="wantedTitle"></h2>
-        <p class="help" id="wantedHelp"></p>
-      </section>
       <section class="card" id="awardsCard" hidden>
         <h2>${esc(s.family['awards']!)}</h2>
         <div id="awards" class="list"></div>
@@ -128,9 +124,6 @@ select{width:100%;height:50px;border-radius:14px;border:1.5px solid var(--line);
 button:disabled{opacity:.5}
 .soundb{align-self:flex-end;height:36px;padding:0 12px;font-size:13px;border-radius:99px;background:transparent;color:var(--muted);border:1px solid var(--line)}
 .twist{border:2px solid var(--primary)}
-.wanted{border:2px solid #B3261E}
-.wanted h2{color:#B3261E}
-.chip.wantedslip{border:2px solid #B3261E}
 .rumor{margin:0;padding:10px 12px;border-radius:14px;background:var(--bg);font-weight:700}
 .rumor.new{outline:2px solid var(--primary)}
 .event.secret{font-style:italic}
@@ -332,13 +325,6 @@ const _script = r'''
     button(S.letMeGoAnswer, 'ghostb', function(){ post('/game/letmego', { use: '0' }, err); });
   }
 
-  function renderWanted(){
-    var x = st.wanted == null ? null : slipOf(st.wanted), open = !!x && !x.writer && !st.winner;
-    show($('wantedCard'), open || st.bonus > 0);
-    $('wantedTitle').textContent = open ? t('wantedTitle', { name: slipText(x) }) : '';
-    $('wantedHelp').textContent = (open ? S.wantedDetail : '') + (st.bonus > 0 ? (open ? ' ' : '') + t('bonus', { count: st.bonus }) : '');
-  }
-
   function renderRumors(){
     var on = st.twists.rumors;
     show($('rumorCard'), on && (st.rumors.length > 0 || st.canRumor));
@@ -388,7 +374,6 @@ const _script = r'''
       awards.appendChild(row);
     });
     sounds();
-    renderWanted();
     renderRumors();
     if (myTurn && !wasMyTurn) { try { navigator.vibrate && navigator.vibrate([120, 80, 120]); } catch (e) {} }
     wasMyTurn = !!myTurn;
@@ -450,7 +435,7 @@ const _script = r'''
     show($('namesHint'), !won);
     st.slips.forEach(function(x){
       if (!x.writer && !won) return;
-      var chip = names.appendChild(el('span', 'chip slip' + (x.writer ? ' done' : '') + (x.id === st.wanted && !x.writer ? ' wantedslip' : ''), iso(slipText(x)) + (x.writer ? ' · ' + iso(nameOf(x.writer)) : '')));
+      var chip = names.appendChild(el('span', 'chip slip' + (x.writer ? ' done' : ''), iso(slipText(x)) + (x.writer ? ' · ' + iso(nameOf(x.writer)) : '')));
       if (x.ink) chip.insertBefore(inkImg(x), chip.firstChild);
     });
     var events = $('events'); clear(events);
@@ -459,7 +444,6 @@ const _script = r'''
       if (e.hidden) { events.appendChild(el('p', 'event secret', t('eventSecret', vars))); return; }
       var p = el('p', 'event' + (e.correct && !e.blocked ? ' ok' : ''));
       p.appendChild(document.createTextNode(e.blocked ? t('eventBlocked', vars) : t(e.correct ? 'eventCorrect' : 'eventWrong', vars)));
-      if (e.wanted) p.appendChild(document.createTextNode(' ' + S.tagWanted));
       events.appendChild(p);
     });
   }

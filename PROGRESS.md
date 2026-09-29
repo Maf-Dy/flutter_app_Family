@@ -108,7 +108,9 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 210 te
 ### House rules review (2026-09-29)
 - Dropped Counter-catch and Revenge (Mafdy: joining a family means knowing its names, and you can already ask anyone back). Their code is removed.
 - "فكّك مني" is now one card in the whole game that passes to whoever was blocked (Mafdy picked "hot potato").
-- Kept: Secret catches, Wanted, Rumors, Handwritten slips.
+- Dropped Wanted too (a right guess already lets you keep guessing).
+- Kept: Secret catches (Family online only; it can't work on one phone), Rumors, Handwritten slips.
+- Drawing pad: full width and taller, Undo and Clear, a covered pad opens only from its button, and a tap without movement doesn't draw.
 
 ### Family online back to the table's rules (2026-09-29, Mafdy's review)
 - Anyone outside your family can be asked, caught people included; the app no longer narrows the list.

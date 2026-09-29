@@ -271,7 +271,6 @@ class _FamilyViewState extends State<_FamilyView> {
           onLetMeGo: ({required use}) => _report(cubit.answerLetMeGo(use: use)),
         ),
       ],
-      if (!over && game.twists.wanted) ...[const SizedBox(height: 10), WantedCard(game: game, myHead: myHead)],
       if (me == null) ...[
         const SizedBox(height: 10),
         Text(

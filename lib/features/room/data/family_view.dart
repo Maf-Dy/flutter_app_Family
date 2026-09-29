@@ -42,7 +42,7 @@ Map<String, Object?> familyViewFor(FamilyGame game, String? playerId) {
     'turn': pub(game.secret ? game.headSeenBy(playerId, game.turnPlayer) : game.turn),
     'turnPlayer': pub(game.asker),
     'secret': game.secret,
-    'twists': {'wanted': game.twists.wanted, 'rumors': game.twists.rumors, 'letMeGo': game.twists.letMeGo},
+    'twists': {'rumors': game.twists.rumors, 'letMeGo': game.twists.letMeGo},
     'askable': myHead == null ? const <Object?>[] : [for (final p in game.askableFor(myHead)) pub(p.id)],
     'open': myHead == null
         ? const <Object?>[]
@@ -60,8 +60,6 @@ Map<String, Object?> familyViewFor(FamilyGame game, String? playerId) {
             'mine': mine,
             if (mine) 'slip': move.slipId,
           },
-    'wanted': game.wanted,
-    'bonus': myHead == null ? 0 : game.bonus[myHead] ?? 0,
     'card': inGame && game.hasCard(playerId),
     // The one "فكّك مني" card is in plain sight: everyone knows who holds it.
     'cardHolder': game.twists.letMeGo ? pubOrNull(game.cardHolder) : null,
@@ -131,7 +129,6 @@ Map<String, Object?> familyViewFor(FamilyGame game, String? playerId) {
             'slip': e.slipId,
             'correct': e.correct,
             if (e.blocked) 'blocked': true,
-            if (e.wantedCaught) 'wanted': true,
           }
         else
           {'asker': pub(e.askerId), 'hidden': true},

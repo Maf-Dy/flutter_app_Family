@@ -1207,13 +1207,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Only your family sees whether you were right. A caught player joins in secret and keeps acting free.';
 
   @override
-  String get twistWanted => 'Wanted';
-
-  @override
-  String get twistWantedDetail =>
-      'The app puts up a wanted name. Catch its writer and your family earns an extra ask.';
-
-  @override
   String get twistRumors => 'Rumors';
 
   @override
@@ -1243,29 +1236,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String familyEventBlocked(String asker, String target) {
     return '$target told $asker “Let me go!”';
-  }
-
-  @override
-  String get familyEventWantedTag => '(wanted!)';
-
-  @override
-  String wantedTitle(String name) {
-    return 'Wanted: “$name”';
-  }
-
-  @override
-  String get wantedDetail =>
-      'Catch whoever wrote it and your family earns an extra ask.';
-
-  @override
-  String wantedBonus(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Your family has $count extra asks saved',
-      one: 'Your family has 1 extra ask saved',
-    );
-    return '$_temp0';
   }
 
   @override

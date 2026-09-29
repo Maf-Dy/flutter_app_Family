@@ -2066,18 +2066,6 @@ abstract class AppLocalizations {
   /// **'Only your family sees whether you were right. A caught player joins in secret and keeps acting free.'**
   String get twistSecretDetail;
 
-  /// No description provided for @twistWanted.
-  ///
-  /// In en, this message translates to:
-  /// **'Wanted'**
-  String get twistWanted;
-
-  /// No description provided for @twistWantedDetail.
-  ///
-  /// In en, this message translates to:
-  /// **'The app puts up a wanted name. Catch its writer and your family earns an extra ask.'**
-  String get twistWantedDetail;
-
   /// No description provided for @twistRumors.
   ///
   /// In en, this message translates to:
@@ -2125,30 +2113,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{target} told {asker} “Let me go!”'**
   String familyEventBlocked(String asker, String target);
-
-  /// No description provided for @familyEventWantedTag.
-  ///
-  /// In en, this message translates to:
-  /// **'(wanted!)'**
-  String get familyEventWantedTag;
-
-  /// No description provided for @wantedTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Wanted: “{name}”'**
-  String wantedTitle(String name);
-
-  /// No description provided for @wantedDetail.
-  ///
-  /// In en, this message translates to:
-  /// **'Catch whoever wrote it and your family earns an extra ask.'**
-  String get wantedDetail;
-
-  /// No description provided for @wantedBonus.
-  ///
-  /// In en, this message translates to:
-  /// **'{count, plural, =1{Your family has 1 extra ask saved} other{Your family has {count} extra asks saved}}'**
-  String wantedBonus(int count);
 
   /// No description provided for @pendingWaiting.
   ///

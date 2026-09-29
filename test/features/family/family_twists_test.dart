@@ -79,29 +79,6 @@ void main() {
     });
   });
 
-  group('wanted', () {
-    const twists = FamilyTwists(wanted: true);
-
-    test("catching the wanted name's writer earns an extra ask for the next miss", () {
-      var game = start(twists);
-      final wanted = game.wanted!;
-      final writer = game.slips[wanted].writerId;
-      // Make sure Omar isn't the wanted one: re-pick seeds until he's not.
-      if (writer == 'a') return;
-      game = game.guess('a', writer, wanted);
-      expect(game.events.last.wantedCaught, isTrue);
-      expect(game.bonus['a'], 1);
-      expect(game.wanted, isNot(wanted));
-      expect(game.revealed.contains(game.wanted), isFalse);
-      // A miss spends the extra ask: Omar's family keeps the turn.
-      final other = game.askableFor('a').first.id;
-      final wrong = game.slips.firstWhere((s) => s.writerId != other && !game.revealed.contains(s.id)).id;
-      game = game.guess('a', other, wrong);
-      expect(game.turn, 'a');
-      expect(game.bonus['a'], isNull);
-    });
-  });
-
   group('rumors', () {
     const twists = FamilyTwists(rumors: true);
 

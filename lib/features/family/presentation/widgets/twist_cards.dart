@@ -4,63 +4,6 @@ import '../../../../core/l10n/l10n.dart';
 import '../../domain/family_game.dart';
 import 'ask_card.dart';
 
-/// The wanted name, and any extra asks the host's family has saved.
-class WantedCard extends StatelessWidget {
-  const WantedCard({super.key, required this.game, required this.myHead});
-
-  final FamilyGame game;
-  final String? myHead;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
-    final wanted = game.wanted == null ? null : game.slip(game.wanted!);
-    final saved = myHead == null ? 0 : game.bonus[myHead] ?? 0;
-    if (wanted == null && saved == 0) return const SizedBox.shrink();
-    return Card(
-      color: theme.colorScheme.errorContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            Icon(Icons.local_police_rounded, color: theme.colorScheme.onErrorContainer, size: 30),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (wanted != null) ...[
-                    Text(
-                      l10n.wantedTitle(wanted.text),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.colorScheme.onErrorContainer,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    Text(
-                      l10n.wantedDetail,
-                      style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onErrorContainer),
-                    ),
-                  ],
-                  if (saved > 0)
-                    Text(
-                      l10n.wantedBonus(saved),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onErrorContainer,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 /// What the game waits on: the host's own answer to "فكّك مني", or who
 /// everyone is waiting for.
 class PendingCard extends StatelessWidget {

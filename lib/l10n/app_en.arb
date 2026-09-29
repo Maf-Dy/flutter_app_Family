@@ -720,8 +720,6 @@
   "twistsNote": "Twists for the family game. Turn on as many as you like.",
   "twistSecret": "Secret catches",
   "twistSecretDetail": "Only your family sees whether you were right. A caught player joins in secret and keeps acting free.",
-  "twistWanted": "Wanted",
-  "twistWantedDetail": "The app puts up a wanted name. Catch its writer and your family earns an extra ask.",
   "twistRumors": "Rumors",
   "twistRumorsDetail": "Once a game, spread an anonymous rumor. True, or a total lie.",
   "twistLetMeGo": "Let me go!",
@@ -751,24 +749,6 @@
       },
       "target": {
         "type": "String"
-      }
-    }
-  },
-  "familyEventWantedTag": "(wanted!)",
-  "wantedTitle": "Wanted: “{name}”",
-  "@wantedTitle": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "wantedDetail": "Catch whoever wrote it and your family earns an extra ask.",
-  "wantedBonus": "{count, plural, =1{Your family has 1 extra ask saved} other{Your family has {count} extra asks saved}}",
-  "@wantedBonus": {
-    "placeholders": {
-      "count": {
-        "type": "int"
       }
     }
   },

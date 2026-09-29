@@ -117,7 +117,6 @@ class FamilyBoard extends StatelessWidget {
                           ? '${slip.text} · ${game.nameOf(slip.writerId)}'
                           : slip.text,
                       out: game.writerShownTo(me, slip.id),
-                      wanted: slip.id == game.wanted && !game.isOver,
                       ink: slip.ink,
                       writer: game.writerShownTo(me, slip.id) ? game.nameOf(slip.writerId) : null,
                       paper: paper,
@@ -170,7 +169,6 @@ class _EventLine extends StatelessWidget {
         e.correct ? paper.live : theme.colorScheme.error,
         [
           (e.correct ? l10n.familyEventCorrect : l10n.familyEventWrong)(asker, target, game.slip(e.slipId)?.text ?? ''),
-          if (e.wantedCaught) l10n.familyEventWantedTag,
         ].where((part) => part.isNotEmpty).join(' '),
       ),
     };
@@ -190,14 +188,7 @@ class _EventLine extends StatelessWidget {
 }
 
 class _SlipChip extends StatelessWidget {
-  const _SlipChip({
-    required this.text,
-    required this.out,
-    required this.paper,
-    this.wanted = false,
-    this.ink,
-    this.writer,
-  });
+  const _SlipChip({required this.text, required this.out, required this.paper, this.ink, this.writer});
 
   final String text;
 
@@ -207,9 +198,6 @@ class _SlipChip extends StatelessWidget {
   final bool out;
   final GameColors paper;
 
-  /// The wanted name: drawn with a red border.
-  final bool wanted;
-
   @override
   Widget build(BuildContext context) {
     return Opacity(
@@ -218,10 +206,7 @@ class _SlipChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: paper.slipPaper,
-          border: Border.all(
-            color: wanted ? Theme.of(context).colorScheme.error : paper.slipEdge,
-            width: wanted ? 2 : 1,
-          ),
+          border: Border.all(color: paper.slipEdge),
           borderRadius: BorderRadius.circular(6),
         ),
         child: ink == null

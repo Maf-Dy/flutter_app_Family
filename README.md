@@ -52,7 +52,6 @@ Pick **Family online** when opening a room to play the classic game with the app
 
 **House rules** (switches when opening the room, all off by default):
 - **Secret catches (مسكة في السر):** only your family sees your ask's result; caught people secretly join you and keep acting free. Turns go round every player. Everything is revealed at the end.
-- **Wanted (مطلوب):** a flagged name; catching its writer earns an extra ask, saved for your next miss.
 - **Rumors (إشاعة):** once a game, spread an anonymous true-or-false rumor to every phone.
 - **"فكّك مني!":** one card goes round the game (hot potato). Whoever holds it can cancel an ask on them: nobody learns if it was right, the asker loses the turn and gets the card.
 

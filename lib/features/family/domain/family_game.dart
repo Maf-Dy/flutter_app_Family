@@ -64,7 +64,7 @@ final class ChatMessage {
 /// Optional twists on the family game, switched on when the room opens.
 @immutable
 final class FamilyTwists {
-  const FamilyTwists({this.secretCatches = false, this.wanted = false, this.rumors = false, this.letMeGo = false});
+  const FamilyTwists({this.secretCatches = false, this.rumors = false, this.letMeGo = false});
 
   static const none = FamilyTwists();
 
@@ -72,10 +72,6 @@ final class FamilyTwists {
   /// and keeps playing as if free; turns go round every player, so nobody can
   /// tell from the turn order who was caught.
   final bool secretCatches;
-
-  /// The app puts one name up as wanted. Catching its writer earns the
-  /// family an extra ask.
-  final bool wanted;
 
   /// Once a game, each player may spread an anonymous rumor: "X wrote Y".
   final bool rumors;
@@ -85,11 +81,10 @@ final class FamilyTwists {
   /// turn, and the card passes to the asker.
   final bool letMeGo;
 
-  bool get any => secretCatches || wanted || rumors || letMeGo;
+  bool get any => secretCatches || rumors || letMeGo;
 
-  FamilyTwists copyWith({bool? secretCatches, bool? wanted, bool? rumors, bool? letMeGo}) => FamilyTwists(
+  FamilyTwists copyWith({bool? secretCatches, bool? rumors, bool? letMeGo}) => FamilyTwists(
     secretCatches: secretCatches ?? this.secretCatches,
-    wanted: wanted ?? this.wanted,
     rumors: rumors ?? this.rumors,
     letMeGo: letMeGo ?? this.letMeGo,
   );
@@ -98,12 +93,11 @@ final class FamilyTwists {
   bool operator ==(Object other) =>
       other is FamilyTwists &&
       other.secretCatches == secretCatches &&
-      other.wanted == wanted &&
       other.rumors == rumors &&
       other.letMeGo == letMeGo;
 
   @override
-  int get hashCode => Object.hash(secretCatches, wanted, rumors, letMeGo);
+  int get hashCode => Object.hash(secretCatches, rumors, letMeGo);
 }
 
 /// A guess, right or wrong. With secret catches only the families involved see it.
@@ -118,7 +112,6 @@ final class GuessEvent {
     this.swallowedHead,
     this.intoHead,
     this.joined = const [],
-    this.wantedCaught = false,
   });
 
   final String askerId;
@@ -139,9 +132,6 @@ final class GuessEvent {
 
   /// Everyone who changed family because of this guess.
   final List<String> joined;
-
-  /// The person caught was the writer of the wanted name.
-  final bool wantedCaught;
 
   bool get caught => swallowedHead != null;
 }
@@ -248,8 +238,6 @@ final class FamilyGame {
     this.turnPlayer = '',
     this.known = const {},
     this.pending,
-    this.wanted,
-    this.bonus = const {},
     this.cardHolder,
     this.rumors = const [],
     this.seed = 0,
@@ -297,7 +285,7 @@ final class FamilyGame {
       // The one "فكّك مني" card starts with someone at random.
       cardHolder: twists.letMeGo ? players[seed % players.length].id : null,
     );
-    return twists.wanted ? game._copy(wanted: game._pickWanted()) : game;
+    return game;
   }
 
   static const maxChat = 150;
@@ -341,19 +329,13 @@ final class FamilyGame {
   /// What the game waits on before the next ask.
   final PendingMove? pending;
 
-  /// The wanted name, when that twist is on and names are left.
-  final int? wanted;
-
-  /// Per family head, extra asks earned by catching the wanted name's writer.
-  final Map<String, int> bonus;
-
   /// Who holds the one "فكّك مني" card, when that twist is on.
   final String? cardHolder;
 
   /// Players who already spread their rumor are in here as authors.
   final List<Rumor> rumors;
 
-  /// For picking wanted names, so the same game always picks the same ones.
+  /// Fixed per game, so the same game always deals the same way.
   final int seed;
 
   bool get secret => twists.secretCatches;
@@ -522,35 +504,21 @@ final class FamilyGame {
     return _copy(events: [...events, event], suggestions: cleared)._afterMiss(askerId, targetId);
   }
 
-  /// After a wrong ask: the turn goes to the family asked, unless the asking
-  /// family spends an extra ask it earned.
-  FamilyGame _afterMiss(String askerId, String targetId) {
-    final family = headOf(askerId);
-    if (!secret && (bonus[family] ?? 0) > 0) {
-      return _spendBonus(family)._copy(turn: family, turnPlayer: family, clearPending: true);
-    }
-    return _nextTurn(askerId, keep: false, toward: headOf(targetId));
-  }
+  /// After a wrong ask: the turn goes to the family asked.
+  FamilyGame _afterMiss(String askerId, String targetId) => _nextTurn(askerId, keep: false, toward: headOf(targetId));
 
   /// Hands the turn on after [askerId]'s move. [keep]: their family asks again.
   /// [toward]: the family the turn goes to, when it doesn't stay.
   FamilyGame _nextTurn(String askerId, {required bool keep, String? toward}) {
     if (isOver) return _copy(clearPending: true);
     if (secret) {
-      // Turns go round everyone. An extra ask lets the same player go again.
-      final family = headOf(askerId);
-      if ((bonus[family] ?? 0) > 0 && player(askerId) != null) {
-        return _spendBonus(family)._copy(clearPending: true, turnPlayer: askerId, turn: family);
-      }
+      // Turns go round everyone, so the turn order gives no catch away.
       final next = _playerAfter(askerId);
       return _copy(clearPending: true, turnPlayer: next, turn: headOf(next));
     }
     final head = keep ? headOf(askerId) : headOf(toward ?? _headAfter(headOf(askerId)));
     return _copy(clearPending: true, turn: head, turnPlayer: head);
   }
-
-  FamilyGame _spendBonus(String family) =>
-      _copy(bonus: {...bonus, family: (bonus[family] ?? 1) - 1}..removeWhere((_, n) => n <= 0));
 
   String _playerAfter(String playerId) {
     final i = players.indexWhere((p) => p.id == playerId);
@@ -573,7 +541,6 @@ final class FamilyGame {
   FamilyGame _swallow({required String into, required String person, required GuessEvent event}) {
     final caught = headOf(person);
     final joined = membersOf(caught);
-    final hitWanted = wanted != null && slips[wanted!].writerId == person;
     final recorded = GuessEvent(
       askerId: event.askerId,
       targetId: event.targetId,
@@ -582,13 +549,8 @@ final class FamilyGame {
       swallowedHead: caught,
       intoHead: into,
       joined: List.unmodifiable(joined),
-      wantedCaught: hitWanted,
     );
     final history = [...events, recorded];
-    final bonusLeft = {...bonus};
-    final carried = bonusLeft.remove(caught) ?? 0;
-    final earned = (bonusLeft[into] ?? 0) + carried + (hitWanted ? 1 : 0);
-    if (earned > 0) bonusLeft[into] = earned;
     final merged = _copy(
       heads: {for (final MapEntry(:key, :value) in heads.entries) key: value == caught ? into : value},
       revealed: {...revealed, ..._slipsBy(person)},
@@ -607,20 +569,9 @@ final class FamilyGame {
               ? ChatMessage(id: m.id, familyHead: into, authorId: m.authorId, text: m.text, nonce: m.nonce)
               : m,
       ],
-      bonus: bonusLeft,
       turn: turn == caught ? into : turn,
     );
-    return hitWanted ? merged._copy(wanted: merged._pickWanted(), clearWanted: true) : merged;
-  }
-
-  /// A hidden name to put up as wanted, or null when none is left.
-  int? _pickWanted() {
-    final left = [
-      for (final s in slips)
-        if (!revealed.contains(s.id) && s.id != wanted) s.id,
-    ];
-    if (left.isEmpty) return null;
-    return left[Random(seed + events.length).nextInt(left.length)];
+    return merged;
   }
 
   /// Why [playerId] can't answer what the game waits on, or null when they can.
@@ -930,9 +881,6 @@ final class FamilyGame {
     Map<String, Set<int>>? known,
     PendingMove? pending,
     bool clearPending = false,
-    int? wanted,
-    bool clearWanted = false,
-    Map<String, int>? bonus,
     String? cardHolder,
     List<Rumor>? rumors,
   }) => FamilyGame._(
@@ -954,8 +902,6 @@ final class FamilyGame {
         ? this.known
         : Map.unmodifiable({for (final e in known.entries) e.key: Set<int>.unmodifiable(e.value)}),
     pending: pending ?? (clearPending ? null : this.pending),
-    wanted: wanted ?? (clearWanted ? null : this.wanted),
-    bonus: bonus == null ? this.bonus : Map.unmodifiable(bonus),
     cardHolder: cardHolder ?? this.cardHolder,
     rumors: rumors == null
         ? this.rumors

@@ -1207,13 +1207,6 @@ class AppLocalizationsAr extends AppLocalizations {
       'محدش يعرف النتيجة غير عيلتك. اللي يتمسك ينضم في السر ويفضل عامل نفسه حر.';
 
   @override
-  String get twistWanted => 'مطلوب';
-
-  @override
-  String get twistWantedDetail =>
-      'الأبلكيشن يعلن اسم مطلوب. اللي يمسك صاحبه عيلته تاخد سؤال زيادة.';
-
-  @override
   String get twistRumors => 'إشاعات';
 
   @override
@@ -1243,29 +1236,6 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String familyEventBlocked(String asker, String target) {
     return '$target قال لـ$asker: فكّك مني!';
-  }
-
-  @override
-  String get familyEventWantedTag => '(المطلوب!)';
-
-  @override
-  String wantedTitle(String name) {
-    return 'مطلوب: «$name»';
-  }
-
-  @override
-  String get wantedDetail => 'امسك اللي كتبه وعيلتك تاخد سؤال زيادة.';
-
-  @override
-  String wantedBonus(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'عيلتك معاها $count أسئلة زيادة',
-      two: 'عيلتك معاها سؤالين زيادة',
-      one: 'عيلتك معاها سؤال زيادة',
-    );
-    return '$_temp0';
   }
 
   @override
