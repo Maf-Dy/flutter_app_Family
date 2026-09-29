@@ -66,12 +66,27 @@ void main() {
     expect(RegExp('<canvas').allMatches(page), hasLength(2));
     expect(page, contains('name="s0"'));
     expect(page, contains('Write the name here with your finger'));
-    expect(page, contains('class="pad-clear"'));
     expect(page, isNot(contains('class="hand"')), reason: 'no typing in a handwritten room');
+
+    // Undo and Clear under each pad, off until something is drawn.
+    expect(RegExp('class="pad-undo" disabled').allMatches(page), hasLength(2));
+    expect(RegExp('class="pad-clear" disabled').allMatches(page), hasLength(2));
+    expect(page, contains('Undo'));
+    expect(page, contains('Clear'));
+
+    // A big pad that never scrolls the page while writing.
+    expect(page, contains('height:clamp(200px,50vw,300px);touch-action:none'));
+
+    // A tap that doesn't move leaves no dot on an empty pad, and the PNG is shrunk to fit a slip.
+    expect(page, contains('MIN_MOVE = 8'));
+    expect(page, contains('strokes.length && e.type'));
+    expect(page, contains('MAX_W = ${SlipInk.maxWidth}, MAX_H = ${SlipInk.maxHeight}'));
 
     final arabic = JoinPage.form(host.room, const ArabicJoinStrings());
     expect(arabic, contains('dir="rtl"'));
     expect(arabic, contains('اكتب الاسم هنا بصباعك'));
+    expect(arabic, contains('تراجع'));
+    expect(arabic, contains('امسح'));
   });
 
   test('drawings sent as PNG data URLs go in the bowl', () async {

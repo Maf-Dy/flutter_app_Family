@@ -77,8 +77,9 @@ abstract final class JoinPage {
     );
   }
 
-  /// A pad to write one name on with a finger. The drawing travels in the
-  /// hidden field as a PNG data URL, and comes back in it when the form is shown again.
+  /// A big pad to write one name on with a finger, with Undo and Clear under it.
+  /// The drawing travels in the hidden field as a PNG data URL (cropped to the
+  /// ink and shrunk to fit a slip), and comes back in it when the form is shown again.
   static String _inkField(int i, String label, JoinStrings s, SlipInk? ink) =>
       '''
       <div class="field">
@@ -86,7 +87,10 @@ abstract final class JoinPage {
         <div class="pad">
           <canvas width="${SlipInk.maxWidth}" height="${SlipInk.maxHeight}" data-ink="s$i" role="img" aria-labelledby="s${i}l"></canvas>
           <span class="pad-hint">${_esc(s.inkHint)}</span>
-          <button type="button" class="pad-clear">${_esc(s.inkClear)}</button>
+        </div>
+        <div class="pad-tools">
+          <button type="button" class="pad-undo" disabled><span aria-hidden="true">↶</span> ${_esc(s.inkUndo)}</button>
+          <button type="button" class="pad-clear" disabled><span aria-hidden="true">✕</span> ${_esc(s.inkClear)}</button>
         </div>
         <input type="hidden" id="s$i" name="s$i" data-draft value="${ink == null ? '' : ink.toDataUrl()}">
       </div>''';
@@ -192,11 +196,12 @@ h1{margin:2px 0 0;font-size:28px;line-height:1.1;letter-spacing:-.02em;text-wrap
 .stack{display:flex;flex-direction:column;gap:16px}
 .field label,.flabel{display:block;font-weight:800;font-size:13px;margin-bottom:6px}
 .pad{position:relative;border-radius:14px;border:1.5px solid var(--slip-edge);background:var(--slip);overflow:hidden}
-.pad canvas{display:block;width:100%;height:auto;aspect-ratio:2/1;touch-action:none;cursor:crosshair}
-.pad-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;text-align:center;color:var(--slip-ink);opacity:.5;pointer-events:none;font-family:"Segoe Print","Bradley Hand","Chalkboard SE","Comic Sans MS",cursive;font-weight:700}
-.pad-clear{position:absolute;top:6px;inset-inline-end:6px;height:34px;padding:0 12px;font-size:14px;border-radius:10px;background:var(--card);color:var(--primary);border:1.5px solid var(--line);display:none}
+.pad canvas{display:block;width:100%;height:clamp(200px,50vw,300px);touch-action:none;cursor:crosshair;-webkit-user-select:none;user-select:none}
+.pad-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;text-align:center;color:var(--slip-ink);opacity:.5;pointer-events:none;font-family:"Segoe Print","Bradley Hand","Chalkboard SE","Comic Sans MS",cursive;font-weight:700;font-size:18px}
 .pad.inked .pad-hint{display:none}
-.pad.inked .pad-clear{display:block}
+.pad-tools{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+.pad-tools button{height:42px;padding:0 16px;font-size:15px;border-radius:12px;background:var(--card);color:var(--primary);border:1.5px solid var(--line)}
+.pad-tools button:disabled{opacity:.4;cursor:default;transform:none}
 input{width:100%;height:52px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:17px;padding:0 14px}
 input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px var(--primary)}
 input.hand{background:var(--slip);color:var(--slip-ink);border-color:var(--slip-edge);font-family:"Segoe Print","Bradley Hand","Chalkboard SE","Comic Sans MS",cursive;font-weight:700;font-size:19px}
@@ -279,31 +284,102 @@ $familyCss@media (prefers-reduced-motion: reduce){*{animation:none!important}}
     } catch (e) {}
   }
   // One name written with a finger: thick ink, touch or mouse, kept in the hidden field as a PNG.
+  // The canvas is always ${SlipInk.maxWidth} units wide and as tall as its shape on screen; the PNG is
+  // cropped to the ink and shrunk to fit a slip. A tap that doesn't move draws nothing on an empty
+  // pad (only a dot next to other ink, for the dots of letters).
   function pad(cv){
-    var input = document.getElementById(cv.dataset.ink), box = cv.parentNode, ctx = cv.getContext('2d'), last = null;
-    ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#000'; ctx.fillStyle = '#000';
-    function mark(){ box.className = input.value ? 'pad inked' : 'pad'; }
+    var LINE = 12, MIN_MOVE = 8, MAX_W = ${SlipInk.maxWidth}, MAX_H = ${SlipInk.maxHeight};
+    var input = document.getElementById(cv.dataset.ink), box = cv.parentNode, tools = box.nextElementSibling;
+    var undoBtn = tools.querySelector('.pad-undo'), clearBtn = tools.querySelector('.pad-clear');
+    var ctx = cv.getContext('2d'), strokes = [], cur = null, start = null, active = null;
+    function mark(){
+      box.className = strokes.length || input.value ? 'pad inked' : 'pad';
+      undoBtn.disabled = clearBtn.disabled = !strokes.length;
+    }
+    function pen(){ ctx.lineWidth = LINE; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#000'; ctx.fillStyle = '#000'; }
+    function place(img){ return { x: Math.max(0, (cv.width - img.width) / 2), y: Math.max(0, (cv.height - img.height) / 2) }; }
+    function draw(s){
+      if (s.img) { var o = place(s.img); ctx.drawImage(s.img, o.x, o.y); return; }
+      var p = s.pts;
+      ctx.beginPath();
+      if (p.length === 1) { ctx.arc(p[0].x, p[0].y, LINE / 2, 0, Math.PI * 2); ctx.fill(); return; }
+      ctx.moveTo(p[0].x, p[0].y);
+      for (var i = 1; i < p.length; i++) ctx.lineTo(p[i].x, p[i].y);
+      ctx.stroke();
+    }
+    function redraw(){ ctx.clearRect(0, 0, cv.width, cv.height); pen(); for (var i = 0; i < strokes.length; i++) draw(strokes[i]); }
+    // Match the canvas to its size on screen, so the ink isn't stretched.
+    function size(){
+      var r = cv.getBoundingClientRect();
+      var h = r.width > 0 && r.height > 0 ? Math.round(MAX_W * r.height / r.width) : MAX_H;
+      if (cv.width !== MAX_W || cv.height !== h) { cv.width = MAX_W; cv.height = h; }
+      redraw();
+    }
+    function bounds(){
+      var b = [Infinity, Infinity, -Infinity, -Infinity];
+      for (var i = 0; i < strokes.length; i++) {
+        var s = strokes[i];
+        if (s.img) {
+          var o = place(s.img);
+          b = [Math.min(b[0], o.x), Math.min(b[1], o.y), Math.max(b[2], o.x + s.img.width), Math.max(b[3], o.y + s.img.height)];
+          continue;
+        }
+        for (var j = 0; j < s.pts.length; j++) {
+          var p = s.pts[j];
+          b = [Math.min(b[0], p.x - LINE), Math.min(b[1], p.y - LINE), Math.max(b[2], p.x + LINE), Math.max(b[3], p.y + LINE)];
+        }
+      }
+      return b;
+    }
+    function toPng(){
+      if (!strokes.length) return '';
+      var b = bounds();
+      var l = Math.max(0, Math.floor(b[0])), t = Math.max(0, Math.floor(b[1]));
+      var w = Math.max(1, Math.min(cv.width, Math.ceil(b[2])) - l), h = Math.max(1, Math.min(cv.height, Math.ceil(b[3])) - t);
+      var f = Math.min(1, MAX_W / w, MAX_H / h), out = document.createElement('canvas');
+      out.width = Math.max(1, Math.min(MAX_W, Math.ceil(w * f)));
+      out.height = Math.max(1, Math.min(MAX_H, Math.ceil(h * f)));
+      out.getContext('2d').drawImage(cv, l, t, w, h, 0, 0, out.width, out.height);
+      return out.toDataURL('image/png');
+    }
+    function changed(){ input.value = toPng(); mark(); save(); }
     function at(e){
-      var t = e.touches ? e.touches[0] : e, r = cv.getBoundingClientRect();
+      var t = e.touches ? (e.touches[0] || e.changedTouches[0]) : e, r = cv.getBoundingClientRect();
       return { x: (t.clientX - r.left) * cv.width / r.width, y: (t.clientY - r.top) * cv.height / r.height };
     }
+    function mine(e){ return active !== null && (e.pointerId === undefined || e.pointerId === active); }
     function down(e){
-      e.preventDefault(); inking = true; last = at(e);
-      ctx.beginPath(); ctx.arc(last.x, last.y, 6, 0, Math.PI * 2); ctx.fill();
+      // One finger writes at a time, and only the main mouse button.
+      if (active !== null || e.button > 0) return;
+      e.preventDefault();
+      active = e.pointerId === undefined ? 0 : e.pointerId;
+      inking = true; start = at(e); cur = null;
     }
     function move(e){
-      if (!inking || !last) return;
+      if (!mine(e)) return;
       e.preventDefault();
       var p = at(e);
-      ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p;
+      if (!cur) {
+        if (Math.sqrt((p.x - start.x) * (p.x - start.x) + (p.y - start.y) * (p.y - start.y)) < MIN_MOVE) return;
+        cur = { pts: [start] };
+        strokes.push(cur);
+        mark();
+      }
+      var q = cur.pts[cur.pts.length - 1];
+      cur.pts.push(p);
+      pen(); ctx.beginPath(); ctx.moveTo(q.x, q.y); ctx.lineTo(p.x, p.y); ctx.stroke();
     }
-    function up(){
-      if (!last) return;
-      inking = false; last = null;
-      input.value = cv.toDataURL('image/png'); mark(); save();
+    function up(e){
+      if (!mine(e)) return;
+      var drew = !!cur;
+      if (!cur && start && strokes.length && e.type !== 'pointercancel' && e.type !== 'touchcancel') {
+        cur = { pts: [start] }; strokes.push(cur); pen(); draw(cur); drew = true;
+      }
+      active = null; inking = false; cur = null; start = null;
+      if (drew) changed();
     }
     if (window.PointerEvent) {
-      cv.addEventListener('pointerdown', function(e){ try { cv.setPointerCapture(e.pointerId); } catch (x) {} down(e); });
+      cv.addEventListener('pointerdown', function(e){ down(e); if (active === e.pointerId) { try { cv.setPointerCapture(e.pointerId); } catch (x) {} } });
       cv.addEventListener('pointermove', move);
       cv.addEventListener('pointerup', up);
       cv.addEventListener('pointercancel', up);
@@ -311,14 +387,21 @@ $familyCss@media (prefers-reduced-motion: reduce){*{animation:none!important}}
       cv.addEventListener('touchstart', down, { passive: false });
       cv.addEventListener('touchmove', move, { passive: false });
       cv.addEventListener('touchend', up);
+      cv.addEventListener('touchcancel', up);
       cv.addEventListener('mousedown', down);
       cv.addEventListener('mousemove', move);
       window.addEventListener('mouseup', up);
     }
-    box.querySelector('.pad-clear').addEventListener('click', function(){
-      ctx.clearRect(0, 0, cv.width, cv.height); input.value = ''; mark(); save();
-    });
-    if (input.value) { var img = new Image(); img.onload = function(){ ctx.drawImage(img, 0, 0); }; img.src = input.value; }
+    undoBtn.addEventListener('click', function(){ strokes.pop(); redraw(); changed(); });
+    clearBtn.addEventListener('click', function(){ strokes = []; redraw(); changed(); });
+    window.addEventListener('resize', size);
+    size();
+    // A drawing sent before comes back as one piece of ink: Undo takes it away whole.
+    if (input.value) {
+      var img = new Image();
+      img.onload = function(){ strokes.unshift({ img: img }); redraw(); mark(); };
+      img.src = input.value;
+    }
     mark();
   }
   if (form) {

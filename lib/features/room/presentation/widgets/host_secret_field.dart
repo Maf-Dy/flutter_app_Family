@@ -108,35 +108,26 @@ class _HostInkFieldState extends State<HostInkField> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+    // The pad takes the full width; hiding it and dropping it in sit under it.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
-          child: InkPad(
-            controller: _ink,
-            label: widget.label,
-            hidden: _hidden,
-            onReveal: () => setState(() => _hidden = false),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Column(
-          mainAxisSize: MainAxisSize.min,
+        InkPad(controller: _ink, label: widget.label, hidden: _hidden, onReveal: () => setState(() => _hidden = false)),
+        Row(
           children: [
             IconButton.filledTonal(
               tooltip: _hidden ? context.l10n.show : context.l10n.hide,
               onPressed: () => setState(() => _hidden = !_hidden),
               icon: Icon(_hidden ? Icons.visibility_rounded : Icons.visibility_off_rounded),
             ),
-            const SizedBox(height: 8),
-            IconButton.filled(
-              tooltip: context.l10n.dropInBowl,
-              onPressed: _submit,
-              style: IconButton.styleFrom(
-                minimumSize: const Size(52, 52),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: FilledButton.icon(
+                onPressed: _submit,
+                icon: const Icon(Icons.add_rounded),
+                label: Text(context.l10n.dropInBowl),
               ),
-              icon: const Icon(Icons.add_rounded),
             ),
           ],
         ),

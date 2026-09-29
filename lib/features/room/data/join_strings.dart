@@ -23,9 +23,10 @@ sealed class JoinStrings {
   String get secretPlaceholder;
   String get privacyNote;
 
-  /// Handwritten rooms: the pad's hint, its Clear button, the missing-drawing
-  /// error and a nudge to disguise the handwriting.
+  /// Handwritten rooms: the pad's hint, its Undo and Clear buttons, the
+  /// missing-drawing error and a nudge to disguise the handwriting.
   String get inkHint;
+  String get inkUndo;
   String get inkClear;
   String inkMissing(int names);
   String get inkNote;
@@ -99,6 +100,8 @@ final class EnglishJoinStrings extends JoinStrings {
   String get privacyNote => 'Nobody sees who wrote what until the game is over.';
   @override
   String get inkHint => 'Write the name here with your finger';
+  @override
+  String get inkUndo => 'Undo';
   @override
   String get inkClear => 'Clear';
   @override
@@ -309,6 +312,8 @@ final class ArabicJoinStrings extends JoinStrings {
   String get privacyNote => 'محدش هيعرف مين كتب إيه غير في آخر اللعبة. متقلقش.';
   @override
   String get inkHint => 'اكتب الاسم هنا بصباعك';
+  @override
+  String get inkUndo => 'تراجع';
   @override
   String get inkClear => 'امسح';
   @override
