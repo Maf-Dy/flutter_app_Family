@@ -1191,4 +1191,178 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get faceOffWasDouble => 'كان رهان دبل.';
+
+  @override
+  String get familyErrorWaiting => 'استنى، فيه حد لازم يرد الأول.';
+
+  @override
+  String get familyErrorNotAllowed => 'مينفعش دلوقتي.';
+
+  @override
+  String get twistsTitle => 'قوانين القعدة';
+
+  @override
+  String get twistsNote => 'تويستات على لعبة العيلة. شغّل اللي يعجبك.';
+
+  @override
+  String get twistSecret => 'مسكة في السر';
+
+  @override
+  String get twistSecretDetail =>
+      'محدش يعرف النتيجة غير عيلتك. اللي يتمسك ينضم في السر ويفضل عامل نفسه حر.';
+
+  @override
+  String get twistCounter => 'رد المسكة';
+
+  @override
+  String get twistCounterDetail =>
+      'اتمسكت؟ ليك طلقة واحدة على عيلة اللي مسكك. لو صح، هما اللي ينضموا لك.';
+
+  @override
+  String get twistWanted => 'مطلوب';
+
+  @override
+  String get twistWantedDetail =>
+      'الأبلكيشن يعلن اسم مطلوب. اللي يمسك صاحبه عيلته تاخد سؤال زيادة.';
+
+  @override
+  String get twistRevenge => 'التار';
+
+  @override
+  String get twistRevengeDetail => 'حد اتهمك غلط؟ ليك سؤال ببلاش عليه.';
+
+  @override
+  String get twistRumors => 'إشاعات';
+
+  @override
+  String get twistRumorsDetail =>
+      'مرة في اللعبة، اطلق إشاعة من غير اسمك. صح أو كدب في كدب.';
+
+  @override
+  String get twistLetMeGo => 'فكّك مني!';
+
+  @override
+  String get twistLetMeGoDetail =>
+      'مرة في اللعبة، الغي سؤال عليك. محدش هيعرف كان صح ولا غلط، واللي سأل يخسر دوره.';
+
+  @override
+  String get familyTurnYouAsk => 'دورك! اسأل لعيلتك.';
+
+  @override
+  String familyTurnPlayer(String name) {
+    return 'الدور على $name';
+  }
+
+  @override
+  String familyEventSecret(String asker) {
+    return '$asker سأل حد…';
+  }
+
+  @override
+  String familyEventBlocked(String asker, String target) {
+    return '$target قال لـ$asker: فكّك مني!';
+  }
+
+  @override
+  String get familyEventCounterTag => 'رد المسكة!';
+
+  @override
+  String get familyEventRevengeTag => 'تار!';
+
+  @override
+  String get familyEventWantedTag => '(المطلوب!)';
+
+  @override
+  String wantedTitle(String name) {
+    return 'مطلوب: «$name»';
+  }
+
+  @override
+  String get wantedDetail => 'امسك اللي كتبه وعيلتك تاخد سؤال زيادة.';
+
+  @override
+  String wantedBonus(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'عيلتك معاها $count أسئلة زيادة',
+      two: 'عيلتك معاها سؤالين زيادة',
+      one: 'عيلتك معاها سؤال زيادة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pendingWaiting(String name) {
+    return 'مستنيين $name…';
+  }
+
+  @override
+  String get pendingWaitingSomeone => 'مستنيين حد يرد…';
+
+  @override
+  String letMeGoAsked(String asker, String name) {
+    return '$asker بيسألك: انت اللي كتبت «$name»؟';
+  }
+
+  @override
+  String get letMeGoUse => 'فكّك مني!';
+
+  @override
+  String get letMeGoAnswer => 'رد عليه';
+
+  @override
+  String get letMeGoHint =>
+      'مرة واحدة في اللعبة. محدش هيعرف كان صح ولا غلط، وهو يخسر دوره.';
+
+  @override
+  String get letMeGoReady => 'كارت «فكّك مني» معاك';
+
+  @override
+  String get letMeGoUsed => 'استخدمت كارت «فكّك مني»';
+
+  @override
+  String counterTitle(String asker) {
+    return '$asker قفشك! ليك طلقة واحدة:';
+  }
+
+  @override
+  String get counterHint => 'خمّن مين في عيلته كتب اسم. لو صح، كلهم ينضموا لك.';
+
+  @override
+  String get counterShoot => 'رد المسكة';
+
+  @override
+  String revengeTitle(String asker) {
+    return '$asker اتهمك ظلم. خد تارك!';
+  }
+
+  @override
+  String revengeHint(String asker) {
+    return 'أنهي اسم فيهم $asker كتبه؟ لو صح، عيلته كلها تنضم لك.';
+  }
+
+  @override
+  String get revengeTake => 'خد تارك';
+
+  @override
+  String get passShot => 'عدّي';
+
+  @override
+  String get rumorsTitle => 'إشاعات';
+
+  @override
+  String rumorLine(String target, String name) {
+    return 'بيقولوا إن $target كتب «$name» 👀';
+  }
+
+  @override
+  String get rumorSpread => 'اطلق إشاعة';
+
+  @override
+  String get rumorHint =>
+      'مرة واحدة في اللعبة، ومحدش هيعرف إنها منك. صح أو كدب في كدب.';
+
+  @override
+  String get rumorSend => 'اطلقها';
 }

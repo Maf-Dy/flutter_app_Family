@@ -10,6 +10,8 @@ import '../family_style.dart';
 class FamilyMembers extends StatelessWidget {
   const FamilyMembers({super.key, required this.game, required this.head, required this.colors, this.me});
 
+  /// The members as [me] sees them: with secret catches, only their own family's are known.
+
   final FamilyGame game;
   final String head;
   final FamilyColors colors;
@@ -18,7 +20,7 @@ class FamilyMembers extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final members = [head, ...game.membersOf(head).where((id) => id != head)];
+    final members = [head, ...game.membersSeenBy(me, head).where((id) => id != head)];
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -64,6 +66,7 @@ class FamilyBoard extends StatelessWidget {
     final l10n = context.l10n;
     final paper = context.gameColors;
     final events = game.events.reversed.take(6).toList();
+    final myHead = me == null || game.player(me!) == null ? null : game.headOf(me!);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(14),
@@ -71,11 +74,12 @@ class FamilyBoard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(l10n.familyFamilies, style: theme.textTheme.titleMedium),
-            for (final head in game.familyHeads) ...[
+            for (final head in game.familyHeadsSeenBy(me)) ...[
               const SizedBox(height: 10),
               Row(
                 children: [
-                  if (head == game.turn && !game.isOver) ...[
+                  if ((game.secret ? head == game.headSeenBy(me, game.turnPlayer) : head == game.turn) &&
+                      !game.isOver) ...[
                     Icon(Icons.play_arrow_rounded, size: 20, color: theme.colorScheme.primary),
                     const SizedBox(width: 2),
                   ],
@@ -99,8 +103,9 @@ class FamilyBoard extends StatelessWidget {
               children: [
                 for (final slip in game.slips)
                   _SlipChip(
-                    text: game.revealed.contains(slip.id) ? '${slip.text} · ${game.nameOf(slip.writerId)}' : slip.text,
-                    out: game.revealed.contains(slip.id),
+                    text: game.writerShownTo(me, slip.id) ? '${slip.text} · ${game.nameOf(slip.writerId)}' : slip.text,
+                    out: game.writerShownTo(me, slip.id),
+                    wanted: slip.id == game.wanted && !game.isOver,
                     paper: paper,
                   ),
               ],
@@ -111,27 +116,7 @@ class FamilyBoard extends StatelessWidget {
               for (final e in events)
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        e.correct ? Icons.check_circle_rounded : Icons.cancel_rounded,
-                        size: 18,
-                        color: e.correct ? paper.live : theme.colorScheme.error,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          (e.correct ? l10n.familyEventCorrect : l10n.familyEventWrong)(
-                            game.nameOf(e.askerId),
-                            game.nameOf(e.targetId),
-                            game.slip(e.slipId)?.text ?? '',
-                          ),
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                      ),
-                    ],
-                  ),
+                  child: _EventLine(game: game, event: e, seen: game.seesEvent(me, e), myHead: myHead),
                 ),
             ],
           ],
@@ -141,12 +126,65 @@ class FamilyBoard extends StatelessWidget {
   }
 }
 
+/// One guess on the board, in words. Guesses the viewer isn't allowed to see
+/// (secret catches) only say that someone asked.
+class _EventLine extends StatelessWidget {
+  const _EventLine({required this.game, required this.event, required this.seen, required this.myHead});
+
+  final FamilyGame game;
+  final GuessEvent event;
+  final bool seen;
+  final String? myHead;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final paper = context.gameColors;
+    final e = event;
+    final asker = game.nameOf(e.askerId);
+    final target = game.nameOf(e.targetId);
+    final (IconData icon, Color color, String text) = switch (e) {
+      _ when !seen => (Icons.help_rounded, theme.colorScheme.onSurfaceVariant, l10n.familyEventSecret(asker)),
+      GuessEvent(blocked: true) => (
+        Icons.back_hand_rounded,
+        theme.colorScheme.tertiary,
+        l10n.familyEventBlocked(asker, target),
+      ),
+      _ => (
+        e.correct ? Icons.check_circle_rounded : Icons.cancel_rounded,
+        e.correct ? paper.live : theme.colorScheme.error,
+        [
+          switch (e.kind) {
+            AskKind.counter => l10n.familyEventCounterTag,
+            AskKind.revenge => l10n.familyEventRevengeTag,
+            AskKind.ask => '',
+          },
+          (e.correct ? l10n.familyEventCorrect : l10n.familyEventWrong)(asker, target, game.slip(e.slipId)?.text ?? ''),
+          if (e.wantedCaught) l10n.familyEventWantedTag,
+        ].where((part) => part.isNotEmpty).join(' '),
+      ),
+    };
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(width: 6),
+        Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),
+      ],
+    );
+  }
+}
+
 class _SlipChip extends StatelessWidget {
-  const _SlipChip({required this.text, required this.out, required this.paper});
+  const _SlipChip({required this.text, required this.out, required this.paper, this.wanted = false});
 
   final String text;
   final bool out;
   final GameColors paper;
+
+  /// The wanted name: drawn with a red border.
+  final bool wanted;
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +194,10 @@ class _SlipChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: paper.slipPaper,
-          border: Border.all(color: paper.slipEdge),
+          border: Border.all(
+            color: wanted ? Theme.of(context).colorScheme.error : paper.slipEdge,
+            width: wanted ? 2 : 1,
+          ),
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(

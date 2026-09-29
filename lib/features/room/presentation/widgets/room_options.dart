@@ -225,3 +225,47 @@ class NamesPerPlayerCard extends StatelessWidget {
     );
   }
 }
+
+/// The family game's house rules, each a switch.
+class FamilyTwistsCard extends StatelessWidget {
+  const FamilyTwistsCard({super.key, required this.twists, required this.onChanged});
+
+  final FamilyTwists twists;
+  final ValueChanged<FamilyTwists> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final rules = [
+      (l10n.twistSecret, l10n.twistSecretDetail, twists.secretCatches, (bool on) => twists.copyWith(secretCatches: on)),
+      (l10n.twistCounter, l10n.twistCounterDetail, twists.counterCatch, (bool on) => twists.copyWith(counterCatch: on)),
+      (l10n.twistWanted, l10n.twistWantedDetail, twists.wanted, (bool on) => twists.copyWith(wanted: on)),
+      (l10n.twistRevenge, l10n.twistRevengeDetail, twists.revenge, (bool on) => twists.copyWith(revenge: on)),
+      (l10n.twistRumors, l10n.twistRumorsDetail, twists.rumors, (bool on) => twists.copyWith(rumors: on)),
+      (l10n.twistLetMeGo, l10n.twistLetMeGoDetail, twists.letMeGo, (bool on) => twists.copyWith(letMeGo: on)),
+    ];
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+            child: Text(
+              l10n.twistsNote,
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ),
+          for (final (title, detail, on, change) in rules)
+            SwitchListTile(
+              value: on,
+              onChanged: (value) => onChanged(change(value)),
+              title: Text(title, style: theme.textTheme.titleMedium),
+              subtitle: Text(detail),
+            ),
+        ],
+      ),
+    );
+  }
+}

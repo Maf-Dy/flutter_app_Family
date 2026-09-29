@@ -64,6 +64,8 @@ class RoomCubit extends Cubit<RoomState> {
 
   void setFamilyChat(bool on) => emit(state.copyWith(familyChat: on));
 
+  void setFamilyTwists(FamilyTwists twists) => emit(state.copyWith(familyTwists: twists));
+
   void setTeamSetup(TeamSetup setup) =>
       emit(state.copyWith(teamSetup: setup.copyWith(count: setup.count.clamp(TeamSetup.minTeams, TeamSetup.maxTeams))));
 
@@ -195,6 +197,7 @@ class RoomCubit extends Cubit<RoomState> {
       mode: state.mode,
       teamSetup: state.teamSetup,
       familyChat: state.familyChat,
+      familyTwists: state.familyTwists,
     );
     try {
       final port = await host.open(room);

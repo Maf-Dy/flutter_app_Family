@@ -1190,4 +1190,181 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get faceOffWasDouble => 'It was a double bet.';
+
+  @override
+  String get familyErrorWaiting => 'Wait: someone has to answer first.';
+
+  @override
+  String get familyErrorNotAllowed => 'You can\'t do that now.';
+
+  @override
+  String get twistsTitle => 'House rules';
+
+  @override
+  String get twistsNote =>
+      'Twists for the family game. Turn on as many as you like.';
+
+  @override
+  String get twistSecret => 'Secret catches';
+
+  @override
+  String get twistSecretDetail =>
+      'Only your family sees whether you were right. A caught player joins in secret and keeps acting free.';
+
+  @override
+  String get twistCounter => 'Counter-catch';
+
+  @override
+  String get twistCounterDetail =>
+      'Caught? One shot back at the catcher\'s family. Right, and they all join you.';
+
+  @override
+  String get twistWanted => 'Wanted';
+
+  @override
+  String get twistWantedDetail =>
+      'The app puts up a wanted name. Catch its writer and your family earns an extra ask.';
+
+  @override
+  String get twistRevenge => 'Revenge';
+
+  @override
+  String get twistRevengeDetail =>
+      'Wrongly accused? You get a free shot at whoever accused you.';
+
+  @override
+  String get twistRumors => 'Rumors';
+
+  @override
+  String get twistRumorsDetail =>
+      'Once a game, spread an anonymous rumor. True, or a total lie.';
+
+  @override
+  String get twistLetMeGo => 'Let me go!';
+
+  @override
+  String get twistLetMeGoDetail =>
+      'Once a game, cancel an ask about you. Nobody learns if it was right, and the asker loses the turn.';
+
+  @override
+  String get familyTurnYouAsk => 'Your turn! You ask for your family.';
+
+  @override
+  String familyTurnPlayer(String name) {
+    return '$name is asking';
+  }
+
+  @override
+  String familyEventSecret(String asker) {
+    return '$asker asked someone…';
+  }
+
+  @override
+  String familyEventBlocked(String asker, String target) {
+    return '$target told $asker “Let me go!”';
+  }
+
+  @override
+  String get familyEventCounterTag => 'Counter-catch!';
+
+  @override
+  String get familyEventRevengeTag => 'Revenge!';
+
+  @override
+  String get familyEventWantedTag => '(wanted!)';
+
+  @override
+  String wantedTitle(String name) {
+    return 'Wanted: “$name”';
+  }
+
+  @override
+  String get wantedDetail =>
+      'Catch whoever wrote it and your family earns an extra ask.';
+
+  @override
+  String wantedBonus(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Your family has $count extra asks saved',
+      one: 'Your family has 1 extra ask saved',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String pendingWaiting(String name) {
+    return 'Waiting for $name…';
+  }
+
+  @override
+  String get pendingWaitingSomeone => 'Waiting for someone to answer…';
+
+  @override
+  String letMeGoAsked(String asker, String name) {
+    return '$asker asks: did you write “$name”?';
+  }
+
+  @override
+  String get letMeGoUse => 'Let me go!';
+
+  @override
+  String get letMeGoAnswer => 'Answer it';
+
+  @override
+  String get letMeGoHint =>
+      'Once a game. Nobody learns if they were right, and they lose the turn.';
+
+  @override
+  String get letMeGoReady => 'Your “Let me go!” card is ready';
+
+  @override
+  String get letMeGoUsed => 'You used your “Let me go!” card';
+
+  @override
+  String counterTitle(String asker) {
+    return '$asker caught you! One shot back:';
+  }
+
+  @override
+  String get counterHint =>
+      'Guess who in their family wrote a name. Right, and they all join you.';
+
+  @override
+  String get counterShoot => 'Shoot back';
+
+  @override
+  String revengeTitle(String asker) {
+    return '$asker accused you wrongly. Revenge!';
+  }
+
+  @override
+  String revengeHint(String asker) {
+    return 'Which of these did $asker write? Right, and their whole family joins you.';
+  }
+
+  @override
+  String get revengeTake => 'Take revenge';
+
+  @override
+  String get passShot => 'Pass';
+
+  @override
+  String get rumorsTitle => 'Rumors';
+
+  @override
+  String rumorLine(String target, String name) {
+    return 'They say $target wrote “$name” 👀';
+  }
+
+  @override
+  String get rumorSpread => 'Spread a rumor';
+
+  @override
+  String get rumorHint =>
+      'Once a game, and nobody knows it was you. True or a total lie.';
+
+  @override
+  String get rumorSend => 'Spread it';
 }

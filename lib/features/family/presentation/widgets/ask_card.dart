@@ -43,7 +43,7 @@ class AskCard extends StatelessWidget {
     final l10n = context.l10n;
     final people = game.askableFor(myHead);
     final names = [
-      for (final s in game.hiddenSlips)
+      for (final s in game.slipsOpenTo(myHead))
         if (s.writerId != me) s,
     ];
     // A friend's move can take a choice off the table; never hand the dropdown a value it doesn't list.
@@ -56,14 +56,14 @@ class AskCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _Picker<String>(
+            FamilyPicker<String>(
               label: l10n.familyWho,
               value: target,
               items: [for (final p in people) (value: p.id, label: p.name)],
               onChanged: onTarget,
             ),
             const SizedBox(height: 10),
-            _Picker<int>(
+            FamilyPicker<int>(
               label: l10n.familyWhich,
               value: slip,
               items: [for (final s in names) (value: s.id, label: s.text)],
@@ -99,8 +99,9 @@ class AskCard extends StatelessWidget {
   }
 }
 
-class _Picker<T> extends StatelessWidget {
-  const _Picker({required this.label, required this.value, required this.items, required this.onChanged});
+/// A labelled dropdown for picking a person or a name.
+class FamilyPicker<T> extends StatelessWidget {
+  const FamilyPicker({super.key, required this.label, required this.value, required this.items, required this.onChanged});
 
   final String label;
   final T? value;

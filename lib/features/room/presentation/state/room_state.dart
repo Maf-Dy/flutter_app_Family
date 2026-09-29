@@ -58,6 +58,7 @@ final class RoomState {
     this.mode = GameMode.classic,
     this.teamSetup = const TeamSetup(),
     this.familyChat = true,
+    this.familyTwists = FamilyTwists.none,
     this.namesPerPlayer = 1,
     this.connection = const ConnectionChecking(),
     this.room,
@@ -75,6 +76,9 @@ final class RoomState {
 
   /// Whether families can message each other in [GameMode.family].
   final bool familyChat;
+
+  /// House rules for [GameMode.family].
+  final FamilyTwists familyTwists;
   final int namesPerPlayer;
   final Connection connection;
   final Room? room;
@@ -102,6 +106,7 @@ final class RoomState {
     GameMode? mode,
     TeamSetup? teamSetup,
     bool? familyChat,
+    FamilyTwists? familyTwists,
     int? namesPerPlayer,
     Connection? connection,
     Room? room,
@@ -117,6 +122,7 @@ final class RoomState {
     mode: mode ?? this.mode,
     teamSetup: teamSetup ?? this.teamSetup,
     familyChat: familyChat ?? this.familyChat,
+    familyTwists: familyTwists ?? this.familyTwists,
     namesPerPlayer: namesPerPlayer ?? this.namesPerPlayer,
     connection: connection ?? this.connection,
     room: clearRoom ? null : room ?? this.room,

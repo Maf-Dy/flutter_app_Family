@@ -58,15 +58,168 @@ final class ChatMessage {
   final String? nonce;
 }
 
-/// A guess everyone can see, right or wrong.
+/// Optional twists on the family game, switched on when the room opens.
+@immutable
+final class FamilyTwists {
+  const FamilyTwists({
+    this.secretCatches = false,
+    this.counterCatch = false,
+    this.wanted = false,
+    this.revenge = false,
+    this.rumors = false,
+    this.letMeGo = false,
+  });
+
+  static const none = FamilyTwists();
+
+  /// Only the asking family sees the result. A caught person joins in secret
+  /// and keeps playing as if free; turns go round every player, so nobody can
+  /// tell from the turn order who was caught.
+  final bool secretCatches;
+
+  /// Someone just caught gets one shot back at the catcher's family. Right,
+  /// and it flips: the catcher's family joins theirs.
+  final bool counterCatch;
+
+  /// The app puts one name up as wanted. Catching its writer earns the
+  /// family an extra ask.
+  final bool wanted;
+
+  /// Someone wrongly accused gets a free shot at their accuser.
+  final bool revenge;
+
+  /// Once a game, each player may spread an anonymous rumor: "X wrote Y".
+  final bool rumors;
+
+  /// "فكّك مني": once a game, each player may cancel an ask about them.
+  /// Nobody learns whether it was right, and the asker loses the turn.
+  final bool letMeGo;
+
+  bool get any => secretCatches || counterCatch || wanted || revenge || rumors || letMeGo;
+
+  FamilyTwists copyWith({
+    bool? secretCatches,
+    bool? counterCatch,
+    bool? wanted,
+    bool? revenge,
+    bool? rumors,
+    bool? letMeGo,
+  }) => FamilyTwists(
+    secretCatches: secretCatches ?? this.secretCatches,
+    counterCatch: counterCatch ?? this.counterCatch,
+    wanted: wanted ?? this.wanted,
+    revenge: revenge ?? this.revenge,
+    rumors: rumors ?? this.rumors,
+    letMeGo: letMeGo ?? this.letMeGo,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      other is FamilyTwists &&
+      other.secretCatches == secretCatches &&
+      other.counterCatch == counterCatch &&
+      other.wanted == wanted &&
+      other.revenge == revenge &&
+      other.rumors == rumors &&
+      other.letMeGo == letMeGo;
+
+  @override
+  int get hashCode => Object.hash(secretCatches, counterCatch, wanted, revenge, rumors, letMeGo);
+}
+
+/// How a guess came about.
+enum AskKind {
+  /// The family on turn asks.
+  ask,
+
+  /// Someone just caught shoots back at the catcher's family.
+  counter,
+
+  /// Someone wrongly accused shoots back at their accuser.
+  revenge,
+}
+
+/// A guess, right or wrong. With secret catches only the families involved see it.
 @immutable
 final class GuessEvent {
-  const GuessEvent({required this.askerId, required this.targetId, required this.slipId, required this.correct});
+  const GuessEvent({
+    required this.askerId,
+    required this.targetId,
+    required this.slipId,
+    required this.correct,
+    this.kind = AskKind.ask,
+    this.blocked = false,
+    this.swallowedHead,
+    this.intoHead,
+    this.joined = const [],
+    this.wantedCaught = false,
+  });
 
   final String askerId;
   final String targetId;
   final int slipId;
+
+  /// Whether the target wrote the name. Meaningless when [blocked].
   final bool correct;
+  final AskKind kind;
+
+  /// The target said "فكّك مني": the ask was cancelled unanswered.
+  final bool blocked;
+
+  /// The head of the family that was swallowed, when this guess caught someone.
+  final String? swallowedHead;
+
+  /// The head of the family that swallowed it.
+  final String? intoHead;
+
+  /// Everyone who changed family because of this guess.
+  final List<String> joined;
+
+  /// The person caught was the writer of the wanted name.
+  final bool wantedCaught;
+
+  bool get caught => swallowedHead != null;
+}
+
+/// Something the game waits on before anyone else can ask.
+enum PendingKind {
+  /// The person asked may say "فكّك مني".
+  letMeGo,
+
+  /// The person just caught may shoot back at the catcher's family.
+  counter,
+
+  /// The person wrongly accused may shoot back at the accuser.
+  revenge,
+}
+
+@immutable
+final class PendingMove {
+  const PendingMove({required this.kind, required this.askerId, required this.targetId, required this.slipId});
+
+  final PendingKind kind;
+
+  /// Who made the ask this waits on.
+  final String askerId;
+
+  /// Who was asked. They answer the pending move.
+  final String targetId;
+  final int slipId;
+
+  String get responderId => targetId;
+}
+
+/// An anonymous rumor everyone sees: "they say [targetId] wrote [slipId]".
+@immutable
+final class Rumor {
+  const Rumor({required this.id, required this.authorId, required this.targetId, required this.slipId});
+
+  final int id;
+
+  /// Never shown to anyone.
+  final String authorId;
+  final String targetId;
+  final int slipId;
 }
 
 enum ClaimStatus { pending, approved, denied }
@@ -99,13 +252,19 @@ enum FamilyActionError {
   invalidSlip,
   chatOff,
   emptyMessage,
+
+  /// The game waits on someone's answer (فكّك مني, a counter-catch or revenge).
+  waiting,
+
+  /// That twist is off, not yours to answer, or already used.
+  notAllowed,
 }
 
 /// The classic Family game, refereed by the app: each player starts as their
 /// own family. On your family's turn the head asks someone outside it "did you
 /// write …?". Right, and that person's whole family joins yours and you go
 /// again; wrong, and the turn passes to the family of the person asked. The
-/// last family standing wins.
+/// last family standing wins. [FamilyTwists] add optional house rules.
 ///
 /// Immutable; every change bumps [version] so phones know when to redraw.
 @immutable
@@ -123,6 +282,15 @@ final class FamilyGame {
     required this.version,
     this.away = const {},
     this.claims = const [],
+    this.twists = FamilyTwists.none,
+    this.turnPlayer = '',
+    this.known = const {},
+    this.pending,
+    this.wanted,
+    this.bonus = const {},
+    this.cardsUsed = const {},
+    this.rumors = const [],
+    this.seed = 0,
   });
 
   factory FamilyGame.start({
@@ -130,26 +298,41 @@ final class FamilyGame {
     required List<({String text, String writerId})> slips,
     required bool chatEnabled,
     required Random random,
+    FamilyTwists twists = FamilyTwists.none,
   }) {
     assert(players.length >= 2, 'A family game needs players');
-    return FamilyGame._(
+    final dealt = [
+      for (final (i, s) in ([...slips]..shuffle(random)).indexed) FamilySlip(id: i, text: s.text, writerId: s.writerId),
+    ];
+    final first = players[random.nextInt(players.length)].id;
+    final game = FamilyGame._(
       players: List.unmodifiable(players),
-      slips: List.unmodifiable([
-        for (final (i, s) in ([...slips]..shuffle(random)).indexed)
-          FamilySlip(id: i, text: s.text, writerId: s.writerId),
-      ]),
+      slips: List.unmodifiable(dealt),
       heads: Map.unmodifiable({for (final p in players) p.id: p.id}),
-      turn: players[random.nextInt(players.length)].id,
+      turn: first,
       revealed: const {},
       suggestions: const {},
       chat: const [],
       events: const [],
       chatEnabled: chatEnabled,
       version: 1,
+      twists: twists,
+      turnPlayer: first,
+      // Everyone knows their own names.
+      known: Map.unmodifiable({
+        for (final p in players)
+          p.id: Set<int>.unmodifiable({
+            for (final s in dealt)
+              if (s.writerId == p.id) s.id,
+          }),
+      }),
+      seed: random.nextInt(1 << 30),
     );
+    return twists.wanted ? game._copy(wanted: game._pickWanted()) : game;
   }
 
   static const maxChat = 150;
+  static const maxRumors = 30;
 
   final List<FamilyPlayer> players;
   final List<FamilySlip> slips;
@@ -175,6 +358,62 @@ final class FamilyGame {
   final List<SeatClaim> claims;
 
   static const maxClaims = 10;
+
+  final FamilyTwists twists;
+
+  /// With secret catches, turns go round every player, not every family: the
+  /// player asking now. Otherwise the same as [turn].
+  final String turnPlayer;
+
+  /// Per family head, the names that family knows the writer of. Everyone
+  /// knows their own; a catch shares what both families knew.
+  final Map<String, Set<int>> known;
+
+  /// What the game waits on before the next ask.
+  final PendingMove? pending;
+
+  /// The wanted name, when that twist is on and names are left.
+  final int? wanted;
+
+  /// Per family head, extra asks earned by catching the wanted name's writer.
+  final Map<String, int> bonus;
+
+  /// Players who already said "فكّك مني" this game.
+  final Set<String> cardsUsed;
+
+  /// Players who already spread their rumor are in here as authors.
+  final List<Rumor> rumors;
+
+  /// For picking wanted names, so the same game always picks the same ones.
+  final int seed;
+
+  bool get secret => twists.secretCatches;
+
+  /// Who asks now: the head on their family's turn, or with secret catches the player on turn.
+  String get asker => secret ? turnPlayer : turn;
+
+  /// The one person the game waits on to answer, if any.
+  String? get waitingOn => pending?.responderId;
+
+  /// Whether the turn is stuck on someone whose phone dropped out, so only the host can move it on.
+  bool get turnStalled {
+    if (isOver) return false;
+    final waiting = waitingOn;
+    if (waiting != null) return away.contains(waiting);
+    return secret ? away.contains(turnPlayer) : familyAway(turn);
+  }
+
+  Set<int> knownBy(String head) => known[head] ?? const {};
+
+  /// Whether the family headed by [head] knows who wrote slip [slipId]: always
+  /// for revealed names, and with secret catches only for names it caught.
+  bool knowsWriter(String head, int slipId) =>
+      secret ? knownBy(head).contains(slipId) || isOver : revealed.contains(slipId);
+
+  bool hasCard(String playerId) => twists.letMeGo && !cardsUsed.contains(playerId);
+
+  bool canSpreadRumor(String playerId) =>
+      twists.rumors && !isOver && player(playerId) != null && !rumors.any((r) => r.authorId == playerId);
 
   String headOf(String playerId) => heads[playerId] ?? playerId;
 
@@ -217,10 +456,12 @@ final class FamilyGame {
   /// Whether [playerId]'s names are out: they were caught, so asking them again can't be right.
   bool isCaught(String playerId) => slips.any((s) => s.writerId == playerId && revealed.contains(s.id));
 
-  /// The people worth asking: outside the family headed by [head], and not caught yet.
+  /// The people worth asking: outside the family headed by [head], and not
+  /// caught yet. With secret catches nobody else knows who was caught, so
+  /// everyone outside the family can be asked.
   List<FamilyPlayer> askableFor(String head) => [
     for (final p in targetsFor(head))
-      if (!isCaught(p.id)) p,
+      if (secret || !isCaught(p.id)) p,
   ];
 
   bool isAway(String playerId) => away.contains(playerId);
@@ -234,7 +475,8 @@ final class FamilyGame {
   /// Whether [playerId] makes the guess now: the head on their family's turn,
   /// or any member still here when the head's phone has dropped out.
   bool canAsk(String playerId) {
-    if (isOver || player(playerId) == null) return false;
+    if (isOver || pending != null || player(playerId) == null) return false;
+    if (secret) return playerId == turnPlayer;
     final family = headOf(playerId);
     if (turn != family) return false;
     return family == playerId || (away.contains(family) && !away.contains(playerId));
@@ -242,52 +484,387 @@ final class FamilyGame {
 
   FamilyActionError? _checkPick(String family, String targetId, int slipId) {
     if (isOver) return FamilyActionError.gameOver;
-    if (player(targetId) == null || headOf(targetId) == family || isCaught(targetId)) {
+    if (player(targetId) == null || headOf(targetId) == family || (!secret && isCaught(targetId))) {
       return FamilyActionError.invalidTarget;
     }
-    if (slip(slipId) == null || revealed.contains(slipId)) return FamilyActionError.invalidSlip;
+    if (slip(slipId) == null || knowsWriter(family, slipId)) return FamilyActionError.invalidSlip;
     return null;
   }
 
   /// Why [askerId] can't make this guess right now, or null when they can.
   FamilyActionError? checkGuess(String askerId, String targetId, int slipId) {
     if (isOver) return FamilyActionError.gameOver;
-    if (turn != headOf(askerId)) return FamilyActionError.notYourTurn;
+    if (pending != null) return FamilyActionError.waiting;
+    if (secret ? askerId != turnPlayer : turn != headOf(askerId)) return FamilyActionError.notYourTurn;
     if (!canAsk(askerId)) return FamilyActionError.notHead;
-    return _checkPick(turn, targetId, slipId);
+    return _checkPick(headOf(askerId), targetId, slipId);
   }
 
   /// The guess for the family whose turn it is. Check with [checkGuess] first.
+  ///
+  /// With "فكّك مني" on, the person asked answers first ([answerLetMeGo]).
   FamilyGame guess(String askerId, String targetId, int slipId) {
     if (checkGuess(askerId, targetId, slipId) != null) return this;
-    final family = turn;
-    // Duplicate names are allowed, so any hidden slip with the same text counts.
-    final asked = Room.matchKey(slips[slipId].text);
-    final correct = hiddenSlips.any((s) => s.writerId == targetId && Room.matchKey(s.text) == asked);
-    final event = GuessEvent(askerId: askerId, targetId: targetId, slipId: slipId, correct: correct);
-    if (!correct) {
-      return _copy(turn: headOf(targetId), events: [...events, event], suggestions: {...suggestions}..remove(family));
+    if (hasCard(targetId) && !away.contains(targetId)) {
+      return _copy(
+        pending: PendingMove(kind: PendingKind.letMeGo, askerId: askerId, targetId: targetId, slipId: slipId),
+      );
     }
-    final caught = headOf(targetId);
-    return _copy(
-      heads: {for (final MapEntry(:key, :value) in heads.entries) key: value == caught ? family : value},
-      revealed: {
-        ...revealed,
-        for (final s in slips)
-          if (s.writerId == targetId) s.id,
+    return _settleAsk(askerId, targetId, slipId);
+  }
+
+  /// Whether [targetId] wrote a name the same as slip [slipId]. Duplicate names
+  /// are allowed, so either copy counts. Names already caught don't count again,
+  /// except with secret catches, where nobody else knows they were caught.
+  bool _wrote(String targetId, int slipId) {
+    final asked = slips[slipId];
+    return slips.any((s) => s.writerId == targetId && (secret || !revealed.contains(s.id)) && _sameName(s, asked));
+  }
+
+  static bool _sameName(FamilySlip a, FamilySlip b) =>
+      a.id == b.id || (a.text.isNotEmpty && Room.matchKey(a.text) == Room.matchKey(b.text));
+
+  /// An ask gets its answer.
+  FamilyGame _settleAsk(String askerId, String targetId, int slipId) {
+    final family = headOf(askerId);
+    final correct = _wrote(targetId, slipId);
+    final event = GuessEvent(askerId: askerId, targetId: targetId, slipId: slipId, correct: correct);
+    final cleared = {...suggestions}..remove(family);
+    if (correct) {
+      if (twists.counterCatch && !away.contains(targetId) && _shootableIn(family).isNotEmpty) {
+        // The catch waits for the shot back; the caught names are out either way.
+        return _copy(
+          events: [...events, event],
+          suggestions: cleared,
+          revealed: {...revealed, ..._slipsBy(targetId)},
+          pending: PendingMove(kind: PendingKind.counter, askerId: askerId, targetId: targetId, slipId: slipId),
+        );
+      }
+      return _swallow(into: family, person: targetId, event: event)._nextTurn(askerId, keep: true);
+    }
+    final missed = _copy(events: [...events, event], suggestions: cleared);
+    if (twists.revenge && !away.contains(targetId) && missed._hiddenSlipsOf(askerId).isNotEmpty) {
+      return missed._copy(
+        pending: PendingMove(kind: PendingKind.revenge, askerId: askerId, targetId: targetId, slipId: slipId),
+      );
+    }
+    return missed._afterMiss(askerId, targetId);
+  }
+
+  /// After a wrong ask: the turn goes to the family asked, unless the asking
+  /// family spends an extra ask it earned.
+  FamilyGame _afterMiss(String askerId, String targetId) {
+    final family = headOf(askerId);
+    if (!secret && (bonus[family] ?? 0) > 0) {
+      return _spendBonus(family)._copy(turn: family, turnPlayer: family, clearPending: true);
+    }
+    return _nextTurn(askerId, keep: false, toward: headOf(targetId));
+  }
+
+  /// Hands the turn on after [askerId]'s move. [keep]: their family asks again.
+  /// [toward]: the family the turn goes to, when it doesn't stay.
+  FamilyGame _nextTurn(String askerId, {required bool keep, String? toward}) {
+    if (isOver) return _copy(clearPending: true);
+    if (secret) {
+      // Turns go round everyone. An extra ask lets the same player go again.
+      final family = headOf(askerId);
+      if ((bonus[family] ?? 0) > 0 && player(askerId) != null) {
+        return _spendBonus(family)._copy(clearPending: true, turnPlayer: askerId, turn: family);
+      }
+      final next = _playerAfter(askerId);
+      return _copy(clearPending: true, turnPlayer: next, turn: headOf(next));
+    }
+    final head = keep ? headOf(askerId) : headOf(toward ?? _headAfter(headOf(askerId)));
+    return _copy(clearPending: true, turn: head, turnPlayer: head);
+  }
+
+  FamilyGame _spendBonus(String family) =>
+      _copy(bonus: {...bonus, family: (bonus[family] ?? 1) - 1}..removeWhere((_, n) => n <= 0));
+
+  String _playerAfter(String playerId) {
+    final i = players.indexWhere((p) => p.id == playerId);
+    return players[(i + 1) % players.length].id;
+  }
+
+  /// The next family in join order after the one headed by [head].
+  String _headAfter(String head) {
+    final order = familyHeads;
+    final i = order.indexOf(head);
+    return i < 0 ? order.first : order[(i + 1) % order.length];
+  }
+
+  Set<int> _slipsBy(String playerId) => {
+    for (final s in slips)
+      if (s.writerId == playerId) s.id,
+  };
+
+  List<FamilySlip> _hiddenSlipsOf(String playerId) => [
+    for (final s in slips)
+      if (s.writerId == playerId && !revealed.contains(s.id)) s,
+  ];
+
+  /// Members of the family headed by [head] with names still hidden: who a counter-catch can aim at.
+  List<String> _shootableIn(String head) => [
+    for (final id in membersOf(head))
+      if (_hiddenSlipsOf(id).isNotEmpty) id,
+  ];
+
+  /// [person] was caught: their whole family joins the family headed by [into].
+  FamilyGame _swallow({required String into, required String person, required GuessEvent event}) {
+    final caught = headOf(person);
+    final joined = membersOf(caught);
+    final hitWanted = wanted != null && slips[wanted!].writerId == person;
+    final recorded = GuessEvent(
+      askerId: event.askerId,
+      targetId: event.targetId,
+      slipId: event.slipId,
+      correct: event.correct,
+      kind: event.kind,
+      swallowedHead: caught,
+      intoHead: into,
+      joined: List.unmodifiable(joined),
+      wantedCaught: hitWanted,
+    );
+    // The event may already be on the list (a catch that waited for a counter-catch).
+    final history = events.any((e) => identical(e, event))
+        ? [for (final e in events) identical(e, event) ? recorded : e]
+        : [...events, recorded];
+    final bonusLeft = {...bonus};
+    final carried = bonusLeft.remove(caught) ?? 0;
+    final earned = (bonusLeft[into] ?? 0) + carried + (hitWanted ? 1 : 0);
+    if (earned > 0) bonusLeft[into] = earned;
+    final merged = _copy(
+      heads: {for (final MapEntry(:key, :value) in heads.entries) key: value == caught ? into : value},
+      revealed: {...revealed, ..._slipsBy(person)},
+      events: history,
+      known: {
+        for (final MapEntry(:key, :value) in known.entries)
+          if (key != caught) key: key == into ? {...value, ...knownBy(caught), ..._slipsBy(person)} : value,
       },
-      events: [...events, event],
       // The merged family starts planning afresh, and reads both families' chat.
       suggestions: {...suggestions}
-        ..remove(family)
+        ..remove(into)
         ..remove(caught),
       chat: [
         for (final m in chat)
           m.familyHead == caught
-              ? ChatMessage(id: m.id, familyHead: family, authorId: m.authorId, text: m.text, nonce: m.nonce)
+              ? ChatMessage(id: m.id, familyHead: into, authorId: m.authorId, text: m.text, nonce: m.nonce)
               : m,
       ],
+      bonus: bonusLeft,
+      turn: turn == caught ? into : turn,
     );
+    return hitWanted ? merged._copy(wanted: merged._pickWanted(), clearWanted: true) : merged;
+  }
+
+  /// A hidden name to put up as wanted, or null when none is left.
+  int? _pickWanted() {
+    final left = [
+      for (final s in slips)
+        if (!revealed.contains(s.id) && s.id != wanted) s.id,
+    ];
+    if (left.isEmpty) return null;
+    return left[Random(seed + events.length).nextInt(left.length)];
+  }
+
+  /// Why [playerId] can't answer what the game waits on, or null when they can.
+  FamilyActionError? checkAnswer(String playerId, PendingKind kind) {
+    if (isOver) return FamilyActionError.gameOver;
+    final move = pending;
+    if (move == null || move.kind != kind || move.responderId != playerId) return FamilyActionError.notAllowed;
+    return null;
+  }
+
+  /// The person asked says "فكّك مني" ([use]) or lets the ask be answered.
+  FamilyGame answerLetMeGo(String playerId, {required bool use}) {
+    if (checkAnswer(playerId, PendingKind.letMeGo) != null) return this;
+    final move = pending!;
+    final cleared = _copy(clearPending: true);
+    if (!use) return cleared._settleAsk(move.askerId, move.targetId, move.slipId);
+    final event = GuessEvent(
+      askerId: move.askerId,
+      targetId: move.targetId,
+      slipId: move.slipId,
+      correct: false,
+      blocked: true,
+    );
+    return cleared
+        ._copy(
+          events: [...events, event],
+          cardsUsed: {...cardsUsed, playerId},
+          suggestions: {...suggestions}..remove(headOf(move.askerId)),
+        )
+        ._nextTurn(move.askerId, keep: false);
+  }
+
+  /// Who [playerId] may aim a counter-catch at: the catcher's family members with names still hidden.
+  List<String> counterTargetsFor(String playerId) {
+    final move = pending;
+    if (move == null || move.kind != PendingKind.counter || move.responderId != playerId) return const [];
+    return _shootableIn(headOf(move.askerId));
+  }
+
+  /// The person just caught says [targetId] wrote slip [slipId]. Right, and the
+  /// catcher's family joins theirs; wrong, and they join the catcher's family.
+  FamilyActionError? checkCounter(String playerId, String targetId, int slipId) {
+    final error = checkAnswer(playerId, PendingKind.counter);
+    if (error != null) return error;
+    if (!counterTargetsFor(playerId).contains(targetId)) return FamilyActionError.invalidTarget;
+    if (slip(slipId) == null || revealed.contains(slipId) || slips[slipId].writerId == playerId) {
+      return FamilyActionError.invalidSlip;
+    }
+    return null;
+  }
+
+  FamilyGame counterCatch(String playerId, String targetId, int slipId) {
+    if (checkCounter(playerId, targetId, slipId) != null) return this;
+    final move = pending!;
+    final catcher = headOf(move.askerId);
+    final original = events.last;
+    final correct = _wrote(targetId, slipId);
+    final shot = GuessEvent(
+      askerId: playerId,
+      targetId: targetId,
+      slipId: slipId,
+      correct: correct,
+      kind: AskKind.counter,
+    );
+    final cleared = _copy(clearPending: true);
+    if (correct) {
+      // It flips: the catcher's family joins the family of the person they caught.
+      final flipped = cleared._swallow(into: headOf(playerId), person: targetId, event: shot);
+      // The person first caught had their names read out too; a wanted name among them is used up.
+      final fresh = flipped.wanted != null && flipped.revealed.contains(flipped.wanted)
+          ? flipped._copy(wanted: flipped._pickWanted(), clearWanted: true)
+          : flipped;
+      return fresh._nextTurn(move.askerId, keep: false, toward: headOf(playerId));
+    }
+    return cleared
+        ._copy(events: [...events, shot])
+        ._swallow(into: catcher, person: move.targetId, event: original)
+        ._nextTurn(move.askerId, keep: true);
+  }
+
+  /// The person caught passes on their counter-catch.
+  FamilyGame passCounter(String playerId) {
+    if (checkAnswer(playerId, PendingKind.counter) != null) return this;
+    final move = pending!;
+    return _copy(clearPending: true)
+        ._swallow(into: headOf(move.askerId), person: move.targetId, event: events.last)
+        ._nextTurn(move.askerId, keep: true);
+  }
+
+  /// The slips [playerId] may aim their revenge at: the accuser's names still hidden.
+  List<FamilySlip> revengeSlipsFor(String playerId) {
+    final move = pending;
+    if (move == null || move.kind != PendingKind.revenge || move.responderId != playerId) return const [];
+    return _hiddenSlipsOf(move.askerId);
+  }
+
+  FamilyActionError? checkRevenge(String playerId, int slipId) {
+    final error = checkAnswer(playerId, PendingKind.revenge);
+    if (error != null) return error;
+    if (slip(slipId) == null || revealed.contains(slipId) || slips[slipId].writerId == playerId) {
+      return FamilyActionError.invalidSlip;
+    }
+    return null;
+  }
+
+  /// The person wrongly accused says their accuser wrote slip [slipId]. Right,
+  /// and the accuser's family joins theirs.
+  FamilyGame revenge(String playerId, int slipId) {
+    if (checkRevenge(playerId, slipId) != null) return this;
+    final move = pending!;
+    final correct = _wrote(move.askerId, slipId);
+    final shot = GuessEvent(
+      askerId: playerId,
+      targetId: move.askerId,
+      slipId: slipId,
+      correct: correct,
+      kind: AskKind.revenge,
+    );
+    final cleared = _copy(clearPending: true);
+    if (correct) {
+      return cleared._swallow(into: headOf(playerId), person: move.askerId, event: shot)._afterRevenge(move);
+    }
+    return cleared._copy(events: [...events, shot])._afterRevenge(move);
+  }
+
+  FamilyGame passRevenge(String playerId) {
+    if (checkAnswer(playerId, PendingKind.revenge) != null) return this;
+    return _copy(clearPending: true)._afterRevenge(pending!);
+  }
+
+  /// Revenge was free: the turn then moves on as after any wrong ask.
+  FamilyGame _afterRevenge(PendingMove move) =>
+      player(move.askerId) == null || isOver ? _copy(clearPending: true) : _afterMiss(move.askerId, move.targetId);
+
+  FamilyActionError? checkRumor(String authorId, String targetId, int slipId) {
+    if (isOver) return FamilyActionError.gameOver;
+    if (!canSpreadRumor(authorId)) return FamilyActionError.notAllowed;
+    if (player(targetId) == null) return FamilyActionError.invalidTarget;
+    if (slip(slipId) == null || revealed.contains(slipId)) return FamilyActionError.invalidSlip;
+    return null;
+  }
+
+  /// [authorId] spreads their one anonymous rumor: "they say [targetId] wrote [slipId]".
+  FamilyGame spreadRumor(String authorId, String targetId, int slipId) {
+    if (checkRumor(authorId, targetId, slipId) != null) return this;
+    final rumor = Rumor(
+      id: (rumors.isEmpty ? 0 : rumors.last.id) + 1,
+      authorId: authorId,
+      targetId: targetId,
+      slipId: slipId,
+    );
+    return _copy(rumors: [...rumors, rumor]);
+  }
+
+  /// Names the family headed by [head] may still ask about: any whose writer it doesn't know.
+  List<FamilySlip> slipsOpenTo(String head) => [
+    for (final s in slips)
+      if (!knowsWriter(head, s.id)) s,
+  ];
+
+  /// Whether [viewerId] sees who wrote slip [slipId] on the board.
+  bool writerShownTo(String? viewerId, int slipId) {
+    if (!secret || isOver) return revealed.contains(slipId);
+    return viewerId != null && player(viewerId) != null && knowsWriter(headOf(viewerId), slipId);
+  }
+
+  /// The families as [viewerId] sees them, by head in join order. With secret
+  /// catches everyone outside the viewer's family looks like they're on their own.
+  List<String> familyHeadsSeenBy(String? viewerId) => [
+    for (final p in players)
+      if (headSeenBy(viewerId, p.id) == p.id) p.id,
+  ];
+
+  List<String> membersSeenBy(String? viewerId, String head) => [
+    for (final p in players)
+      if (headSeenBy(viewerId, p.id) == head) p.id,
+  ];
+
+  /// Guesses [viewerId] may see. With secret catches, others' asks show only
+  /// that someone asked: [GuessEvent]s for the viewer's own family and asks
+  /// about the viewer come through whole.
+  bool seesEvent(String? viewerId, GuessEvent e) {
+    if (!secret || isOver) return true;
+    if (viewerId == null || player(viewerId) == null) return false;
+    final family = headOf(viewerId);
+    return e.askerId == viewerId ||
+        e.targetId == viewerId ||
+        headOf(e.askerId) == family ||
+        e.joined.contains(viewerId) ||
+        e.intoHead == family;
+  }
+
+  /// The family [viewerId] sees [playerId] in: the truth, or with secret
+  /// catches only for their own family (others look like they're on their own).
+  String headSeenBy(String? viewerId, String playerId) {
+    if (!secret || isOver) return headOf(playerId);
+    if (viewerId != null && player(viewerId) != null && headOf(playerId) == headOf(viewerId)) {
+      return headOf(playerId);
+    }
+    return playerId;
   }
 
   /// A member backs an idea for the next guess. Each member backs one idea at a time.
@@ -392,11 +969,26 @@ final class FamilyGame {
 
   /// Passes the turn on from a family whose phones have all dropped out.
   /// Only the host can do this; the game never skips anyone by itself.
+  ///
+  /// When the game waits on a dropped player's answer, it goes on as if they
+  /// passed.
   FamilyGame skipTurn() {
-    if (isOver || !familyAway(turn)) return this;
+    if (!turnStalled) return this;
+    final move = pending;
+    if (move != null) {
+      return switch (move.kind) {
+        PendingKind.letMeGo => answerLetMeGo(move.responderId, use: false),
+        PendingKind.counter => passCounter(move.responderId),
+        PendingKind.revenge => passRevenge(move.responderId),
+      };
+    }
+    if (secret) {
+      final next = _playerAfter(turnPlayer);
+      return _copy(turnPlayer: next, turn: headOf(next), suggestions: {...suggestions}..remove(turn));
+    }
     final order = familyHeads;
     final next = order[(order.indexOf(turn) + 1) % order.length];
-    return _copy(turn: next, suggestions: {...suggestions}..remove(turn));
+    return _copy(turn: next, turnPlayer: next, suggestions: {...suggestions}..remove(turn));
   }
 
   /// Players whose seat someone may ask for: dropped out, and not the host's phone.
@@ -481,6 +1073,15 @@ final class FamilyGame {
     List<GuessEvent>? events,
     Set<String>? away,
     List<SeatClaim>? claims,
+    String? turnPlayer,
+    Map<String, Set<int>>? known,
+    PendingMove? pending,
+    bool clearPending = false,
+    int? wanted,
+    bool clearWanted = false,
+    Map<String, int>? bonus,
+    Set<String>? cardsUsed,
+    List<Rumor>? rumors,
   }) => FamilyGame._(
     players: players,
     slips: slips,
@@ -494,5 +1095,18 @@ final class FamilyGame {
     version: version + 1,
     away: away == null ? this.away : Set.unmodifiable(away),
     claims: claims == null ? this.claims : List.unmodifiable(claims),
+    twists: twists,
+    turnPlayer: turnPlayer ?? this.turnPlayer,
+    known: known == null
+        ? this.known
+        : Map.unmodifiable({for (final e in known.entries) e.key: Set<int>.unmodifiable(e.value)}),
+    pending: pending ?? (clearPending ? null : this.pending),
+    wanted: wanted ?? (clearWanted ? null : this.wanted),
+    bonus: bonus == null ? this.bonus : Map.unmodifiable(bonus),
+    cardsUsed: cardsUsed == null ? this.cardsUsed : Set.unmodifiable(cardsUsed),
+    rumors: rumors == null
+        ? this.rumors
+        : List.unmodifiable(rumors.length > maxRumors ? rumors.sublist(rumors.length - maxRumors) : rumors),
+    seed: seed,
   );
 }

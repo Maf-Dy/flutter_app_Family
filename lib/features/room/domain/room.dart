@@ -7,6 +7,7 @@ import '../../family/domain/family_game.dart';
 import 'category.dart';
 
 export 'category.dart';
+export '../../family/domain/family_game.dart' show FamilyTwists;
 
 /// How the room plays once the names are in.
 enum GameMode {
@@ -123,6 +124,7 @@ final class Room {
     this.mode = GameMode.classic,
     this.teamSetup = const TeamSetup(),
     this.familyChat = true,
+    this.familyTwists = FamilyTwists.none,
     this.family,
     this.phase = RoomPhase.collecting,
     this.round = 1,
@@ -164,6 +166,9 @@ final class Room {
 
   /// Whether families can message each other in [GameMode.family].
   final bool familyChat;
+
+  /// House rules for [GameMode.family].
+  final FamilyTwists familyTwists;
 
   /// The game in progress in [GameMode.family], once it has started.
   final FamilyGame? family;
@@ -325,6 +330,7 @@ final class Room {
       slips: [for (final s in slips) (text: s.text, writerId: s.writerId)],
       chatEnabled: familyChat,
       random: random,
+      twists: familyTwists,
     ),
   );
 
@@ -351,6 +357,7 @@ final class Room {
         mode: mode,
         teamSetup: teamSetup,
         familyChat: familyChat,
+        familyTwists: familyTwists,
         family: clearFamily ? null : family ?? this.family,
         phase: phase ?? this.phase,
         round: round ?? this.round,

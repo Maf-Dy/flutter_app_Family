@@ -21,6 +21,7 @@ import '../widgets/family_chat.dart';
 import '../widgets/ideas_card.dart';
 import '../widgets/table_notices.dart';
 import '../widgets/turn_banner.dart';
+import '../widgets/twist_cards.dart';
 
 /// The host's seat in a family game that friends play in their browsers.
 /// Pops with a [GameExit] once there's a winner, or null to go back to the lobby.
@@ -104,7 +105,7 @@ class _FamilyViewState extends State<_FamilyView> {
     if (target == null ||
         slip == null ||
         !game.askableFor(context.read<FamilyCubit>().myHead ?? '').any((p) => p.id == target) ||
-        !game.hiddenSlips.any((s) => s.id == slip)) {
+        !game.slipsOpenTo(context.read<FamilyCubit>().myHead ?? '').any((s) => s.id == slip)) {
       setState(() => _pickError = context.l10n.familyPickBoth);
       return;
     }
@@ -116,6 +117,19 @@ class _FamilyViewState extends State<_FamilyView> {
       _slip = null;
       _pickError = null;
     });
+  }
+
+  void _report(FamilyActionError? error) {
+    if (error != null) _showError(error);
+  }
+
+  Future<void> _spreadRumor(FamilyGame game, String me) async {
+    final picked = await showDialog<(String, int)>(
+      context: context,
+      builder: (_) => RumorDialog(game: game, me: me),
+    );
+    if (picked == null || !mounted) return;
+    _report(context.read<FamilyCubit>().spreadRumor(picked.$1, picked.$2));
   }
 
   void _share(FamilyGame game) {
@@ -208,7 +222,20 @@ class _FamilyViewState extends State<_FamilyView> {
           const SizedBox(height: 10),
         ],
       TurnBanner(game: game, me: me),
-      if (!over && game.familyAway(game.turn)) AwayTurnCard(onSkip: cubit.skipTurn),
+      if (!over && game.turnStalled) AwayTurnCard(onSkip: cubit.skipTurn),
+      if (!over && game.pending != null) ...[
+        const SizedBox(height: 10),
+        PendingCard(
+          game: game,
+          me: me,
+          onLetMeGo: ({required use}) => _report(cubit.answerLetMeGo(use: use)),
+          onCounter: (target, slip) => _report(cubit.counterCatch(target, slip)),
+          onPassCounter: () => _report(cubit.passCounter()),
+          onRevenge: (slip) => _report(cubit.revenge(slip)),
+          onPassRevenge: () => _report(cubit.passRevenge()),
+        ),
+      ],
+      if (!over && game.twists.wanted) ...[const SizedBox(height: 10), WantedCard(game: game, myHead: myHead)],
       if (me == null) ...[
         const SizedBox(height: 10),
         Text(
@@ -226,6 +253,7 @@ class _FamilyViewState extends State<_FamilyView> {
         ),
         const SizedBox(height: 8),
         FamilyMembers(game: game, head: myHead, colors: colors, me: me),
+        if (!over && game.twists.letMeGo) ...[const SizedBox(height: 6), LetMeGoChip(game: game, me: me)],
         if (!over) ...[
           const SizedBox(height: 14),
           AskCard(
@@ -264,6 +292,10 @@ class _FamilyViewState extends State<_FamilyView> {
             }),
           ),
         ],
+        if (!over && game.twists.rumors) ...[
+          const SizedBox(height: 10),
+          RumorsCard(game: game, me: me, onSpread: () => _spreadRumor(game, me)),
+        ],
         if (game.chatEnabled) ...[
           const SizedBox(height: 10),
           FamilyChat(
@@ -285,12 +317,31 @@ class _FamilyViewState extends State<_FamilyView> {
       listeners: [
         BlocListener<FamilyCubit, FamilyGame>(
           listenWhen: (previous, current) =>
-              myHead != null && !current.isOver && current.turn == current.headOf(me!) && previous.turn != current.turn,
+              myHead != null &&
+              !current.isOver &&
+              (current.secret ? current.turnPlayer == me : current.turn == current.headOf(me!)) &&
+              (previous.turn != current.turn || previous.turnPlayer != current.turnPlayer),
           listener: (_, _) => unawaited(Haptics.yourTurn()),
         ),
         BlocListener<FamilyCubit, FamilyGame>(
           listenWhen: (previous, current) => current.isOver && !previous.isOver,
           listener: (_, _) => _showWinner(),
+        ),
+        BlocListener<FamilyCubit, FamilyGame>(
+          listenWhen: (previous, current) => current.rumors.length > previous.rumors.length,
+          listener: (context, game) {
+            final rumor = game.rumors.last;
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: Text(
+                    context.l10n.rumorLine(game.nameOf(rumor.targetId), game.slip(rumor.slipId)?.text ?? ''),
+                  ),
+                  duration: const Duration(seconds: 5),
+                ),
+              );
+          },
         ),
       ],
       child: PopScope<Object?>(

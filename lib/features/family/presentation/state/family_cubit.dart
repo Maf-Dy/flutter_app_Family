@@ -48,6 +48,25 @@ class FamilyCubit extends Cubit<FamilyGame> {
   void resolveClaim(String clientId, {required bool approve}) =>
       _table.apply((game) => game.resolveClaim(clientId, approve: approve));
 
+  /// The host, asked about, says "فكّك مني" ([use]) or lets it be answered.
+  FamilyActionError? answerLetMeGo({required bool use}) =>
+      _move((g, me) => g.checkAnswer(me, PendingKind.letMeGo), (g, me) => g.answerLetMeGo(me, use: use));
+
+  FamilyActionError? counterCatch(String targetId, int slipId) =>
+      _move((g, me) => g.checkCounter(me, targetId, slipId), (g, me) => g.counterCatch(me, targetId, slipId));
+
+  FamilyActionError? passCounter() =>
+      _move((g, me) => g.checkAnswer(me, PendingKind.counter), (g, me) => g.passCounter(me));
+
+  FamilyActionError? revenge(int slipId) =>
+      _move((g, me) => g.checkRevenge(me, slipId), (g, me) => g.revenge(me, slipId));
+
+  FamilyActionError? passRevenge() =>
+      _move((g, me) => g.checkAnswer(me, PendingKind.revenge), (g, me) => g.passRevenge(me));
+
+  FamilyActionError? spreadRumor(String targetId, int slipId) =>
+      _move((g, me) => g.checkRumor(me, targetId, slipId), (g, me) => g.spreadRumor(me, targetId, slipId));
+
   FamilyActionError? say(String text) => _move((g, me) => g.checkMessage(me, text), (g, me) => g.say(me, text));
 
   FamilyActionError? _move(

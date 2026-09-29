@@ -2035,6 +2035,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'It was a double bet.'**
   String get faceOffWasDouble;
+
+  /// No description provided for @familyErrorWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait: someone has to answer first.'**
+  String get familyErrorWaiting;
+
+  /// No description provided for @familyErrorNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t do that now.'**
+  String get familyErrorNotAllowed;
+
+  /// No description provided for @twistsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'House rules'**
+  String get twistsTitle;
+
+  /// No description provided for @twistsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Twists for the family game. Turn on as many as you like.'**
+  String get twistsNote;
+
+  /// No description provided for @twistSecret.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret catches'**
+  String get twistSecret;
+
+  /// No description provided for @twistSecretDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Only your family sees whether you were right. A caught player joins in secret and keeps acting free.'**
+  String get twistSecretDetail;
+
+  /// No description provided for @twistCounter.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter-catch'**
+  String get twistCounter;
+
+  /// No description provided for @twistCounterDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Caught? One shot back at the catcher\'s family. Right, and they all join you.'**
+  String get twistCounterDetail;
+
+  /// No description provided for @twistWanted.
+  ///
+  /// In en, this message translates to:
+  /// **'Wanted'**
+  String get twistWanted;
+
+  /// No description provided for @twistWantedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'The app puts up a wanted name. Catch its writer and your family earns an extra ask.'**
+  String get twistWantedDetail;
+
+  /// No description provided for @twistRevenge.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenge'**
+  String get twistRevenge;
+
+  /// No description provided for @twistRevengeDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrongly accused? You get a free shot at whoever accused you.'**
+  String get twistRevengeDetail;
+
+  /// No description provided for @twistRumors.
+  ///
+  /// In en, this message translates to:
+  /// **'Rumors'**
+  String get twistRumors;
+
+  /// No description provided for @twistRumorsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Once a game, spread an anonymous rumor. True, or a total lie.'**
+  String get twistRumorsDetail;
+
+  /// No description provided for @twistLetMeGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Let me go!'**
+  String get twistLetMeGo;
+
+  /// No description provided for @twistLetMeGoDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Once a game, cancel an ask about you. Nobody learns if it was right, and the asker loses the turn.'**
+  String get twistLetMeGoDetail;
+
+  /// No description provided for @familyTurnYouAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'Your turn! You ask for your family.'**
+  String get familyTurnYouAsk;
+
+  /// No description provided for @familyTurnPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is asking'**
+  String familyTurnPlayer(String name);
+
+  /// No description provided for @familyEventSecret.
+  ///
+  /// In en, this message translates to:
+  /// **'{asker} asked someone…'**
+  String familyEventSecret(String asker);
+
+  /// No description provided for @familyEventBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'{target} told {asker} “Let me go!”'**
+  String familyEventBlocked(String asker, String target);
+
+  /// No description provided for @familyEventCounterTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Counter-catch!'**
+  String get familyEventCounterTag;
+
+  /// No description provided for @familyEventRevengeTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Revenge!'**
+  String get familyEventRevengeTag;
+
+  /// No description provided for @familyEventWantedTag.
+  ///
+  /// In en, this message translates to:
+  /// **'(wanted!)'**
+  String get familyEventWantedTag;
+
+  /// No description provided for @wantedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wanted: “{name}”'**
+  String wantedTitle(String name);
+
+  /// No description provided for @wantedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Catch whoever wrote it and your family earns an extra ask.'**
+  String get wantedDetail;
+
+  /// No description provided for @wantedBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Your family has 1 extra ask saved} other{Your family has {count} extra asks saved}}'**
+  String wantedBonus(int count);
+
+  /// No description provided for @pendingWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {name}…'**
+  String pendingWaiting(String name);
+
+  /// No description provided for @pendingWaitingSomeone.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for someone to answer…'**
+  String get pendingWaitingSomeone;
+
+  /// No description provided for @letMeGoAsked.
+  ///
+  /// In en, this message translates to:
+  /// **'{asker} asks: did you write “{name}”?'**
+  String letMeGoAsked(String asker, String name);
+
+  /// No description provided for @letMeGoUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Let me go!'**
+  String get letMeGoUse;
+
+  /// No description provided for @letMeGoAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer it'**
+  String get letMeGoAnswer;
+
+  /// No description provided for @letMeGoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Once a game. Nobody learns if they were right, and they lose the turn.'**
+  String get letMeGoHint;
+
+  /// No description provided for @letMeGoReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Your “Let me go!” card is ready'**
+  String get letMeGoReady;
+
+  /// No description provided for @letMeGoUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'You used your “Let me go!” card'**
+  String get letMeGoUsed;
+
+  /// No description provided for @counterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{asker} caught you! One shot back:'**
+  String counterTitle(String asker);
+
+  /// No description provided for @counterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Guess who in their family wrote a name. Right, and they all join you.'**
+  String get counterHint;
+
+  /// No description provided for @counterShoot.
+  ///
+  /// In en, this message translates to:
+  /// **'Shoot back'**
+  String get counterShoot;
+
+  /// No description provided for @revengeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{asker} accused you wrongly. Revenge!'**
+  String revengeTitle(String asker);
+
+  /// No description provided for @revengeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Which of these did {asker} write? Right, and their whole family joins you.'**
+  String revengeHint(String asker);
+
+  /// No description provided for @revengeTake.
+  ///
+  /// In en, this message translates to:
+  /// **'Take revenge'**
+  String get revengeTake;
+
+  /// No description provided for @passShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Pass'**
+  String get passShot;
+
+  /// No description provided for @rumorsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rumors'**
+  String get rumorsTitle;
+
+  /// No description provided for @rumorLine.
+  ///
+  /// In en, this message translates to:
+  /// **'They say {target} wrote “{name}” 👀'**
+  String rumorLine(String target, String name);
+
+  /// No description provided for @rumorSpread.
+  ///
+  /// In en, this message translates to:
+  /// **'Spread a rumor'**
+  String get rumorSpread;
+
+  /// No description provided for @rumorHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Once a game, and nobody knows it was you. True or a total lie.'**
+  String get rumorHint;
+
+  /// No description provided for @rumorSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Spread it'**
+  String get rumorSend;
 }
 
 class _AppLocalizationsDelegate

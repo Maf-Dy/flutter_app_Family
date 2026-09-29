@@ -19,7 +19,7 @@ class TurnBanner extends StatelessWidget {
     final l10n = context.l10n;
     final myHead = me == null ? null : game.headOf(me!);
     final winner = game.winner;
-    final myTurn = winner == null && myHead != null && game.turn == myHead;
+    final myTurn = winner == null && myHead != null && (game.secret ? game.turnPlayer == me : game.turn == myHead);
 
     final (Color bg, Color fg, IconData icon, String text) = switch (winner) {
       final w? => (
@@ -27,6 +27,12 @@ class TurnBanner extends StatelessWidget {
         scheme.onTertiaryContainer,
         Icons.emoji_events_rounded,
         w == myHead ? l10n.familyYouWon : l10n.familyWon(game.nameOf(w)),
+      ),
+      null when myTurn && game.secret => (
+        scheme.primary,
+        scheme.onPrimary,
+        Icons.campaign_rounded,
+        l10n.familyTurnYouAsk,
       ),
       null when myTurn => (
         scheme.primary,
@@ -36,17 +42,17 @@ class TurnBanner extends StatelessWidget {
             ? l10n.familyActingHead(game.nameOf(myHead))
             : '${l10n.familyTurnYours} ${me == myHead ? l10n.familyYouAsk : l10n.familyHeadAsks(game.nameOf(myHead))}',
       ),
-      null when game.familyAway(game.turn) => (
+      null when game.turnStalled && game.pending == null => (
         scheme.surfaceContainerHigh,
         scheme.onSurface,
         Icons.wifi_off_rounded,
-        l10n.familyAwayTurn(game.nameOf(game.turn)),
+        l10n.familyAwayTurn(game.nameOf(game.asker)),
       ),
       null => (
         scheme.surfaceContainerHigh,
         scheme.onSurface,
         Icons.hourglass_top_rounded,
-        l10n.familyTurnOther(game.nameOf(game.turn)),
+        game.secret ? l10n.familyTurnPlayer(game.nameOf(game.asker)) : l10n.familyTurnOther(game.nameOf(game.turn)),
       ),
     };
 
