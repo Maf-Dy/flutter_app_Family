@@ -43,10 +43,10 @@ Pick **Face-off** (فريق قصاد فريق) when opening a room. Everyone wri
 
 Pick **Family online** when opening a room to play the classic game with the app as referee. Everyone writes names as usual, then plays on their own phone (friends in the browser, the host in the app):
 
-1. **Everyone starts as their own family.** On your family's turn, the head asks someone outside it "did you write …?".
+1. **Everyone starts as their own family.** A random player goes first. On your family's turn, the head picks anyone outside the family and types a name from memory: "did you write …?". Only names already caught show on the board, so nobody reads the list off a phone (in a handwritten room the drawings are picked instead).
 2. **Right**, and that person's whole family joins yours and you ask again. **Wrong**, and the turn passes to the family of the person you asked. The last family standing wins.
-3. **Family ideas.** Members suggest guesses and back them; the head can pick one with *Use*.
-4. **Family chat** (a room option, on by default) is private to each family and follows people when families merge.
+3. **Family ideas.** Members suggest guesses and vote for them; the head can pick one with *Use*. There's no chat, so the game keeps moving.
+4. **Two winners:** the family that grew to take everyone in, and its head, the one person nobody caught.
 5. A host who put no name in watches the board, and so does anyone who arrives after the start.
 6. **Awards of the night** at the end (أسوأ كداب, وش البوكر, أكتر واحد اتظلم, المخبر) and a **family tree** of who caught whom, on the screen and in the share picture.
 

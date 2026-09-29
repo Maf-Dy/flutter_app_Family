@@ -8,8 +8,9 @@ import '../state/round_cubit.dart';
 import '../widgets/paper_slip.dart';
 import '../../../../core/l10n/l10n.dart';
 
-/// The phone goes down on the table here. Nothing moves once the slips have
-/// settled, so the screen does not pull eyes away from the game.
+/// The phone goes down on the table here, the slips folded so nobody can read
+/// the names off it. Nothing moves once they have settled, so the screen does
+/// not pull eyes away from the game.
 class NamesBoardScreen extends StatefulWidget {
   const NamesBoardScreen({super.key});
 
@@ -62,7 +63,7 @@ class _NamesBoardScreenState extends State<NamesBoardScreen> with SingleTickerPr
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
               child: Text(
-                context.l10n.boardHint,
+                context.l10n.boardHintHidden,
                 style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
               ),
             ),
@@ -78,7 +79,7 @@ class _NamesBoardScreenState extends State<NamesBoardScreen> with SingleTickerPr
                       spacing: gap,
                       runSpacing: gap + 4,
                       children: [
-                        for (final (i, slip) in state.slips.indexed)
+                        for (final (i, _) in state.slips.indexed)
                           SizedBox(
                             width: width,
                             child: _SettleIn(
@@ -90,7 +91,8 @@ class _NamesBoardScreenState extends State<NamesBoardScreen> with SingleTickerPr
                                   curve: Motion.spring,
                                 ),
                               ),
-                              child: PaperSlip(text: slip.text, ink: slip.ink, tiltDegrees: slipTilt(i)),
+                              // Folded: playing from memory is the game, so the names stay hidden until "Who wrote what?".
+                              child: PaperSlip(text: '?', tiltDegrees: slipTilt(i)),
                             ),
                           ),
                       ],

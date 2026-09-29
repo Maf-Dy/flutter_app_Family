@@ -109,14 +109,13 @@ void main() {
     expect(start().checkMessage('a', '   '), FamilyActionError.emptyMessage);
   });
 
-  test('caught people drop out of who is worth asking', () {
+  test('anyone outside your family can be asked, caught or not: remembering is the game', () {
     var game = omarsTurn();
     expect(game.askableFor('a').map((p) => p.id), ['b', 'c']);
     game = game.guess('a', 'b', slipBy(game, 'b'));
     expect(game.isCaught('b'), isTrue);
-    expect(game.isCaught('a'), isFalse);
     expect(game.askableFor('a').map((p) => p.id), ['c']);
-    expect(game.askableFor('c').map((p) => p.id), ['a'], reason: 'Nour is in the family, but her name is out');
+    expect(game.askableFor('c').map((p) => p.id), ['a', 'b'], reason: 'Nour was caught, but Yara may still ask her');
   });
 
   test('a repeated name counts for either person who wrote it', () {
@@ -150,15 +149,24 @@ void main() {
     expect(game.events.last.correct, isTrue);
   });
 
-  test('caught people can\'t be asked again, by guess or idea', () {
+  test('asking a caught person about a name they didn\'t write is simply wrong', () {
     var game = omarsTurn();
     game = game.guess('a', 'b', slipBy(game, 'b'));
     // Yara's turn comes when Omar asks her wrongly.
     game = game.guess('a', 'c', slipBy(game, 'a'));
     expect(game.turn, 'c');
-    expect(game.checkGuess('c', 'b', slipBy(game, 'a')), FamilyActionError.invalidTarget);
-    expect(game.checkSuggestion('c', 'b', slipBy(game, 'a')), FamilyActionError.invalidTarget);
-    expect(game.guess('c', 'b', slipBy(game, 'a')), same(game));
+    expect(game.checkGuess('c', 'b', slipBy(game, 'a')), isNull);
+    game = game.guess('c', 'b', slipBy(game, 'a'));
+    expect(game.events.last.correct, isFalse);
+    expect(game.turn, 'a', reason: 'the turn goes to the family of the person asked');
+  });
+
+  test('a name typed from memory finds its slip, however it is spelled', () {
+    final game = omarsTurn();
+    final messi = slipBy(game, 'a');
+    expect(game.slipNamed('  MESSI ', head: 'c'), messi);
+    expect(game.slipNamed('Ronaldo', head: 'c'), isNull);
+    expect(game.slipNamed('', head: 'c'), isNull);
   });
 
   test('a resent message with the same id is posted once', () {

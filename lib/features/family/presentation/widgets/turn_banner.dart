@@ -67,12 +67,25 @@ class TurnBanner extends StatelessWidget {
             Icon(icon, color: fg, size: winner == null ? 26 : 36),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                text,
-                style: (winner == null ? theme.textTheme.titleMedium : theme.textTheme.headlineSmall)?.copyWith(
-                  color: fg,
-                  fontWeight: FontWeight.w800,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    text,
+                    style: (winner == null ? theme.textTheme.titleMedium : theme.textTheme.headlineSmall)?.copyWith(
+                      color: fg,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  // Two winners: the family that grew biggest, and the one person nobody caught.
+                  if (winner != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '${l10n.familyWinnersSize(game.membersOf(winner).length)} · ${l10n.familyLastUnknown(game.nameOf(winner))}',
+                      style: theme.textTheme.titleSmall?.copyWith(color: fg),
+                    ),
+                  ],
+                ],
               ),
             ),
           ],

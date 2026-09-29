@@ -93,7 +93,7 @@ void main() {
 
         // Names on the table
         expect(find.text('Names on the table'), findsOneWidget);
-        expect(find.text('Lionel Messi'), findsOneWidget);
+        expect(find.text('Lionel Messi'), findsNothing, reason: 'the slips lie folded: the game is played from memory');
         await tapVisible(tester, find.text('Who wrote what?'));
 
         // Who wrote what

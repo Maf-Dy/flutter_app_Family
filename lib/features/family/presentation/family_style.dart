@@ -15,6 +15,7 @@ String familyErrorText(AppLocalizations l10n, FamilyActionError error) => switch
   FamilyActionError.emptyMessage => l10n.familyErrorEmptyMessage,
   FamilyActionError.waiting => l10n.familyErrorWaiting,
   FamilyActionError.notAllowed => l10n.familyErrorNotAllowed,
+  FamilyActionError.unknownName => l10n.familyErrorUnknownName,
 };
 
 /// Where each player sits in the room's join order, so they keep their lobby colour.

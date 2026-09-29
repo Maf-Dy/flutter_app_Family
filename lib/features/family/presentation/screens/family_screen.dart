@@ -55,6 +55,7 @@ class _FamilyView extends StatefulWidget {
 class _FamilyViewState extends State<_FamilyView> {
   String? _target;
   int? _slip;
+  final _name = TextEditingController();
   String? _pickError;
 
   /// The host's side and the board: both jump back to the top when someone wins.
@@ -76,6 +77,7 @@ class _FamilyViewState extends State<_FamilyView> {
   @override
   void dispose() {
     _lifecycle.dispose();
+    _name.dispose();
     _seat.dispose();
     _board.dispose();
     super.dispose();
@@ -102,20 +104,27 @@ class _FamilyViewState extends State<_FamilyView> {
   }
 
   void _submit({required bool ask}) {
+    final cubit = context.read<FamilyCubit>();
+    final game = cubit.state;
+    final head = cubit.myHead ?? '';
     final target = _target;
-    final slip = _slip;
-    final game = context.read<FamilyCubit>().state;
-    // The pickers drop choices a friend's move took off the table, so check what they still show.
-    if (target == null ||
-        slip == null ||
-        !game.askableFor(context.read<FamilyCubit>().myHead ?? '').any((p) => p.id == target) ||
-        !game.slipsOpenTo(context.read<FamilyCubit>().myHead ?? '').any((s) => s.id == slip)) {
+    // The picker drops people a friend's move took off the table, so check what it still shows.
+    if (target == null || !game.askableFor(head).any((p) => p.id == target)) {
       setState(() => _pickError = context.l10n.familyPickBoth);
       return;
     }
-    final cubit = context.read<FamilyCubit>();
+    final slip = game.handwritten ? _slip : game.slipNamed(_name.text, head: head, targetId: target);
+    if (slip == null) {
+      setState(
+        () => _pickError = game.handwritten || _name.text.trim().isEmpty
+            ? context.l10n.familyPickBoth
+            : context.l10n.familyErrorUnknownName,
+      );
+      return;
+    }
     final error = ask ? cubit.guess(target, slip) : cubit.suggest(target, slip);
     if (error != null) return _showError(error);
+    _name.clear();
     setState(() {
       _target = null;
       _slip = null;
@@ -257,6 +266,8 @@ class _FamilyViewState extends State<_FamilyView> {
       if (!over && game.pending != null) ...[
         const SizedBox(height: 10),
         PendingCard(
+          // A new question gets a fresh card, not the last one's half-typed name.
+          key: ObjectKey(game.pending),
           game: game,
           me: me,
           onLetMeGo: ({required use}) => _report(cubit.answerLetMeGo(use: use)),
@@ -294,6 +305,7 @@ class _FamilyViewState extends State<_FamilyView> {
             canAsk: canAsk,
             target: _target,
             slip: _slip,
+            name: _name,
             error: _pickError,
             onTarget: (id) => setState(() {
               _target = id;
@@ -319,6 +331,7 @@ class _FamilyViewState extends State<_FamilyView> {
             onUse: (idea) => setState(() {
               _target = idea.targetId;
               _slip = idea.slipId;
+              _name.text = game.slip(idea.slipId)?.text ?? '';
               _pickError = null;
             }),
           ),

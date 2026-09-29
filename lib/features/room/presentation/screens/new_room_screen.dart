@@ -98,16 +98,7 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
                 TeamSettings(setup: state.teamSetup, onChanged: cubit.setTeamSetup),
               ],
               if (state.mode == GameMode.family) ...[
-                const SizedBox(height: 8),
-                Card(
-                  clipBehavior: Clip.antiAlias,
-                  child: SwitchListTile(
-                    value: state.familyChat,
-                    onChanged: cubit.setFamilyChat,
-                    title: Text(l10n.familyChatSwitch, style: theme.textTheme.titleMedium),
-                    subtitle: Text(state.familyChat ? l10n.familyChatOn : l10n.familyChatOff),
-                  ),
-                ),
+                // No chat switch: typing to your family drags the game out. Families decide by backing ideas.
                 const SizedBox(height: 16),
                 SectionLabel(l10n.twistsTitle),
                 const SizedBox(height: 10),

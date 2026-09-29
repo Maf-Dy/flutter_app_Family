@@ -22,6 +22,7 @@ String familyBody(JoinStrings s, String Function(String) esc, {required String h
         <p class="help" id="pendHelp"></p>
         <div class="field" id="pendWhoF"><label for="pendWho">${esc(s.family['who']!)}</label><select id="pendWho"></select></div>
         <div id="pendSlips" class="chips"></div>
+        <input id="pendName" maxlength="60" autocomplete="off" placeholder="${esc(s.family['nameHint']!)}">
         <p id="pendErr" class="error" hidden></p>
         <div id="pendBtns" class="row"></div>
       </section>
@@ -46,7 +47,7 @@ String familyBody(JoinStrings s, String Function(String) esc, {required String h
       </section>
       <section class="card stack" id="actCard">
         <div class="field"><label for="who">${esc(s.family['who']!)}</label><select id="who"></select></div>
-        <div class="field"><label for="which">${esc(s.family['which']!)}</label><select id="which"></select></div>
+        <div class="field"><label for="which">${esc(s.family['which']!)}</label><select id="which"></select><input id="whichText" maxlength="60" autocomplete="off" placeholder="${esc(s.family['nameHint']!)}"></div>
         <p id="err" class="error" hidden></p>
         <button id="go" type="button"></button>
       </section>
@@ -57,7 +58,7 @@ String familyBody(JoinStrings s, String Function(String) esc, {required String h
           <summary id="rumorOpen">${esc(s.family['rumorSpread']!)}</summary>
           <p class="help">${esc(s.family['rumorHint']!)}</p>
           <div class="field"><label for="rumorWho">${esc(s.family['rumorWho']!)}</label><select id="rumorWho"></select></div>
-          <div class="field"><label for="rumorWhich">${esc(s.family['rumorWhich']!)}</label><select id="rumorWhich"></select></div>
+          <div class="field"><label for="rumorWhich">${esc(s.family['rumorWhich']!)}</label><select id="rumorWhich"></select><input id="rumorText" maxlength="60" autocomplete="off" placeholder="${esc(s.family['nameHint']!)}"></div>
           <p id="rumorErr" class="error" hidden></p>
           <button id="rumorGo" type="button">${esc(s.family['rumorSend']!)}</button>
         </details>
@@ -78,6 +79,7 @@ String familyBody(JoinStrings s, String Function(String) esc, {required String h
         <h2>${esc(s.family['families']!)}</h2>
         <div id="families" class="list"></div>
         <h2>${esc(s.family['names']!)}</h2>
+        <p class="help" id="namesHint">${esc(s.family['namesHidden']!)}</p>
         <div id="names" class="chips"></div>
         <div id="events" class="list"></div>
       </section>
@@ -297,6 +299,16 @@ const _script = r'''
     });
   }
 
+  // Names are typed from memory; only drawings (a handwritten room) are picked from a list.
+  function hand(){ return st.slips.some(function(x){ return x.ink; }); }
+  function nameInput(select, input){ show($(select), hand()); show($(input), !hand()); }
+  function picked(select, input){
+    if (hand()) { var id = $(select).value; return id ? { slip: id } : null; }
+    var text = $(input).value.trim();
+    return text ? { name: text } : null;
+  }
+  function withPick(data, pick){ for (var k in pick) data[k] = pick[k]; return data; }
+
   function slipName(id){ var x = slipOf(id); return x ? slipText(x) : ''; }
 
   function pendTitle(pend){
@@ -319,13 +331,17 @@ const _script = r'''
     var err = $('pendErr'), btns = $('pendBtns'), slips = $('pendSlips'), who = $('pendWho');
     who.value = '';
     clear(btns); clear(slips); show(err, false);
-    var asker = nameOf(pend.asker), picked = null;
+    var asker = nameOf(pend.asker), chosen = null;
+    $('pendName').value = '';
+    show($('pendName'), pend.kind !== 'letMeGo' && !hand());
+    function pick(){ if (hand()) return chosen == null ? null : { slip: chosen }; var text = $('pendName').value.trim(); return text ? { name: text } : null; }
     function button(label, cls, onclick){ var b = el('button', cls, label); b.type = 'button'; b.onclick = onclick; btns.appendChild(b); return b; }
     function pickSlips(){
+      if (!hand()) return;
       (pend.slips || []).forEach(function(id){
         var c = el('button', 'chip pick', slipName(id)); c.type = 'button';
         var x = slipOf(id); if (x && x.ink) c.insertBefore(inkImg(x), c.firstChild);
-        c.onclick = function(){ picked = id; var all = slips.children; for (var i = 0; i < all.length; i++) all[i].className = 'chip pick'; c.className = 'chip slip'; };
+        c.onclick = function(){ chosen = id; var all = slips.children; for (var i = 0; i < all.length; i++) all[i].className = 'chip pick'; c.className = 'chip slip'; };
         slips.appendChild(c);
       });
     }
@@ -340,16 +356,18 @@ const _script = r'''
       fill(who, (pend.targets || []).map(function(id){ return { value: id, label: nameOf(id) }; }));
       pickSlips();
       button(S.counterShoot, '', function(){
-        if (!who.value || picked == null) { err.textContent = S.err_pickBoth; show(err, true); return; }
-        post('/game/counter', { target: who.value, slip: picked }, err);
+        var p = pick();
+        if (!who.value || !p) { err.textContent = S.err_pickBoth; show(err, true); return; }
+        post('/game/counter', withPick({ target: who.value }, p), err);
       });
       button(S.pass, 'ghostb', function(){ post('/game/passcounter', {}, err); });
     } else {
       $('pendHelp').textContent = t('revengeHint', { asker: asker });
       pickSlips();
       button(S.revengeTake, '', function(){
-        if (picked == null) { err.textContent = S.err_pickBoth; show(err, true); return; }
-        post('/game/revenge', { slip: picked }, err);
+        var p = pick();
+        if (!p) { err.textContent = S.err_pickBoth; show(err, true); return; }
+        post('/game/revenge', p, err);
       });
       button(S.pass, 'ghostb', function(){ post('/game/passrevenge', {}, err); });
     }
@@ -375,6 +393,7 @@ const _script = r'''
     if (lastRumor === null || top > lastRumor) lastRumor = top;
     show($('rumorForm'), st.canRumor && !!st.me);
     fill($('rumorWho'), st.players.filter(function(p){ return p.id !== st.me; }).map(function(p){ return { value: p.id, label: p.name }; }));
+    nameInput('rumorWhich', 'rumorText');
     fill($('rumorWhich'), st.slips.filter(function(x){ return !x.writer; }).map(function(x){ return { value: String(x.id), label: slipText(x) }; }));
   }
 
@@ -386,7 +405,7 @@ const _script = r'''
     var banner = $('banner');
     banner.className = 'banner' + (won ? ' won' : (myTurn && !pend) || (pend && pend.mine) ? ' mine' : '');
     banner.textContent = won
-      ? (mine === won ? S.youWin : t('familyWins', { name: nameOf(won) }))
+      ? (mine === won ? S.youWin : t('familyWins', { name: nameOf(won) })) + ' ' + t('familySize', { count: st.families.length ? st.families[0].members.length : 1 }) + ' · ' + t('lastUnknown', { name: nameOf(won) })
       : pend
         ? (pend.mine ? pendTitle(pend)
             : pend.responder ? t('waiting', { name: nameOf(pend.responder) }) : S.waitingSomeone)
@@ -426,6 +445,7 @@ const _script = r'''
 
       // The host works out who can be asked and which names are still open to this family.
       fill($('who'), st.askable.map(function(id){ return { value: id, label: nameOf(id) }; }));
+      nameInput('which', 'whichText');
       fill($('which'), st.open.map(function(id){ return { value: String(id), label: slipName(id) }; }));
       var line = $('cardLine');
       show(line, st.twists.letMeGo && !won);
@@ -450,7 +470,7 @@ const _script = r'''
         if (st.canAsk) {
           var use = el('button', '', S.use);
           use.type = 'button';
-          use.onclick = function(){ $('who').value = idea.target; $('which').value = String(idea.slip); window.scrollTo({ top: $('actCard').offsetTop - 12, behavior: 'smooth' }); };
+          use.onclick = function(){ $('who').value = idea.target; $('which').value = String(idea.slip); $('whichText').value = slip ? slip.text : ''; window.scrollTo({ top: $('actCard').offsetTop - 12, behavior: 'smooth' }); };
           row.appendChild(use);
         }
         ideas.appendChild(row);
@@ -467,7 +487,10 @@ const _script = r'''
       fams.appendChild(line);
     });
     var names = $('names'); clear(names);
+    // Only names already out show; remembering the rest is the game. All of them show at the end.
+    show($('namesHint'), !won);
     st.slips.forEach(function(x){
+      if (!x.writer && !won) return;
       var chip = names.appendChild(el('span', 'chip slip' + (x.writer ? ' done' : '') + (x.id === st.wanted && !x.writer ? ' wantedslip' : ''), iso(slipText(x)) + (x.writer ? ' · ' + iso(nameOf(x.writer)) : '')));
       if (x.ink) chip.insertBefore(inkImg(x), chip.firstChild);
     });
@@ -508,16 +531,16 @@ const _script = r'''
   }
 
   $('go').onclick = function(){
-    var who = $('who').value, which = $('which').value, err = $('err');
-    if (!who || !which) { err.textContent = S.err_pickBoth; show(err, true); return; }
-    post('/game/' + this.dataset.action, { target: who, slip: which }).then(function(res){
-      if (res && !res.error) { $('who').value = ''; $('which').value = ''; }
+    var who = $('who').value, p = picked('which', 'whichText'), err = $('err');
+    if (!who || !p) { err.textContent = S.err_pickBoth; show(err, true); return; }
+    post('/game/' + this.dataset.action, withPick({ target: who }, p)).then(function(res){
+      if (res && !res.error) { $('who').value = ''; $('which').value = ''; $('whichText').value = ''; }
     });
   };
   $('rumorGo').onclick = function(){
-    var who = $('rumorWho').value, which = $('rumorWhich').value, err = $('rumorErr');
-    if (!who || !which) { err.textContent = S.err_pickBoth; show(err, true); return; }
-    post('/game/rumor', { target: who, slip: which }, err).then(function(res){ if (res && !res.error) $('rumorForm').open = false; });
+    var who = $('rumorWho').value, p = picked('rumorWhich', 'rumorText'), err = $('rumorErr');
+    if (!who || !p) { err.textContent = S.err_pickBoth; show(err, true); return; }
+    post('/game/rumor', withPick({ target: who }, p), err).then(function(res){ if (res && !res.error) { $('rumorForm').open = false; $('rumorText').value = ''; } });
   };
   $('chatForm').onsubmit = function(ev){
     ev.preventDefault();

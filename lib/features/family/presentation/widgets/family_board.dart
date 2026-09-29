@@ -98,19 +98,30 @@ class FamilyBoard extends StatelessWidget {
             const SizedBox(height: 18),
             Text(l10n.familyNames, style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
+            // Only names already out show: remembering the rest is the game. All of them show at the end.
+            if (!game.isOver) ...[
+              Text(
+                l10n.boardHintHidden,
+                style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: 8),
+            ],
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
                 for (final slip in game.slips)
-                  _SlipChip(
-                    text: game.writerShownTo(me, slip.id) ? '${slip.text} · ${game.nameOf(slip.writerId)}' : slip.text,
-                    out: game.writerShownTo(me, slip.id),
-                    wanted: slip.id == game.wanted && !game.isOver,
-                    ink: slip.ink,
-                    writer: game.writerShownTo(me, slip.id) ? game.nameOf(slip.writerId) : null,
-                    paper: paper,
-                  ),
+                  if (game.isOver || game.writerShownTo(me, slip.id))
+                    _SlipChip(
+                      text: game.writerShownTo(me, slip.id)
+                          ? '${slip.text} · ${game.nameOf(slip.writerId)}'
+                          : slip.text,
+                      out: game.writerShownTo(me, slip.id),
+                      wanted: slip.id == game.wanted && !game.isOver,
+                      ink: slip.ink,
+                      writer: game.writerShownTo(me, slip.id) ? game.nameOf(slip.writerId) : null,
+                      paper: paper,
+                    ),
               ],
             ),
             if (events.isNotEmpty) ...[

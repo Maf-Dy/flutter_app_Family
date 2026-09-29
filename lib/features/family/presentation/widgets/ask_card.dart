@@ -14,6 +14,7 @@ class AskCard extends StatelessWidget {
     required this.canAsk,
     required this.target,
     required this.slip,
+    required this.name,
     this.me,
     required this.onTarget,
     required this.onSlip,
@@ -31,6 +32,9 @@ class AskCard extends StatelessWidget {
   final bool canAsk;
   final String? target;
   final int? slip;
+
+  /// The name typed from memory.
+  final TextEditingController name;
   final ValueChanged<String?> onTarget;
   final ValueChanged<int?> onSlip;
   final VoidCallback onSubmit;
@@ -64,13 +68,7 @@ class AskCard extends StatelessWidget {
               onChanged: onTarget,
             ),
             const SizedBox(height: 10),
-            FamilyPicker<int>(
-              label: l10n.familyWhich,
-              value: slip,
-              items: [for (final s in names) (value: s.id, label: s.text)],
-              inks: {for (final s in names) s.id: ?s.ink},
-              onChanged: onSlip,
-            ),
+            NameEntry(game: game, controller: name, slips: names, slip: slip, onSlip: onSlip),
             if (error != null) ...[
               const SizedBox(height: 8),
               Text(
@@ -97,6 +95,47 @@ class AskCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Where a name goes: typed from memory, since looking down a list of every
+/// name would spoil the game. A drawing can't be typed, so in a handwritten
+/// room the name is picked from [slips] instead.
+class NameEntry extends StatelessWidget {
+  const NameEntry({
+    super.key,
+    required this.game,
+    required this.controller,
+    required this.slips,
+    required this.slip,
+    required this.onSlip,
+  });
+
+  final FamilyGame game;
+  final TextEditingController controller;
+  final List<FamilySlip> slips;
+  final int? slip;
+  final ValueChanged<int?> onSlip;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    if (game.handwritten) {
+      return FamilyPicker<int>(
+        label: l10n.familyWhich,
+        value: slips.any((s) => s.id == slip) ? slip : null,
+        items: [for (final s in slips) (value: s.id, label: s.text)],
+        inks: {for (final s in slips) s.id: ?s.ink},
+        onChanged: onSlip,
+      );
+    }
+    return TextField(
+      key: const ValueKey('family-name'),
+      controller: controller,
+      maxLength: 60,
+      textCapitalization: TextCapitalization.words,
+      decoration: InputDecoration(labelText: l10n.familyWhich, hintText: l10n.familyNameHint, counterText: ''),
     );
   }
 }

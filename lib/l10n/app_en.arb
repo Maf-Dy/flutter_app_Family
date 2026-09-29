@@ -902,5 +902,24 @@
   "inkClear": "Clear",
   "inkHidden": "Hidden. Tap to see it again",
   "handwrittenName": "A handwritten name",
-  "inkMissing": "Write every name on its slip first."
+  "inkMissing": "Write every name on its slip first.",
+  "familyErrorUnknownName": "No name like that is left. Check the spelling.",
+  "familyNameHint": "Type the name you remember",
+  "familyLastUnknown": "👑 {name} was never caught",
+  "familyWinnersSize": "{count, plural, =1{A family of 1} other{A family of {count}}}",
+  "boardHintHidden": "Play from memory! The names stay hidden until the end.",
+  "@familyLastUnknown": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@familyWinnersSize": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

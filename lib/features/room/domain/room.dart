@@ -149,7 +149,7 @@ final class Room {
     this.handwritten = false,
     this.mode = GameMode.classic,
     this.teamSetup = const TeamSetup(),
-    this.familyChat = true,
+    this.familyChat = false,
     this.familyTwists = FamilyTwists.none,
     this.family,
     this.phase = RoomPhase.collecting,

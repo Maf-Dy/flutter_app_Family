@@ -261,6 +261,9 @@ enum FamilyActionError {
 
   /// That twist is off, not yours to answer, or already used.
   notAllowed,
+
+  /// A name typed from memory matches none still in play.
+  unknownName,
 }
 
 /// The classic Family game, refereed by the app: each player starts as their
@@ -463,13 +466,30 @@ final class FamilyGame {
   /// Whether [playerId]'s names are out: they were caught, so asking them again can't be right.
   bool isCaught(String playerId) => slips.any((s) => s.writerId == playerId && revealed.contains(s.id));
 
-  /// The people worth asking: outside the family headed by [head], and not
-  /// caught yet. With secret catches nobody else knows who was caught, so
-  /// everyone outside the family can be asked.
-  List<FamilyPlayer> askableFor(String head) => [
-    for (final p in targetsFor(head))
-      if (secret || !isCaught(p.id)) p,
-  ];
+  /// Everyone the family headed by [head] may ask: anyone outside it. The app
+  /// doesn't narrow it down; remembering who is worth asking is the game.
+  List<FamilyPlayer> askableFor(String head) => targetsFor(head);
+
+  /// Whether names are drawn by hand, so they're picked from the drawings instead of typed.
+  bool get handwritten => slips.any((s) => s.ink != null);
+
+  /// The slip a name typed from memory means, for the family headed by [head]:
+  /// a name still open to that family that reads the same as [text]. When
+  /// [targetId] wrote one of them, that one; with no [head], any name not out yet.
+  /// Null when no such name is left.
+  int? slipNamed(String text, {String? head, String? targetId}) {
+    final key = Room.matchKey(text);
+    if (key.isEmpty) return null;
+    final open = [
+      for (final s in slips)
+        if (s.text.isNotEmpty &&
+            Room.matchKey(s.text) == key &&
+            (head == null ? !revealed.contains(s.id) : !knowsWriter(head, s.id)))
+          s,
+    ];
+    if (open.isEmpty) return null;
+    return (open.where((s) => s.writerId == targetId).firstOrNull ?? open.first).id;
+  }
 
   bool isAway(String playerId) => away.contains(playerId);
 
@@ -491,7 +511,7 @@ final class FamilyGame {
 
   FamilyActionError? _checkPick(String family, String targetId, int slipId) {
     if (isOver) return FamilyActionError.gameOver;
-    if (player(targetId) == null || headOf(targetId) == family || (!secret && isCaught(targetId))) {
+    if (player(targetId) == null || headOf(targetId) == family) {
       return FamilyActionError.invalidTarget;
     }
     if (slip(slipId) == null || knowsWriter(family, slipId)) return FamilyActionError.invalidSlip;

@@ -232,6 +232,8 @@ void main() {
           namesPerPlayer: 1,
           hostName: 'Mafdy',
           mode: GameMode.family,
+          // The app no longer offers chat, but the page still handles a room that has it.
+          familyChat: true,
         ),
       );
       await send('POST', '/', form: 'name=Omar&s0=Up', as: omar);
@@ -258,6 +260,27 @@ void main() {
 
       final stranger = json((await send('GET', '/game')).body);
       expect(stranger['me'], isNull, reason: 'someone who joined late only watches');
+    });
+
+    test('a name typed from memory is matched, and an unknown one says so', () async {
+      host.update((room) => room.startFamily(Random(1)));
+      final game = host.room.family!;
+      final turn = game.turn;
+      final other = [omar, nour, yara].firstWhere((id) => id != turn);
+      final text = game.slips.firstWhere((s) => s.writerId == other).text;
+
+      final unknown = await send('POST', '/game/guess', form: 'target=${pub(other)}&name=Titanic', as: turn);
+      expect(json(unknown.body)['error'], 'unknownName');
+      expect(host.room.family!.events, isEmpty);
+
+      final typed = await send(
+        'POST',
+        '/game/guess',
+        form: 'target=${pub(other)}&name=${text.toUpperCase()}',
+        as: turn,
+      );
+      expect(json(typed.body)['error'], isNull);
+      expect(host.room.family!.headOf(other), turn);
     });
 
     test('moves go through the rules, and the right answer merges families', () async {
@@ -317,6 +340,8 @@ void main() {
           namesPerPlayer: 1,
           hostName: 'Mafdy',
           mode: GameMode.family,
+          // The app no longer offers chat, but the page still handles a room that has it.
+          familyChat: true,
         ),
       );
       await send('POST', '/', form: 'name=Omar&s0=Up', as: omar);

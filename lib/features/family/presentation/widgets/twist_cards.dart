@@ -92,6 +92,31 @@ class PendingCard extends StatefulWidget {
 class _PendingCardState extends State<PendingCard> {
   String? _target;
   int? _slip;
+  final _name = TextEditingController();
+  String? _error;
+
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  /// The name picked, or typed and matched against [targetId]'s; shows why when it can't be found.
+  int? _pickedSlip(FamilyGame game, String me, String? targetId) {
+    final slip = game.handwritten ? _slip : game.slipNamed(_name.text, head: game.headOf(me), targetId: targetId);
+    if (slip == null) setState(() => _error = context.l10n.familyErrorUnknownName);
+    return slip;
+  }
+
+  List<Widget> get _errorLine => [
+    if (_error case final error?) ...[
+      const SizedBox(height: 8),
+      Text(
+        error,
+        style: TextStyle(color: Theme.of(context).colorScheme.error, fontWeight: FontWeight.w700),
+      ),
+    ],
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +169,6 @@ class _PendingCardState extends State<PendingCard> {
             if (!game.revealed.contains(s.id) && s.writerId != me) s,
         ];
         final target = targets.contains(_target) ? _target : null;
-        final slip = slips.any((s) => s.id == _slip) ? _slip : null;
         body = [
           Text(l10n.counterTitle(asker), style: theme.textTheme.titleMedium),
           const SizedBox(height: 4),
@@ -157,18 +181,25 @@ class _PendingCardState extends State<PendingCard> {
             onChanged: (id) => setState(() => _target = id),
           ),
           const SizedBox(height: 10),
-          FamilyPicker<int>(
-            label: l10n.familyWhich,
-            value: slip,
-            items: [for (final s in slips) (value: s.id, label: s.text)],
-            onChanged: (id) => setState(() => _slip = id),
+          NameEntry(
+            game: game,
+            controller: _name,
+            slips: slips,
+            slip: _slip,
+            onSlip: (id) => setState(() => _slip = id),
           ),
+          ..._errorLine,
           const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: target == null || slip == null ? null : () => widget.onCounter(target, slip),
+                  onPressed: target == null
+                      ? null
+                      : () {
+                          final slip = _pickedSlip(game, me, target);
+                          if (slip != null) widget.onCounter(target, slip);
+                        },
                   icon: const Icon(Icons.replay_rounded),
                   label: Text(l10n.counterShoot),
                 ),
@@ -183,24 +214,28 @@ class _PendingCardState extends State<PendingCard> {
           for (final s in game.slips)
             if (!game.revealed.contains(s.id) && s.writerId != me) s,
         ];
-        final slip = slips.any((s) => s.id == _slip) ? _slip : null;
         body = [
           Text(l10n.revengeTitle(asker), style: theme.textTheme.titleMedium),
           const SizedBox(height: 4),
           Text(l10n.revengeHint(asker), style: theme.textTheme.bodyMedium),
           const SizedBox(height: 12),
-          FamilyPicker<int>(
-            label: l10n.familyWhich,
-            value: slip,
-            items: [for (final s in slips) (value: s.id, label: s.text)],
-            onChanged: (id) => setState(() => _slip = id),
+          NameEntry(
+            game: game,
+            controller: _name,
+            slips: slips,
+            slip: _slip,
+            onSlip: (id) => setState(() => _slip = id),
           ),
+          ..._errorLine,
           const SizedBox(height: 12),
           Row(
             children: [
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: slip == null ? null : () => widget.onRevenge(slip),
+                  onPressed: () {
+                    final slip = _pickedSlip(game, me, move.askerId);
+                    if (slip != null) widget.onRevenge(slip);
+                  },
                   icon: const Icon(Icons.bolt_rounded),
                   label: Text(l10n.revengeTake),
                 ),
@@ -279,6 +314,22 @@ class RumorDialog extends StatefulWidget {
 class _RumorDialogState extends State<RumorDialog> {
   String? _target;
   int? _slip;
+  final _name = TextEditingController();
+  bool _unknown = false;
+
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  void _send() {
+    final target = _target;
+    if (target == null) return;
+    final slip = widget.game.handwritten ? _slip : widget.game.slipNamed(_name.text, targetId: target);
+    if (slip == null) return setState(() => _unknown = true);
+    Navigator.pop(context, (target, slip));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -304,12 +355,17 @@ class _RumorDialogState extends State<RumorDialog> {
               onChanged: (id) => setState(() => _target = id),
             ),
             const SizedBox(height: 10),
-            FamilyPicker<int>(
-              label: l10n.familyWhich,
-              value: _slip,
-              items: [for (final s in slips) (value: s.id, label: s.text)],
-              onChanged: (id) => setState(() => _slip = id),
+            NameEntry(
+              game: game,
+              controller: _name,
+              slips: slips,
+              slip: _slip,
+              onSlip: (id) => setState(() => _slip = id),
             ),
+            if (_unknown) ...[
+              const SizedBox(height: 8),
+              Text(l10n.familyErrorUnknownName, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+            ],
           ],
         ),
       ),
@@ -318,10 +374,7 @@ class _RumorDialogState extends State<RumorDialog> {
           onPressed: () => Navigator.pop(context),
           child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
         ),
-        FilledButton(
-          onPressed: _target == null || _slip == null ? null : () => Navigator.pop(context, (_target!, _slip!)),
-          child: Text(l10n.rumorSend),
-        ),
+        FilledButton(onPressed: _target == null ? null : _send, child: Text(l10n.rumorSend)),
       ],
     );
   }

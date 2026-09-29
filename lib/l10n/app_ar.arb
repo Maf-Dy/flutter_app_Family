@@ -393,5 +393,10 @@
   "inkClear": "امسح",
   "inkHidden": "متخبي. دوس عشان تشوفه تاني",
   "handwrittenName": "اسم مكتوب بخط الإيد",
-  "inkMissing": "اكتب كل اسم على ورقته الأول."
+  "inkMissing": "اكتب كل اسم على ورقته الأول.",
+  "familyErrorUnknownName": "مفيش اسم زي ده لسه في اللعبة. راجع الكتابة.",
+  "familyNameHint": "اكتب الاسم اللي فاكره",
+  "familyLastUnknown": "👑 {name} محدش عرف يقفشه",
+  "familyWinnersSize": "{count, plural, =1{عيلة من واحد} =2{عيلة من اتنين} other{عيلة من {count}}}",
+  "boardHintHidden": "العب من دماغك! الأسامي مستخبية لحد الآخر."
 }

@@ -277,8 +277,22 @@ class LanRoomHost implements RoomHost {
     }
     // Phones name players by their public id; the real id is someone's cookie.
     final target = familyPlayerIdFor(game, form['target'] ?? '') ?? '';
-    final slip = int.tryParse(form['slip'] ?? '') ?? -1;
     final text = form['text'] ?? '';
+    // Names are typed from memory; a handwritten room picks the drawing by id instead.
+    final typed = form['name'];
+    final slip = typed == null
+        ? int.tryParse(form['slip'] ?? '') ?? -1
+        : game.slipNamed(
+                typed,
+                head: action == 'rumor' ? null : game.headOf(clientId),
+                targetId: action == 'revenge' ? game.pending?.askerId : target,
+              ) ??
+              -1;
+    if (typed != null && slip < 0) {
+      response.statusCode = HttpStatus.conflict;
+      _json(response, {'error': FamilyActionError.unknownName.name});
+      return;
+    }
     final (error, next) = switch (action) {
       'guess' => (game.checkGuess(clientId, target, slip), game.guess(clientId, target, slip)),
       'suggest' => (game.checkSuggestion(clientId, target, slip), game.suggest(clientId, target, slip)),

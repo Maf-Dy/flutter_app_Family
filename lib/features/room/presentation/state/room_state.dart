@@ -58,7 +58,7 @@ final class RoomState {
     this.handwritten = false,
     this.mode = GameMode.classic,
     this.teamSetup = const TeamSetup(),
-    this.familyChat = true,
+    this.familyChat = false,
     this.familyTwists = FamilyTwists.none,
     this.namesPerPlayer = 1,
     this.connection = const ConnectionChecking(),

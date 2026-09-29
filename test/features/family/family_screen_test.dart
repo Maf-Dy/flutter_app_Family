@@ -46,6 +46,14 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Types a name from memory, as players do: no list of names to pick from.
+  Future<void> typeName(WidgetTester tester, String name) async {
+    final field = find.byKey(const ValueKey('family-name'));
+    await tester.ensureVisible(field);
+    await tester.enterText(field, name);
+    await tester.pumpAndSettle();
+  }
+
   /// A friend's move, as if it came from their browser.
   void friendMove(FamilyGame Function(FamilyGame game) move) =>
       host.update((room) => room.withFamily(move(room.family!)));
@@ -56,7 +64,7 @@ void main() {
   Future<void> openFamilyRoom(WidgetTester tester, {bool hostPlays = true}) async {
     await tapVisible(tester, find.text('Host a room'));
     await tapVisible(tester, find.text('Family online'));
-    expect(find.text('Family chat'), findsOneWidget, reason: 'the chat switch shows only for this mode');
+    expect(find.text('Family chat'), findsNothing, reason: 'families back ideas instead of chatting');
     await tapVisible(tester, find.text('Open room'));
     host
       ..join('a', 'Omar', ['Messi'])
@@ -99,20 +107,17 @@ void main() {
 
         // The host catches Omar: he joins and it stays the host's turn.
         await pick<String>(tester, 'Omar');
-        await pick<int>(tester, 'Messi');
+        await typeName(tester, 'Messi');
         await tapVisible(tester, find.text('Ask!'));
         expect(host.room.family!.headOf('a'), Player.hostId);
         expect(find.textContaining('caught Omar'), findsOneWidget);
 
-        // Omar, now family, backs an idea and chats; the host sees both.
-        friendMove((g) => g.suggest('a', 'b', slipOf('b')).say('a', 'It was Nour!'));
+        // Omar, now family, backs an idea; the host sees it, and there's no chat.
+        friendMove((g) => g.suggest('a', 'b', slipOf('b')));
         await tester.pumpAndSettle();
         expect(find.text('Nour wrote “Fairuz”?'), findsOneWidget);
-        expect(find.text('It was Nour!'), findsOneWidget);
-        await tester.ensureVisible(find.widgetWithText(TextField, 'Only your family sees this'));
-        await tester.enterText(find.widgetWithText(TextField, 'Only your family sees this'), 'On it');
-        await tapVisible(tester, find.byTooltip('Send'));
-        expect(host.room.family!.chatFor(Player.hostId).map((m) => m.text), ['It was Nour!', 'On it']);
+        expect(find.text('Only your family sees this'), findsNothing);
+        expect(find.text('Fairuz'), findsNothing, reason: 'names not out yet stay off the board');
 
         // The host takes the family's idea and wins.
         await tapVisible(tester, find.text('Use'));
@@ -159,11 +164,10 @@ void main() {
     expect(host.room.slipCount, 3, reason: 'the names stay in the bowl');
   });
 
-  testWidgets('a member suggests instead of asking, and turning chat off hides it', (tester) async {
+  testWidgets('a member suggests instead of asking, and there is no chat', (tester) async {
     await pumpApp(tester, size: sizes['portrait']!);
     await tapVisible(tester, find.text('Host a room'));
     await tapVisible(tester, find.text('Family online'));
-    await tapVisible(tester, find.text('Family chat'));
     await tapVisible(tester, find.text('Open room'));
     expect(host.room.familyChat, isFalse);
     host
@@ -189,10 +193,10 @@ void main() {
     expect(find.text("Omar's family"), findsWidgets);
     expect(find.textContaining('Omar makes the guess.'), findsOneWidget);
     expect(find.text('Ask!'), findsNothing);
-    expect(find.text('Only your family sees this'), findsNothing, reason: 'chat is off in this room');
+    expect(find.text('Only your family sees this'), findsNothing, reason: 'there is no chat');
 
     await pick<String>(tester, 'Nour');
-    await pick<int>(tester, 'Fairuz');
+    await typeName(tester, 'Fairuz');
     await tapVisible(tester, find.text('Suggest to the family'));
     final ideas = host.room.family!.suggestionsFor('a');
     expect(ideas.single.voters, {Player.hostId});
@@ -219,10 +223,10 @@ void main() {
       await handTurnToHost(tester);
       expect(find.textContaining('دور عيلتك!'), findsOneWidget);
       await pick<String>(tester, 'عمر');
-      await pick<int>(tester, 'محمد صلاح');
+      await typeName(tester, 'محمد صلاح');
       await tapVisible(tester, find.text('اسأل!'));
       await pick<String>(tester, 'نور');
-      await pick<int>(tester, 'أبو تريكة');
+      await typeName(tester, 'أبو تريكة');
       await tapVisible(tester, find.text('اسأل!'));
       expect(find.text('عيلتك كسبت يا وحوش!'), findsOneWidget);
       expect(find.text('دور جديد، نفس القعدة'), findsOneWidget);
@@ -259,7 +263,7 @@ void main() {
       if (game.turn == Player.hostId) {
         // The host asks Omar wrongly, which hands Omar the turn.
         await pick<String>(tester, 'Omar');
-        await pick<int>(tester, 'Fairuz');
+        await typeName(tester, 'Fairuz');
         await tapVisible(tester, find.text('Ask!'));
         game = host.room.family!;
       }
@@ -290,7 +294,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text("Your family's turn! Omar is offline, so you ask."), findsOneWidget);
       await pick<String>(tester, 'Nour');
-      await pick<int>(tester, 'Fairuz');
+      await typeName(tester, 'Fairuz');
       await tapVisible(tester, find.text('Ask!'));
       expect(host.room.family!.isOver, isTrue);
       expect(host.room.family!.winner, 'a', reason: 'the family is still Omar\'s');
