@@ -322,5 +322,13 @@
   "faceOffYouSaid": "انتو قلتوا {name}",
   "faceOffNoPoints": "مفيش نقط لـ{team}",
   "faceOffLosesPoint": "{team} خسر نقطة",
-  "faceOffWasDouble": "كان رهان دبل."
+  "faceOffWasDouble": "كان رهان دبل.",
+  "handwritten": "بخط إيدك",
+  "handwrittenOn": "كل واحد يكتب الأسامي بصباعه، وبعدين الكل هيشوف الشخبطة الحقيقية. الخط بيفضح، فغيّر خطك يا فنان!",
+  "handwrittenOff": "مقفولة. الأسامي بتتكتب بالكيبورد.",
+  "inkHint": "اكتب الاسم هنا بصباعك",
+  "inkClear": "امسح",
+  "inkHidden": "متخبي. دوس عشان تشوفه تاني",
+  "handwrittenName": "اسم مكتوب بخط الإيد",
+  "inkMissing": "اكتب كل اسم على ورقته الأول."
 }

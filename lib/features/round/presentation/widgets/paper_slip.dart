@@ -4,12 +4,67 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/game_colors.dart';
+import '../../../../l10n/app_localizations.dart';
+import '../../../room/domain/slip_ink.dart';
+
+export '../../../room/domain/slip_ink.dart' show SlipInk;
+
+/// A slip's name wherever it shows: the typed [text], or the drawing itself
+/// when the name was written by hand ([ink]), tinted with the text colour.
+class SlipLabel extends StatelessWidget {
+  const SlipLabel({
+    super.key,
+    required this.text,
+    this.ink,
+    this.style,
+    this.textAlign,
+    this.maxLines,
+    this.overflow,
+    this.inkHeight,
+  });
+
+  final String text;
+  final SlipInk? ink;
+  final TextStyle? style;
+  final TextAlign? textAlign;
+  final int? maxLines;
+  final TextOverflow? overflow;
+
+  /// How tall the drawing shows; about two lines of [style] by default.
+  final double? inkHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    final ink = this.ink;
+    if (ink == null) return Text(text, style: style, textAlign: textAlign, maxLines: maxLines, overflow: overflow);
+    final resolved = DefaultTextStyle.of(context).style.merge(style);
+    final height = inkHeight ?? (resolved.fontSize ?? 14) * 2.2;
+    return Semantics(
+      container: true,
+      label: Localizations.of<AppLocalizations>(context, AppLocalizations)?.handwrittenName ?? text,
+      image: true,
+      child: Image.memory(
+        ink.png,
+        height: height,
+        fit: BoxFit.contain,
+        color: resolved.color,
+        colorBlendMode: BlendMode.srcIn,
+        filterQuality: FilterQuality.medium,
+        gaplessPlayback: true,
+        excludeFromSemantics: true,
+      ),
+    );
+  }
+}
 
 /// A handwritten paper slip, like the ones that go in the bowl.
 class PaperSlip extends StatelessWidget {
-  const PaperSlip({super.key, required this.text, this.tiltDegrees = 0, this.large = false});
+  const PaperSlip({super.key, required this.text, this.ink, this.tiltDegrees = 0, this.large = false});
 
   final String text;
+
+  /// The name as written by hand; shown instead of [text] when set.
+  final SlipInk? ink;
   final double tiltDegrees;
 
   /// The big single slip on the read-aloud screen, with a strip of tape.
@@ -36,8 +91,10 @@ class PaperSlip extends StatelessWidget {
         padding: large
             ? const EdgeInsets.symmetric(horizontal: 20, vertical: 34)
             : const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-        child: Text(
-          text,
+        child: SlipLabel(
+          text: text,
+          ink: ink,
+          inkHeight: large ? 120 : 44,
           textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: AppFonts.hand,

@@ -16,11 +16,14 @@ final class FamilyPlayer {
 /// A name in play and who secretly wrote it.
 @immutable
 final class FamilySlip {
-  const FamilySlip({required this.id, required this.text, required this.writerId});
+  const FamilySlip({required this.id, required this.text, required this.writerId, this.ink});
 
   final int id;
   final String text;
   final String writerId;
+
+  /// The name as written by hand, when the room asked for handwriting.
+  final SlipInk? ink;
 }
 
 /// A family member's idea for the head's next guess, with who backs it.
@@ -130,13 +133,16 @@ final class FamilyGame {
     required List<({String text, String writerId})> slips,
     required bool chatEnabled,
     required Random random,
+
+    /// The drawing behind each of [slips], by position, for handwritten names.
+    List<SlipInk?> inks = const [],
   }) {
     assert(players.length >= 2, 'A family game needs players');
     return FamilyGame._(
       players: List.unmodifiable(players),
       slips: List.unmodifiable([
-        for (final (i, s) in ([...slips]..shuffle(random)).indexed)
-          FamilySlip(id: i, text: s.text, writerId: s.writerId),
+        for (final (i, (j, s)) in ([...slips.indexed]..shuffle(random)).indexed)
+          FamilySlip(id: i, text: s.text, writerId: s.writerId, ink: j < inks.length ? inks[j] : null),
       ]),
       heads: Map.unmodifiable({for (final p in players) p.id: p.id}),
       turn: players[random.nextInt(players.length)].id,

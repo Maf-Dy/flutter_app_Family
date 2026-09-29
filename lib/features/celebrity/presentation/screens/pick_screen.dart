@@ -54,7 +54,7 @@ class _PickScreenState extends State<PickScreen> {
                       key: ValueKey((game.bowl.length, current.text, current.writerId)),
                       child: Semantics(
                         liveRegion: true,
-                        child: PaperSlip(text: current.text, tiltDegrees: -2, large: true),
+                        child: PaperSlip(text: current.text, ink: current.ink, tiltDegrees: -2, large: true),
                       ),
                     ),
                   ),

@@ -29,6 +29,9 @@ class LanRoomHost implements RoomHost {
   static const cookieName = 'family_id';
   static const _maxBodyBytes = 8 * 1024;
 
+  /// Room for one drawing sent as a form field: a base64 data URL, URL-encoded.
+  static const _maxInkFieldBytes = SlipInk.maxBytes * 2;
+
   final int preferredPort;
   final Random _random;
   final DateTime Function() _clock;
@@ -134,6 +137,8 @@ class LanRoomHost implements RoomHost {
           await _familyAction(request, clientId, request.uri.pathSegments.last);
         case ('POST', '/game/claim'):
           await _claim(request, clientId);
+        case ('GET', final String path) when path.startsWith('/ink/'):
+          _ink(request, response, path);
         case ('GET', '/favicon.ico'):
           response.statusCode = HttpStatus.noContent;
         default:
@@ -158,7 +163,10 @@ class LanRoomHost implements RoomHost {
 
   Future<void> _submit(HttpRequest request, JoinStrings strings, String? clientId, Player? player) async {
     final response = request.response;
-    final form = await _readForm(request);
+    final form = await _readForm(
+      request,
+      maxBytes: _room.handwritten ? _maxBodyBytes + _room.namesPerPlayer * _maxInkFieldBytes : _maxBodyBytes,
+    );
     if (form == null) {
       response.statusCode = HttpStatus.requestEntityTooLarge;
       return;
@@ -172,25 +180,58 @@ class LanRoomHost implements RoomHost {
       return;
     }
     final name = form['name'] ?? '';
-    final secrets = [for (var i = 0; i < _room.namesPerPlayer; i++) form['s$i'] ?? ''];
+    // A handwritten room sends each name as the pad's PNG data URL; anything else reads as no drawing.
+    final fields = [for (var i = 0; i < _room.namesPerPlayer; i++) form['s$i'] ?? ''];
+    final secrets = _room.handwritten ? const <String>[] : fields;
+    final inks = _room.handwritten ? fields.map(SlipInk.fromDataUrl).toList() : const <SlipInk?>[];
     final team = int.tryParse(form['team'] ?? '');
     final error = _room.playersPickTeams && team == null
         ? SubmissionError.invalidTeam
-        : _room.validate(name: name, secrets: secrets, playerId: clientId, team: team);
+        : _room.validate(name: name, secrets: secrets, inks: inks, playerId: clientId, team: team);
     if (error != null || clientId == null) {
       response.statusCode = error == SubmissionError.roomClosed ? HttpStatus.conflict : HttpStatus.badRequest;
       _html(
         response,
         error == SubmissionError.roomClosed
             ? JoinPage.reading(_room, strings, player)
-            : JoinPage.form(_room, strings, player: player, name: name, secrets: secrets, error: error, team: team),
+            : JoinPage.form(
+                _room,
+                strings,
+                player: player,
+                name: name,
+                secrets: secrets,
+                inks: inks,
+                error: error,
+                team: team,
+              ),
       );
       return;
     }
-    _set(_room.withSubmission(playerId: clientId, name: name, secrets: secrets, team: team));
+    _set(_room.withSubmission(playerId: clientId, name: name, secrets: secrets, inks: inks, team: team));
     response
       ..statusCode = HttpStatus.seeOther
       ..headers.set(HttpHeaders.locationHeader, '/');
+  }
+
+  /// A handwritten name in the family game, as `/ink/<slip id>.png`. Pages
+  /// redraw often, so the drawing is revalidated by its ETag instead of resent.
+  void _ink(HttpRequest request, HttpResponse response, String path) {
+    final match = RegExp(r'^/ink/(\d{1,4})\.png$').firstMatch(path);
+    final ink = match == null ? null : _room.family?.slip(int.parse(match.group(1)!))?.ink;
+    if (ink == null) {
+      response.statusCode = HttpStatus.notFound;
+      return;
+    }
+    final etag = '"${ink.tag}"';
+    response.headers
+      ..set(HttpHeaders.cacheControlHeader, 'no-cache')
+      ..set(HttpHeaders.etagHeader, etag);
+    if (request.headers.value(HttpHeaders.ifNoneMatchHeader) == etag) {
+      response.statusCode = HttpStatus.notModified;
+      return;
+    }
+    response.headers.contentType = ContentType('image', 'png');
+    response.add(ink.png);
   }
 
   /// A move in the family game from a friend's phone. Answers `{"error": null}` or the reason it was refused.
@@ -319,11 +360,11 @@ class LanRoomHost implements RoomHost {
     response.write(jsonEncode(body));
   }
 
-  Future<Map<String, String>?> _readForm(HttpRequest request) async {
+  Future<Map<String, String>?> _readForm(HttpRequest request, {int maxBytes = _maxBodyBytes}) async {
     final bytes = <int>[];
     await for (final chunk in request) {
       bytes.addAll(chunk);
-      if (bytes.length > _maxBodyBytes) return null;
+      if (bytes.length > maxBytes) return null;
     }
     try {
       return Uri.splitQueryString(utf8.decode(bytes));

@@ -5,6 +5,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/platform/haptics.dart';
 import '../../../../core/theme/game_colors.dart';
 import '../../../room/presentation/team_style.dart';
+import '../../../round/presentation/widgets/paper_slip.dart';
 import '../../domain/face_off_game.dart';
 import '../state/celebrity_cubit.dart';
 import '../widgets/scoreboard.dart';
@@ -71,6 +72,16 @@ class _RevealScreenState extends State<RevealScreen> {
               textAlign: TextAlign.center,
               style: theme.textTheme.titleLarge,
             ),
+            // A handwritten name: show the scribble itself, the whole point of the round.
+            if (guess.slip.ink != null) ...[
+              const SizedBox(height: 10),
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 240),
+                  child: PaperSlip(text: guess.slip.text, ink: guess.slip.ink, tiltDegrees: -2),
+                ),
+              ),
+            ],
             if (!guess.correct) ...[
               const SizedBox(height: 4),
               Text(

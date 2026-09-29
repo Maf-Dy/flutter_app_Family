@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/l10n/l10n.dart';
+import '../../../../core/widgets/ink_pad.dart';
+import '../../domain/slip_ink.dart';
 
 /// The host's own secret name, typed hidden so the table can't read it.
 class HostSecretField extends StatefulWidget {
@@ -64,6 +66,79 @@ class _HostSecretFieldState extends State<HostSecretField> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
           ),
           icon: const Icon(Icons.add_rounded),
+        ),
+      ],
+    );
+  }
+}
+
+/// The host's own secret name written with a finger, in a handwritten room.
+/// The pad can be covered while the table looks on.
+class HostInkField extends StatefulWidget {
+  const HostInkField({super.key, required this.onSubmit, required this.label});
+
+  /// Returns whether the drawing was accepted; the pad only clears when it was.
+  final bool Function(SlipInk ink) onSubmit;
+  final String label;
+
+  @override
+  State<HostInkField> createState() => _HostInkFieldState();
+}
+
+class _HostInkFieldState extends State<HostInkField> {
+  final _ink = InkController();
+  bool _hidden = false;
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _ink.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_ink.isEmpty || _busy) return;
+    _busy = true;
+    final ink = await _ink.toInk();
+    _busy = false;
+    if (!mounted || ink == null || !widget.onSubmit(ink)) return;
+    _ink.clear();
+    setState(() => _hidden = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: InkPad(
+            controller: _ink,
+            label: widget.label,
+            hidden: _hidden,
+            onReveal: () => setState(() => _hidden = false),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton.filledTonal(
+              tooltip: _hidden ? context.l10n.show : context.l10n.hide,
+              onPressed: () => setState(() => _hidden = !_hidden),
+              icon: Icon(_hidden ? Icons.visibility_rounded : Icons.visibility_off_rounded),
+            ),
+            const SizedBox(height: 8),
+            IconButton.filled(
+              tooltip: context.l10n.dropInBowl,
+              onPressed: _submit,
+              style: IconButton.styleFrom(
+                minimumSize: const Size(52, 52),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              icon: const Icon(Icons.add_rounded),
+            ),
+          ],
         ),
       ],
     );

@@ -32,12 +32,14 @@ final class PassBowl {
     required bool allowDuplicates,
     required GameMode mode,
     required TeamSetup teamSetup,
+    bool handwritten = false,
   }) : room = Room(
          code: '',
          category: category,
          namesPerPlayer: namesPerPlayer,
          hostName: '',
          allowDuplicates: allowDuplicates,
+         handwritten: handwritten,
          mode: mode,
          teamSetup: teamSetup,
        );
@@ -64,13 +66,14 @@ final class PassBowl {
   List<Slip> get slips => room.slips;
 
   /// Checks one person's turn. Returns null when it can go in the bowl.
-  PassError? validate({required String name, required List<String> secrets}) {
+  /// In a handwritten game the names are [inks], and a missing drawing is a missing name.
+  PassError? validate({required String name, List<String> secrets = const [], List<SlipInk?> inks = const []}) {
     final clean = Room.tidy(name);
     if (clean.isEmpty) return PassError.missingName;
     final known = _playerNamed(clean);
     if (known != null && known.hasSubmitted) return PassError.nameTaken;
     if (known == null && room.players.length >= Room.maxPlayers) return PassError.full;
-    return switch (room.validate(name: clean, secrets: secrets, playerId: known?.id)) {
+    return switch (room.validate(name: clean, secrets: secrets, inks: inks, playerId: known?.id)) {
       null => null,
       SubmissionError.missingName => PassError.missingName,
       SubmissionError.missingSecret => PassError.missingSecret,
@@ -83,11 +86,11 @@ final class PassBowl {
   }
 
   /// Drops one person's names in the bowl. Call [validate] first.
-  PassBowl submit({required String name, required List<String> secrets}) {
-    assert(validate(name: name, secrets: secrets) == null, 'Validate the turn first');
+  PassBowl submit({required String name, List<String> secrets = const [], List<SlipInk?> inks = const []}) {
+    assert(validate(name: name, secrets: secrets, inks: inks) == null, 'Validate the turn first');
     final clean = Room.tidy(name);
     final id = _playerNamed(clean)?.id ?? 'p${room.players.length + 1}';
-    return PassBowl._(room.withSubmission(playerId: id, name: clean, secrets: secrets));
+    return PassBowl._(room.withSubmission(playerId: id, name: clean, secrets: secrets, inks: inks));
   }
 
   /// Same players, empty bowl.

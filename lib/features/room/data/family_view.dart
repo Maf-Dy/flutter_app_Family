@@ -51,6 +51,8 @@ Map<String, Object?> familyViewFor(FamilyGame game, String? playerId) {
         {
           'id': s.id,
           'text': s.text,
+          // Written by hand: the page shows the drawing from `/ink/<id>.png`.
+          if (s.ink != null) 'ink': true,
           if (game.revealed.contains(s.id)) 'writer': pub(s.writerId),
           // Your own names aren't worth asking about: you know who wrote them.
           if (inGame && s.writerId == playerId) 'mine': true,

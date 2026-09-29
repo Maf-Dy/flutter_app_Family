@@ -59,6 +59,8 @@ class RoomCubit extends Cubit<RoomState> {
 
   void setAllowDuplicates(bool allow) => emit(state.copyWith(allowDuplicates: allow));
 
+  void setHandwritten(bool on) => emit(state.copyWith(handwritten: on));
+
   void setMode(GameMode mode) =>
       emit(state.copyWith(mode: mode, namesPerPlayer: Room.namesForMode(state.namesPerPlayer, mode)));
 
@@ -192,6 +194,7 @@ class RoomCubit extends Cubit<RoomState> {
       namesPerPlayer: state.namesPerPlayer,
       hostName: hostName,
       allowDuplicates: state.allowDuplicates,
+      handwritten: state.handwritten,
       mode: state.mode,
       teamSetup: state.teamSetup,
       familyChat: state.familyChat,
@@ -224,12 +227,13 @@ class RoomCubit extends Cubit<RoomState> {
     if (!isClosed) emit(state.copyWith(stage: RoomStage.setup, clearRoom: true));
   }
 
-  /// Puts one of the host's own names in the bowl. Returns why it was refused, if it was.
-  SubmissionError? addHostSecret(String secret) {
+  /// Puts one of the host's own names in the bowl: typed, or drawn as [ink] in a
+  /// handwritten room. Returns why it was refused, if it was.
+  SubmissionError? addHostSecret(String secret, {SlipInk? ink}) {
     final host = _host;
     if (host == null) return SubmissionError.roomClosed;
-    final error = host.room.validateHostSecret(secret);
-    if (error == null) host.update((room) => room.withHostSecret(secret));
+    final error = host.room.validateHostSecret(secret, ink: ink);
+    if (error == null) host.update((room) => room.withHostSecret(secret, ink: ink));
     return error;
   }
 

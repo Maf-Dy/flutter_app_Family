@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/platform/haptics.dart';
 import '../../../../core/platform/secure_screen.dart';
+import '../../../../core/widgets/ink_pad.dart';
 import '../../../room/domain/room.dart';
 import '../../../room/presentation/category_label.dart';
 import '../../../room/presentation/widgets/section_label.dart';
@@ -16,9 +17,11 @@ import '../../domain/pass_bowl.dart';
 import '../state/pass_phone_cubit.dart';
 import '../widgets/secret_slip_field.dart';
 
-/// One person's turn: their name and their secret names, typed in private.
+/// One person's turn: their name and their secret names, typed (or, in a
+/// handwritten game, written with a finger) in private.
 ///
 /// Kept out of screenshots, and the secret names are wiped if the phone leaves the app mid-turn.
+/// Like typed slips, a drawing hides as soon as you move on to the next one.
 class YourTurnScreen extends StatefulWidget {
   const YourTurnScreen({super.key});
 
@@ -34,6 +37,14 @@ class _YourTurnScreenState extends State<YourTurnScreen> {
     text: _bowl.players.isEmpty ? context.read<SettingsCubit>().state.hostName : '',
   );
   late final _secrets = [for (var i = 0; i < _bowl.room.namesPerPlayer; i++) TextEditingController()];
+  late final _inks = [
+    if (_bowl.room.handwritten)
+      for (var i = 0; i < _bowl.room.namesPerPlayer; i++) InkController(),
+  ];
+
+  /// The one drawing on show; the others are covered.
+  int? _open = 0;
+  bool _submitting = false;
   late final AppLifecycleListener _lifecycle;
   PassError? _error;
 
@@ -50,6 +61,9 @@ class _YourTurnScreenState extends State<YourTurnScreen> {
     for (final c in _secrets) {
       c.dispose();
     }
+    for (final c in _inks) {
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -57,11 +71,29 @@ class _YourTurnScreenState extends State<YourTurnScreen> {
     for (final c in _secrets) {
       c.clear();
     }
+    for (final c in _inks) {
+      c.clear();
+    }
     FocusManager.instance.primaryFocus?.unfocus();
   }
 
-  void _submit() {
-    final error = context.read<PassPhoneCubit>().submit(name: _name.text, secrets: [for (final c in _secrets) c.text]);
+  void _showInk(int? index) {
+    if (_open != index) setState(() => _open = index);
+  }
+
+  Future<void> _submit() async {
+    if (_submitting) return;
+    final cubit = context.read<PassPhoneCubit>();
+    PassError? error;
+    if (_inks.isEmpty) {
+      error = cubit.submit(name: _name.text, secrets: [for (final c in _secrets) c.text]);
+    } else {
+      _submitting = true;
+      final inks = await Future.wait([for (final c in _inks) c.toInk()]);
+      _submitting = false;
+      if (!mounted) return;
+      error = cubit.submit(name: _name.text, inks: inks);
+    }
     if (error == null) {
       unawaited(Haptics.nameIn());
       return;
@@ -72,7 +104,7 @@ class _YourTurnScreenState extends State<YourTurnScreen> {
   String _errorText(AppLocalizations l10n, PassError error) => switch (error) {
     PassError.missingName => l10n.passErrorMissingName,
     PassError.nameTaken => l10n.passErrorNameTaken(Room.tidy(_name.text)),
-    PassError.missingSecret => l10n.passErrorMissingSecret,
+    PassError.missingSecret => _inks.isEmpty ? l10n.passErrorMissingSecret : l10n.inkMissing,
     PassError.tooLong => l10n.passErrorTooLong,
     PassError.duplicate => l10n.duplicateHostSecret,
     PassError.full => l10n.passErrorFull,
@@ -124,6 +156,7 @@ class _YourTurnScreenState extends State<YourTurnScreen> {
                 maxLength: AppSettings.maxNameLength,
                 textCapitalization: TextCapitalization.words,
                 textInputAction: TextInputAction.next,
+                onTap: () => _showInk(null),
                 onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
                   labelText: l10n.yourName,
@@ -134,15 +167,25 @@ class _YourTurnScreenState extends State<YourTurnScreen> {
               const SizedBox(height: 24),
               SectionLabel(l10n.passSecretNames),
               const SizedBox(height: 10),
-              for (final (i, controller) in _secrets.indexed) ...[
-                SecretSlipField(
-                  controller: controller,
+              for (final (i, ink) in _inks.indexed) ...[
+                InkPad(
+                  controller: ink,
                   label: l10n.passSecretN(i + 1),
-                  textInputAction: i == _secrets.length - 1 ? TextInputAction.done : TextInputAction.next,
-                  onSubmitted: i == _secrets.length - 1 ? (_) => _submit() : null,
+                  hidden: _open != i,
+                  onReveal: () => _showInk(i),
                 ),
                 const SizedBox(height: 12),
               ],
+              if (_inks.isEmpty)
+                for (final (i, controller) in _secrets.indexed) ...[
+                  SecretSlipField(
+                    controller: controller,
+                    label: l10n.passSecretN(i + 1),
+                    textInputAction: i == _secrets.length - 1 ? TextInputAction.done : TextInputAction.next,
+                    onSubmitted: i == _secrets.length - 1 ? (_) => _submit() : null,
+                  ),
+                  const SizedBox(height: 12),
+                ],
               if (error != null)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),

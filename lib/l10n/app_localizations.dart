@@ -2035,6 +2035,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'It was a double bet.'**
   String get faceOffWasDouble;
+
+  /// No description provided for @handwritten.
+  ///
+  /// In en, this message translates to:
+  /// **'Write by hand'**
+  String get handwritten;
+
+  /// No description provided for @handwrittenOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone writes each name with a finger, and later you all see the real scribbles. Handwriting gives people away, so disguise yours!'**
+  String get handwrittenOn;
+
+  /// No description provided for @handwrittenOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off. Names are typed.'**
+  String get handwrittenOff;
+
+  /// No description provided for @inkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write the name here with your finger'**
+  String get inkHint;
+
+  /// No description provided for @inkClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get inkClear;
+
+  /// No description provided for @inkHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden. Tap to see it again'**
+  String get inkHidden;
+
+  /// No description provided for @handwrittenName.
+  ///
+  /// In en, this message translates to:
+  /// **'A handwritten name'**
+  String get handwrittenName;
+
+  /// No description provided for @inkMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Write every name on its slip first.'**
+  String get inkMissing;
 }
 
 class _AppLocalizationsDelegate

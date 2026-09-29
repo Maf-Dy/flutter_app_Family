@@ -68,6 +68,8 @@ const familyCss = '''
 .chip.head{border-color:var(--primary)}
 .chip.slip{background:var(--slip);color:var(--slip-ink);border-color:var(--slip-edge);border-radius:6px}
 .chip.done{opacity:.55}
+img.ink{height:30px;max-width:100%;vertical-align:middle;margin-inline-end:4px}
+.idea img.ink{display:block;height:36px}
 select{width:100%;height:50px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:16px;padding:0 12px}
 .list{display:flex;flex-direction:column;gap:8px}
 .idea{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:14px;background:var(--bg)}
@@ -107,6 +109,9 @@ const _script = r'''
   function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function nameOf(id){ for (var i = 0; i < st.players.length; i++) if (st.players[i].id === id) return st.players[i].name; return ''; }
   function slipOf(id){ for (var i = 0; i < st.slips.length; i++) if (st.slips[i].id === id) return st.slips[i]; return null; }
+  // A handwritten name reads as a numbered ✍️ in text, and shows as its drawing where there is room.
+  function slipText(x){ return x.ink ? '\u270D\uFE0F' + (x.id + 1) : x.text; }
+  function inkImg(x){ var i = el('img', 'ink'); i.src = '/ink/' + x.id + '.png'; i.alt = slipText(x); return i; }
   // Caught people's names are out, so asking them again can't be right.
   function caught(id){ for (var i = 0; i < st.slips.length; i++) if (st.slips[i].writer === id) return true; return false; }
   function clear(e){ while (e.firstChild) e.removeChild(e.firstChild); }
@@ -253,7 +258,7 @@ const _script = r'''
       st.players.forEach(function(p){ if (p.head === mine) box.appendChild(el('span', 'chip' + (p.id === mine ? ' head' : '') + (isAway(p.id) ? ' away' : ''), (p.id === mine ? '👑 ' : '') + iso(p.name) + (p.id === me ? ' ' + S.youTag : '') + (isAway(p.id) ? ' · ' + S.offline : ''))); });
 
       fill($('who'), st.players.filter(function(p){ return p.head !== mine && !caught(p.id); }).map(function(p){ return { value: p.id, label: p.name }; }));
-      fill($('which'), st.slips.filter(function(x){ return x.writer == null && !x.mine; }).map(function(x){ return { value: String(x.id), label: x.text }; }));
+      fill($('which'), st.slips.filter(function(x){ return x.writer == null && !x.mine; }).map(function(x){ return { value: String(x.id), label: slipText(x) }; }));
       var go = $('go');
       go.textContent = st.canAsk ? S.ask : S.suggest;
       go.dataset.action = st.canAsk ? 'guess' : 'suggest';
@@ -264,7 +269,8 @@ const _script = r'''
       st.ideas.forEach(function(idea){
         var row = el('div', 'idea');
         var slip = slipOf(idea.slip);
-        row.appendChild(el('span', '', t('ideaText', { name: nameOf(idea.target), slip: slip ? slip.text : '' })));
+        var ideaText = row.appendChild(el('span', '', t('ideaText', { name: nameOf(idea.target), slip: slip ? slipText(slip) : '' })));
+        if (slip && slip.ink) ideaText.appendChild(inkImg(slip));
         row.appendChild(el('small', '', t('votes', { count: idea.votes })));
         var vote = el('button', idea.mine ? 'ghostb' : '', idea.mine ? S.voted : S.vote);
         vote.type = 'button';
@@ -290,10 +296,13 @@ const _script = r'''
       fams.appendChild(line);
     });
     var names = $('names'); clear(names);
-    st.slips.forEach(function(x){ names.appendChild(el('span', 'chip slip' + (x.writer ? ' done' : ''), iso(x.text) + (x.writer ? ' · ' + iso(nameOf(x.writer)) : ''))); });
+    st.slips.forEach(function(x){
+      var chip = names.appendChild(el('span', 'chip slip' + (x.writer ? ' done' : ''), iso(slipText(x)) + (x.writer ? ' · ' + iso(nameOf(x.writer)) : '')));
+      if (x.ink) chip.insertBefore(inkImg(x), chip.firstChild);
+    });
     var events = $('events'); clear(events);
     st.events.forEach(function(e){
-      var slip = slipOf(e.slip), vars = { asker: nameOf(e.asker), target: nameOf(e.target), slip: slip ? slip.text : '' };
+      var slip = slipOf(e.slip), vars = { asker: nameOf(e.asker), target: nameOf(e.target), slip: slip ? slipText(slip) : '' };
       events.appendChild(el('p', 'event' + (e.correct ? ' ok' : ''), t(e.correct ? 'eventCorrect' : 'eventWrong', vars)));
     });
   }

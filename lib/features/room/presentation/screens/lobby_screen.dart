@@ -71,6 +71,7 @@ class LobbyScreen extends StatelessWidget {
                   );
                   final bowl = _BowlSection(
                     room: room,
+                    onHostInk: (ink) => cubit.addHostSecret('', ink: ink) == null,
                     onHostSecret: (secret) {
                       final error = cubit.addHostSecret(secret);
                       if (error == SubmissionError.duplicate) {
@@ -320,12 +321,15 @@ class _StartButtonState extends State<_StartButton> with SingleTickerProviderSta
 }
 
 class _BowlSection extends StatelessWidget {
-  const _BowlSection({required this.room, required this.onHostSecret});
+  const _BowlSection({required this.room, required this.onHostSecret, required this.onHostInk});
 
   final Room room;
 
   /// Returns whether the name went in.
   final bool Function(String secret) onHostSecret;
+
+  /// The host's own name written by hand, in a handwritten room.
+  final bool Function(SlipInk ink) onHostInk;
 
   @override
   Widget build(BuildContext context) {
@@ -369,12 +373,22 @@ class _BowlSection extends StatelessWidget {
         PlayersList(room: room, onRemove: context.read<RoomCubit>().removePlayer),
         if (room.hostSecretsLeft > 0 && room.isCollecting) ...[
           const SizedBox(height: 14),
-          HostSecretField(
-            label: room.namesPerPlayer == 1
-                ? context.l10n.yourSecretName
-                : context.l10n.yourSecretNameOf(room.namesPerPlayer - room.hostSecretsLeft + 1, room.namesPerPlayer),
-            onSubmit: onHostSecret,
-          ),
+          if (room.handwritten)
+            HostInkField(
+              // A fresh, empty pad for each name.
+              key: ValueKey(room.hostSecretsLeft),
+              label: room.namesPerPlayer == 1
+                  ? context.l10n.yourSecretName
+                  : context.l10n.yourSecretNameOf(room.namesPerPlayer - room.hostSecretsLeft + 1, room.namesPerPlayer),
+              onSubmit: onHostInk,
+            )
+          else
+            HostSecretField(
+              label: room.namesPerPlayer == 1
+                  ? context.l10n.yourSecretName
+                  : context.l10n.yourSecretNameOf(room.namesPerPlayer - room.hostSecretsLeft + 1, room.namesPerPlayer),
+              onSubmit: onHostSecret,
+            ),
         ],
       ],
     );

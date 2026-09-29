@@ -23,10 +23,12 @@ abstract final class JoinPage {
     Player? player,
     String? name,
     List<String>? secrets,
+    List<SlipInk?>? inks,
     SubmissionError? error,
     int? team,
   }) {
     final values = secrets ?? player?.secrets ?? const [];
+    final drawings = inks ?? player?.inks ?? const [];
     final chosenTeam = team ?? player?.team;
     final teamPicker = !room.playersPickTeams
         ? ''
@@ -38,7 +40,10 @@ abstract final class JoinPage {
     final isNewRound = player != null && !player.hasSubmitted && room.round > 1;
     final fields = [
       for (var i = 0; i < room.namesPerPlayer; i++)
-        '''
+        if (room.handwritten)
+          _inkField(i, s.secretLabel(i + 1, room.namesPerPlayer), s, i < drawings.length ? drawings[i] : null)
+        else
+          '''
       <div class="field">
         <label for="s$i">${_esc(s.secretLabel(i + 1, room.namesPerPlayer))}</label>
         <input id="s$i" name="s$i" class="hand" maxlength="${Room.maxSecretLength}" autocomplete="off"
@@ -58,7 +63,7 @@ abstract final class JoinPage {
         <h1>${_esc(s.category(room.category))}</h1>
         ${isNewRound ? '<p class="note">${_esc(s.newRound(room.namesPerPlayer))}</p>' : ''}
       </div>
-      ${error == null ? '' : '<p class="error" role="alert">${_esc(s.error(error, room.namesPerPlayer))}</p>'}
+      ${error == null ? '' : '<p class="error" role="alert">${_esc(room.handwritten && error == SubmissionError.missingSecret ? s.inkMissing(room.namesPerPlayer) : s.error(error, room.namesPerPlayer))}</p>'}
       <div class="field">
         <label for="name">${_esc(s.yourName)}</label>
         <input id="name" name="name" maxlength="${Room.maxNameLength}" autocomplete="nickname" required
@@ -66,11 +71,25 @@ abstract final class JoinPage {
       </div>
       $fields
       $teamPicker
-      <p class="help">${_esc(s.privacyNote)}</p>
+      <p class="help">${_esc(s.privacyNote)}${room.handwritten ? ' ${_esc(s.inkNote)}' : ''}</p>
       <button type="submit">${_esc(s.submit)}</button>
     </form>''',
     );
   }
+
+  /// A pad to write one name on with a finger. The drawing travels in the
+  /// hidden field as a PNG data URL, and comes back in it when the form is shown again.
+  static String _inkField(int i, String label, JoinStrings s, SlipInk? ink) =>
+      '''
+      <div class="field">
+        <span class="flabel" id="s${i}l">${_esc(label)}</span>
+        <div class="pad">
+          <canvas width="${SlipInk.maxWidth}" height="${SlipInk.maxHeight}" data-ink="s$i" role="img" aria-labelledby="s${i}l"></canvas>
+          <span class="pad-hint">${_esc(s.inkHint)}</span>
+          <button type="button" class="pad-clear">${_esc(s.inkClear)}</button>
+        </div>
+        <input type="hidden" id="s$i" name="s$i" data-draft value="${ink == null ? '' : ink.toDataUrl()}">
+      </div>''';
 
   static String done(Room room, JoinStrings s, Player player) => _layout(
     room: room,
@@ -171,7 +190,13 @@ header{display:flex;justify-content:space-between;align-items:baseline}
 h1{margin:2px 0 0;font-size:28px;line-height:1.1;letter-spacing:-.02em;text-wrap:balance}
 .label{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .stack{display:flex;flex-direction:column;gap:16px}
-.field label{display:block;font-weight:800;font-size:13px;margin-bottom:6px}
+.field label,.flabel{display:block;font-weight:800;font-size:13px;margin-bottom:6px}
+.pad{position:relative;border-radius:14px;border:1.5px solid var(--slip-edge);background:var(--slip);overflow:hidden}
+.pad canvas{display:block;width:100%;height:auto;aspect-ratio:2/1;touch-action:none;cursor:crosshair}
+.pad-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;text-align:center;color:var(--slip-ink);opacity:.5;pointer-events:none;font-family:"Segoe Print","Bradley Hand","Chalkboard SE","Comic Sans MS",cursive;font-weight:700}
+.pad-clear{position:absolute;top:6px;inset-inline-end:6px;height:34px;padding:0 12px;font-size:14px;border-radius:10px;background:var(--card);color:var(--primary);border:1.5px solid var(--line);display:none}
+.pad.inked .pad-hint{display:none}
+.pad.inked .pad-clear{display:block}
 input{width:100%;height:52px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:17px;padding:0 14px}
 input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px var(--primary)}
 input.hand{background:var(--slip);color:var(--slip-ink);border-color:var(--slip-edge);font-family:"Segoe Print","Bradley Hand","Chalkboard SE","Comic Sans MS",cursive;font-weight:700;font-size:19px}
@@ -221,9 +246,9 @@ $familyCss@media (prefers-reduced-motion: reduce){*{animation:none!important}}
 <script>
 (function(){
   var version = ${_jsString(versionFor(room, player))};
-  var S = ${_jsonString({'rec': s.lobbyReconnecting, 'still': s.lobbyStillOffline(room.hostName), 'back': s.lobbyBack, 'offSubmit': s.lobbyOfflineSubmit})};
+  var S = ${_jsonString({'rec': s.lobbyReconnecting, 'still': s.lobbyStillOffline(room.hostName), 'back': s.lobbyBack, 'offSubmit': s.lobbyOfflineSubmit, 'inkMissing': s.inkMissing(room.namesPerPlayer)})};
   var draftKey = ${_jsString('draft-${room.code.toLowerCase()}')};
-  var fails = 0, busy = false, okTimer = null;
+  var fails = 0, busy = false, okTimer = null, inking = false;
   // The family page has its own connection bar.
   var own = !document.getElementById('net');
   var net = document.createElement('p');
@@ -248,10 +273,53 @@ $familyCss@media (prefers-reduced-motion: reduce){*{animation:none!important}}
       var d = {};
       for (var i = 0; i < form.elements.length; i++) {
         var f = form.elements[i];
-        if (f.name && f.type !== 'hidden' && f.type !== 'radio' && f.type !== 'submit') d[f.name] = f.value;
+        if (f.name && (f.type !== 'hidden' || f.hasAttribute('data-draft')) && f.type !== 'radio' && f.type !== 'submit') d[f.name] = f.value;
       }
       sessionStorage.setItem(draftKey, JSON.stringify(d));
     } catch (e) {}
+  }
+  // One name written with a finger: thick ink, touch or mouse, kept in the hidden field as a PNG.
+  function pad(cv){
+    var input = document.getElementById(cv.dataset.ink), box = cv.parentNode, ctx = cv.getContext('2d'), last = null;
+    ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#000'; ctx.fillStyle = '#000';
+    function mark(){ box.className = input.value ? 'pad inked' : 'pad'; }
+    function at(e){
+      var t = e.touches ? e.touches[0] : e, r = cv.getBoundingClientRect();
+      return { x: (t.clientX - r.left) * cv.width / r.width, y: (t.clientY - r.top) * cv.height / r.height };
+    }
+    function down(e){
+      e.preventDefault(); inking = true; last = at(e);
+      ctx.beginPath(); ctx.arc(last.x, last.y, 6, 0, Math.PI * 2); ctx.fill();
+    }
+    function move(e){
+      if (!inking || !last) return;
+      e.preventDefault();
+      var p = at(e);
+      ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke(); last = p;
+    }
+    function up(){
+      if (!last) return;
+      inking = false; last = null;
+      input.value = cv.toDataURL('image/png'); mark(); save();
+    }
+    if (window.PointerEvent) {
+      cv.addEventListener('pointerdown', function(e){ try { cv.setPointerCapture(e.pointerId); } catch (x) {} down(e); });
+      cv.addEventListener('pointermove', move);
+      cv.addEventListener('pointerup', up);
+      cv.addEventListener('pointercancel', up);
+    } else {
+      cv.addEventListener('touchstart', down, { passive: false });
+      cv.addEventListener('touchmove', move, { passive: false });
+      cv.addEventListener('touchend', up);
+      cv.addEventListener('mousedown', down);
+      cv.addEventListener('mousemove', move);
+      window.addEventListener('mouseup', up);
+    }
+    box.querySelector('.pad-clear').addEventListener('click', function(){
+      ctx.clearRect(0, 0, cv.width, cv.height); input.value = ''; mark(); save();
+    });
+    if (input.value) { var img = new Image(); img.onload = function(){ ctx.drawImage(img, 0, 0); }; img.src = input.value; }
+    mark();
   }
   if (form) {
     try {
@@ -259,9 +327,19 @@ $familyCss@media (prefers-reduced-motion: reduce){*{animation:none!important}}
       if (d) for (var n in d) { var f = form.elements[n]; if (f && !f.value) f.value = d[n]; }
     } catch (e) {}
     form.addEventListener('input', save);
+    var pads = form.querySelectorAll('canvas[data-ink]');
+    for (var p = 0; p < pads.length; p++) pad(pads[p]);
     form.addEventListener('submit', function(e){
       save();
-      if (fails >= 2) { e.preventDefault(); say(S.offSubmit, false); }
+      if (fails >= 2) { e.preventDefault(); say(S.offSubmit, false); return; }
+      for (var p = 0; p < pads.length; p++) {
+        if (document.getElementById(pads[p].dataset.ink).value) continue;
+        e.preventDefault();
+        var err = form.querySelector('.error') || form.insertBefore(document.createElement('p'), form.children[2]);
+        err.className = 'error'; err.setAttribute('role', 'alert'); err.textContent = S.inkMissing;
+        pads[p].scrollIntoView({ block: 'center' });
+        return;
+      }
     });
   } else if (${player?.hasSubmitted ?? false}) {
     try { sessionStorage.removeItem(draftKey); } catch (e) {}
@@ -278,7 +356,7 @@ $familyCss@media (prefers-reduced-motion: reduce){*{animation:none!important}}
       connected(true);
       var count = document.getElementById('count');
       if (count) count.textContent = st.count;
-      var typing = document.activeElement && document.activeElement.matches && document.activeElement.matches('input');
+      var typing = inking || document.activeElement && document.activeElement.matches && document.activeElement.matches('input');
       if (st.version !== version && !typing) location.replace('/');
     }).catch(function(){ connected(false); }).then(function(){ clearTimeout(timer); busy = false; });
   }

@@ -51,7 +51,12 @@ class ReadAloudScreen extends StatelessWidget {
                       child: Semantics(
                         liveRegion: true,
                         label: context.l10n.nameXofY(state.index + 1, total),
-                        child: PaperSlip(text: state.current.text, tiltDegrees: -2, large: true),
+                        child: PaperSlip(
+                          text: state.current.text,
+                          ink: state.current.ink,
+                          tiltDegrees: -2,
+                          large: true,
+                        ),
                       ),
                     ),
                   ),

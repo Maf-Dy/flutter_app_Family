@@ -90,7 +90,7 @@ class _NamesBoardScreenState extends State<NamesBoardScreen> with SingleTickerPr
                                   curve: Motion.spring,
                                 ),
                               ),
-                              child: PaperSlip(text: slip.text, tiltDegrees: slipTilt(i)),
+                              child: PaperSlip(text: slip.text, ink: slip.ink, tiltDegrees: slipTilt(i)),
                             ),
                           ),
                       ],
