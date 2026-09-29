@@ -169,7 +169,7 @@ void main() {
     await tapVisible(tester, find.text('Start'));
     for (final (i, name) in ['Sara', 'Omar', 'Nour', 'Karim'].indexed) {
       if (i > 0) await tapVisible(tester, find.text("I'm next"));
-      await takeTurn(tester, name, 'Secret $name');
+      await takeTurn(tester, name, 'Secret $name', names: 3);
     }
     await hold(tester, find.text('Hold to start the game'), const Duration(milliseconds: 2100));
     await tapVisible(tester, find.text('Yes, start the game'));

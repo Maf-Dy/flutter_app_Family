@@ -150,7 +150,7 @@ void main() {
       final cubit = threeIn(mode: GameMode.celebrity);
       cubit
         ..next()
-        ..submit(name: 'Karim', secrets: ['Karim']);
+        ..submit(name: 'Karim', secrets: ['Karim 1', 'Karim 2', 'Karim 3']);
       final args = cubit.celebrityArgs()!;
       expect([for (final p in args.players) p.name], ['Sara', 'Omar', 'Nour', 'Karim']);
       expect(cubit.roundArgs(), isNull);

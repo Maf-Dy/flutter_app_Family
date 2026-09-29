@@ -131,6 +131,18 @@ final class Room {
 
   static const minPlayers = 3;
   static const maxNamesPerPlayer = 3;
+
+  /// Face-off gets easy with few names: once some writers are known, the rest
+  /// follow by elimination. So it starts at 3 each and allows up to 5.
+  static const maxFaceOffNames = 5;
+  static const defaultFaceOffNames = 3;
+
+  static int maxNamesFor(GameMode mode) => mode == GameMode.celebrity ? maxFaceOffNames : maxNamesPerPlayer;
+
+  /// Names each after switching to [mode]: Face-off starts at 3 each, the other modes cap it again.
+  static int namesForMode(int current, GameMode mode) => mode == GameMode.celebrity
+      ? current.clamp(defaultFaceOffNames, maxFaceOffNames)
+      : current.clamp(1, maxNamesPerPlayer);
   static const maxNameLength = 30;
   static const maxSecretLength = 60;
   static const maxPlayers = 30;

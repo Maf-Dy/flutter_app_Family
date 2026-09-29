@@ -199,6 +199,14 @@ void main() {
       expect(Room.matchKey('أحمد'), Room.matchKey('احمد'));
     });
 
+    test('Face-off starts at 3 names each and allows up to 5', () {
+      expect(Room.namesForMode(1, GameMode.celebrity), 3);
+      expect(Room.namesForMode(5, GameMode.celebrity), 5);
+      expect(Room.namesForMode(5, GameMode.classic), 3);
+      expect(Room.maxNamesFor(GameMode.celebrity), 5);
+      expect(Room.maxNamesFor(GameMode.classic), 3);
+    });
+
     test('Face-off starts with two players per team, however few names each', () {
       var race = const Room(
         code: 'K7Q4',

@@ -302,10 +302,10 @@ void main() {
         await tapVisible(tester, find.text('I arrange'));
         await tapVisible(tester, find.text('Open room'));
         host
-          ..join('a', 'Omar', ['Messi'])
-          ..join('b', 'Nour', ['Fairuz'])
-          ..join('c', 'Yara', ['Adele'])
-          ..join('d', 'Sami', ['Mr. Bean']);
+          ..join('a', 'Omar', ['Messi', 'Salah', 'Zidane'])
+          ..join('b', 'Nour', ['Fairuz', 'Amr Diab', 'Sherine'])
+          ..join('c', 'Yara', ['Adele', 'Shakira', 'Beyonce'])
+          ..join('d', 'Sami', ['Mr. Bean', 'Adel Imam', 'Chaplin']);
         await tester.pumpAndSettle();
         await tapVisible(tester, find.text("Let's play"));
 
@@ -318,8 +318,8 @@ void main() {
         expect(find.text('How to play'), findsOneWidget);
         await tapVisible(tester, find.text("Let's play"));
 
-        // Each name comes out once; the first guess is a double bet.
-        for (var i = 0; i < 4; i++) {
+        // Face-off starts at 3 names each; each name comes out once, and the first guess is a double bet.
+        for (var i = 0; i < 12; i++) {
           expect(find.text('Who on the other team wrote it?'), findsOneWidget);
           expect(tester.widget<FilledButton>(find.widgetWithText(FilledButton, 'Pick who wrote it')).onPressed, isNull);
           await tapVisible(tester, find.byType(ChoiceChip).first);
@@ -327,7 +327,7 @@ void main() {
           await tapVisible(tester, find.textContaining('wrote it!'));
           expect(find.textContaining('wrote \u201c'), findsOneWidget);
           if (i == 0) expect(find.text('It was a double bet.'), findsOneWidget);
-          await tapVisible(tester, find.text(i < 3 ? 'Next team' : 'See results'));
+          await tapVisible(tester, find.text(i < 11 ? 'Next team' : 'See results'));
         }
         expect(find.textContaining(RegExp('wins!|draw')), findsOneWidget);
         await tapVisible(tester, find.byTooltip('Share this night'));
