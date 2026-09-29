@@ -67,6 +67,28 @@ void main() {
     expect(game.lastGuess!.points, -1);
   });
 
+  test('every guess is kept, with the team that made it, for the reveal at the end', () {
+    var game = started();
+    expect(game.guesses, isEmpty);
+    final first = game.current!;
+    game = game.guess(game.suspects.firstWhere((id) => id != first.writerId), doubled: true).next();
+    final second = game.current!;
+    game = game.guess(second.writerId);
+    expect(game.guesses, hasLength(2));
+    expect(game.lastGuess, same(game.guesses.last));
+    expect(game.guessFor(first)!.team, 0);
+    expect(game.guessFor(first)!.correct, isFalse);
+    expect(game.guessFor(first)!.doubled, isTrue);
+    expect(game.guessFor(second)!.team, 1);
+    expect(game.guessFor(second)!.guessedId, second.writerId);
+
+    final done = playOut(game.next());
+    expect(done.guesses, hasLength(slips.length));
+    for (final slip in slips) {
+      expect(done.guessFor(slip)?.slip, same(slip));
+    }
+  });
+
   test('only players on the other teams can be picked, and only once per name', () {
     final game = started();
     expect(game.guess('p0'), same(game), reason: 'own team');

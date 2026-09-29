@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'browser_sounds.dart';
 import 'join_strings.dart';
 
 /// The body of a friend's page while a family game runs: their family, the
@@ -15,6 +16,7 @@ String familyBody(JoinStrings s, String Function(String) esc, {required String h
     <div class="stack fam">
       <div id="net" class="net" role="status" aria-live="polite" hidden></div>
       <div id="banner" class="banner" role="status" aria-live="polite"></div>
+      <button id="sound" type="button" class="soundb"></button>
       <section class="card stack twist" id="pendCard" hidden>
         <h2 id="pendTitle"></h2>
         <p class="help" id="pendHelp"></p>
@@ -77,6 +79,7 @@ String familyBody(JoinStrings s, String Function(String) esc, {required String h
       </section>
     </div>
     <script>var FAMILY_STRINGS = $strings, HOST = $host;</script>
+    <script>$browserSoundsJs</script>
     <script>$_script</script>''';
 }
 
@@ -118,6 +121,7 @@ select{width:100%;height:50px;border-radius:14px;border:1.5px solid var(--line);
 .msg.pending{opacity:.6}
 .msg.pending i{display:block;font-size:12px}
 button:disabled{opacity:.5}
+.soundb{align-self:flex-end;height:36px;padding:0 12px;font-size:13px;border-radius:99px;background:transparent;color:var(--muted);border:1px solid var(--line)}
 .twist{border:2px solid var(--primary)}
 .wanted{border:2px solid #B3261E}
 .wanted h2{color:#B3261E}
@@ -144,7 +148,25 @@ const _script = r'''
   function nameOf(id){ for (var i = 0; i < st.players.length; i++) if (st.players[i].id === id) return st.players[i].name; return ''; }
   function slipOf(id){ for (var i = 0; i < st.slips.length; i++) if (st.slips[i].id === id) return st.slips[i]; return null; }
   // Caught people's names are out, so asking them again can't be right.
-  var lastRumor = null;
+  var lastRumor = null, lastAsks = null;
+  var sfx = window.sfx || { drumroll: function(){}, joy: function(){}, wrong: function(){}, muted: true, setMuted: function(){} };
+  function soundLabel(){ $('sound').textContent = sfx.muted ? S.soundOff : S.soundOn; }
+  $('sound').onclick = function(){ sfx.setMuted(!sfx.muted); soundLabel(); };
+  soundLabel();
+
+  // A zaghrouta when a family grows, a sad trombone for a miss. Only the phones
+  // of the families in the ask play it, so the table doesn't hear a chorus.
+  function sounds(){
+    var had = lastAsks;
+    lastAsks = st.asks;
+    if (had === null || st.asks <= had || !st.events.length || !st.myHead) return;
+    var e = st.events[0];
+    if (e.hidden || e.blocked) return;
+    var mine = st.players.some(function(p){ return p.head === st.myHead && (p.id === e.asker || p.id === e.target); });
+    if (!mine) return;
+    if (e.correct) sfx.joy(); else sfx.wrong();
+  }
+
   function clear(e){ while (e.firstChild) e.removeChild(e.firstChild); }
   function show(e, on){ e.hidden = !on; }
 
@@ -284,6 +306,7 @@ const _script = r'''
     var key = pend.kind + ':' + pend.asker + ':' + pend.slip;
     if (card.dataset.key === key) { controls(); return; }
     card.dataset.key = key;
+    sfx.drumroll();
     try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) {}
     var err = $('pendErr'), btns = $('pendBtns'), slips = $('pendSlips'), who = $('pendWho');
     who.value = '';
@@ -369,6 +392,7 @@ const _script = r'''
           : t('turnOther', { name: nameOf(st.turn) });
     renderClaim();
     renderPending(pend);
+    sounds();
     renderWanted();
     renderRumors();
     if (myTurn && !wasMyTurn) { try { navigator.vibrate && navigator.vibrate([120, 80, 120]); } catch (e) {} }

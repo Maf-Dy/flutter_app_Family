@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/l10n/l10n.dart';
 import '../../../../core/motion/motion.dart';
+import '../../../../core/audio/game_sounds.dart';
 import '../../../../core/platform/haptics.dart';
 import '../../../../core/router/game_exit.dart';
 import '../../../../core/widgets/keep_screen_on.dart';
@@ -322,6 +323,25 @@ class _FamilyViewState extends State<_FamilyView> {
               (current.secret ? current.turnPlayer == me : current.turn == current.headOf(me!)) &&
               (previous.turn != current.turn || previous.turnPlayer != current.turnPlayer),
           listener: (_, _) => unawaited(Haptics.yourTurn()),
+        ),
+        // The table hears the host's phone: a drumroll while someone decides, a zaghrouta when a family
+        // grows, a sad trombone for a miss. With secret catches it only sounds for what the host may see.
+        BlocListener<FamilyCubit, FamilyGame>(
+          listenWhen: (previous, current) =>
+              current.pending != null &&
+              previous.pending == null &&
+              (!current.secret || me == null || current.headOf(current.pending!.askerId) == current.headOf(me)),
+          listener: (context, _) => unawaited(context.read<GameSounds>().drumroll()),
+        ),
+        BlocListener<FamilyCubit, FamilyGame>(
+          listenWhen: (previous, current) =>
+              current.events.length > previous.events.length &&
+              !current.events.last.blocked &&
+              (!current.secret || (me != null && current.seesEvent(me, current.events.last))),
+          listener: (context, game) {
+            final sounds = context.read<GameSounds>();
+            unawaited(game.events.last.correct ? sounds.joy() : sounds.wrong());
+          },
         ),
         BlocListener<FamilyCubit, FamilyGame>(
           listenWhen: (previous, current) => current.isOver && !previous.isOver,

@@ -4,6 +4,9 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+
+import '../../../core/audio/game_sounds.dart';
 
 import '../../family/domain/family_game.dart';
 import '../domain/room.dart';
@@ -12,7 +15,12 @@ import 'join_page.dart';
 import 'join_strings.dart';
 import 'family_view.dart';
 
+/// Reads a sound effect's bytes from the app bundle.
+typedef SoundLoader = Future<Uint8List> Function(GameSound sound);
+
 /// Serves the room over plain HTTP on this phone, so friends only need a browser.
+///
+/// Also serves the sound effects at `/sounds/<file>.wav`, for `browserSoundsJs`.
 ///
 /// Listens on every IPv4 interface, so the same server keeps working when the
 /// phone moves between Wi-Fi, its own hotspot, or the hotspot the app creates.
@@ -23,8 +31,10 @@ class LanRoomHost implements RoomHost {
     DateTime Function()? clock,
     this.awayAfter = const Duration(seconds: 6),
     this.presenceTick = const Duration(seconds: 1),
+    SoundLoader? loadSound,
   }) : _random = random ?? Random.secure(),
-       _clock = clock ?? DateTime.now;
+       _clock = clock ?? DateTime.now,
+       _loadSound = loadSound ?? _bundledSound;
 
   static const cookieName = 'family_id';
   static const _maxBodyBytes = 8 * 1024;
@@ -32,6 +42,13 @@ class LanRoomHost implements RoomHost {
   final int preferredPort;
   final Random _random;
   final DateTime Function() _clock;
+  final SoundLoader _loadSound;
+
+  /// Loaded once, then served from memory.
+  final _sounds = <GameSound, Uint8List>{};
+
+  static Future<Uint8List> _bundledSound(GameSound sound) async =>
+      (await rootBundle.load(sound.asset)).buffer.asUint8List();
 
   /// How long a friend's phone can go quiet before the game shows them as offline.
   /// Their page asks for news every 1.5 s, so this is a few missed calls.
@@ -146,6 +163,8 @@ class LanRoomHost implements RoomHost {
           await _familyAction(request, clientId, request.uri.pathSegments.last);
         case ('POST', '/game/claim'):
           await _claim(request, clientId);
+        case ('GET', final path) when path.startsWith('/sounds/'):
+          await _sound(response, path.substring('/sounds/'.length));
         case ('GET', '/favicon.ico'):
           response.statusCode = HttpStatus.noContent;
         default:
@@ -331,6 +350,21 @@ class LanRoomHost implements RoomHost {
     }
     _set(_room.withFamily(next));
     _json(response, {'error': null});
+  }
+
+  Future<void> _sound(HttpResponse response, String file) async {
+    final sound = GameSound.values.where((s) => s.file == file).firstOrNull;
+    if (sound == null) {
+      response.statusCode = HttpStatus.notFound;
+      return;
+    }
+    final bytes = _sounds[sound] ??= await _loadSound(sound);
+    response.headers
+      ..contentType = ContentType('audio', 'wav')
+      ..contentLength = bytes.length
+      // The files never change while the app is installed.
+      ..set(HttpHeaders.cacheControlHeader, 'public, max-age=86400');
+    response.add(bytes);
   }
 
   void _json(HttpResponse response, Object? body) {

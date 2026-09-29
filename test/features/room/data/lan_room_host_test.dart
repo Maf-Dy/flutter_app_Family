@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
+
+import 'package:family_game/core/audio/game_sounds.dart';
 
 import 'package:family_game/features/room/data/family_view.dart';
 import 'package:family_game/features/room/data/lan_room_host.dart';
@@ -11,6 +14,7 @@ void main() {
   late LanRoomHost host;
   late HttpClient client;
   late int port;
+  late int soundLoads;
   const cookie = '${LanRoomHost.cookieName}=0123456789abcdef0123456789abcdef';
 
   Future<({int status, String body, HttpHeaders headers})> send(
@@ -42,7 +46,14 @@ void main() {
   }
 
   setUp(() async {
-    host = LanRoomHost(preferredPort: 0);
+    soundLoads = 0;
+    host = LanRoomHost(
+      preferredPort: 0,
+      loadSound: (sound) async {
+        soundLoads++;
+        return Uint8List.fromList(utf8.encode('RIFF ${sound.name}'));
+      },
+    );
     port = await host.open(
       const Room(
         code: 'K7Q4',
@@ -66,6 +77,20 @@ void main() {
     expect(page.body, isNot(contains('<b>people</b>')));
     expect(page.body, contains('Drop it in the bowl'));
     expect(page.headers[HttpHeaders.setCookieHeader]?.single, startsWith('${LanRoomHost.cookieName}='));
+  });
+
+  test('serves the sound effects for the browser, loaded once', () async {
+    for (final sound in GameSound.values) {
+      final wav = await send('GET', '/sounds/${sound.file}', withCookie: false);
+      expect(wav.status, HttpStatus.ok);
+      expect(wav.headers.contentType?.mimeType, 'audio/wav');
+      expect(wav.headers.value(HttpHeaders.cacheControlHeader), contains('max-age'));
+      expect(wav.body, 'RIFF ${sound.name}');
+    }
+    await send('GET', '/sounds/zaghrouta.wav');
+    expect(soundLoads, GameSound.values.length);
+    expect((await send('GET', '/sounds/../pubspec.yaml')).status, HttpStatus.notFound);
+    expect((await send('GET', '/sounds/applause.wav')).status, HttpStatus.notFound);
   });
 
   test('a valid submission joins the room and shows the confirmation', () async {

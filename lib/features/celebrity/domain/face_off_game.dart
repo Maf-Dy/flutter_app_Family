@@ -12,19 +12,28 @@ enum FaceOffPhase {
   /// A name is out; the team on turn picks who wrote it and whether to bet double.
   pick,
 
-  /// The writer is revealed with the points won or lost.
+  /// Right or wrong, and the points won or lost. Who wrote it stays secret until the end.
   reveal,
 
-  /// The bowl is empty.
+  /// The bowl is empty; everything is revealed.
   finished,
 }
 
-/// The last guess, shown on the reveal.
+/// One guess: shown as right or wrong on the reveal, and in full on the results.
 @immutable
 final class FaceOffGuess {
-  const FaceOffGuess({required this.slip, required this.guessedId, required this.doubled, required this.correct});
+  const FaceOffGuess({
+    required this.slip,
+    required this.team,
+    required this.guessedId,
+    required this.doubled,
+    required this.correct,
+  });
 
   final Slip slip;
+
+  /// The team that guessed.
+  final int team;
   final String guessedId;
   final bool doubled;
   final bool correct;
@@ -46,7 +55,7 @@ final class FaceOffGame {
     required this.bowl,
     required this.team,
     required this.scores,
-    this.lastGuess,
+    this.guesses = const [],
   });
 
   factory FaceOffGame.start({required List<Slip> slips, required List<List<String>> teams}) {
@@ -87,8 +96,19 @@ final class FaceOffGame {
   /// Points per team.
   final List<int> scores;
 
+  /// Every guess so far, in the order they were made.
+  final List<FaceOffGuess> guesses;
+
   /// Shown on the reveal.
-  final FaceOffGuess? lastGuess;
+  FaceOffGuess? get lastGuess => guesses.isEmpty ? null : guesses.last;
+
+  /// The guess made on [slip], if it was played.
+  FaceOffGuess? guessFor(Slip slip) {
+    for (final g in guesses) {
+      if (identical(g.slip, slip)) return g;
+    }
+    return null;
+  }
 
   bool get teamsPlayable => teams.length >= 2 && teams.every((t) => t.length >= minTeamSize);
 
@@ -132,10 +152,10 @@ final class FaceOffGame {
     // Two players may have written the same name: either of them counts.
     final key = Room.matchKey(slip.text);
     final correct = slips.any((s) => s.writerId == guessedId && Room.matchKey(s.text) == key);
-    final result = FaceOffGuess(slip: slip, guessedId: guessedId, doubled: doubled, correct: correct);
+    final result = FaceOffGuess(slip: slip, team: team, guessedId: guessedId, doubled: doubled, correct: correct);
     return _copy(
       phase: FaceOffPhase.reveal,
-      lastGuess: result,
+      guesses: [...guesses, result],
       scores: [for (final (i, s) in scores.indexed) i == team ? s + result.points : s],
     );
   }
@@ -171,7 +191,7 @@ final class FaceOffGame {
     List<Slip>? bowl,
     int? team,
     List<int>? scores,
-    FaceOffGuess? lastGuess,
+    List<FaceOffGuess>? guesses,
   }) => FaceOffGame._(
     slips: slips,
     teams: teams ?? this.teams,
@@ -179,6 +199,6 @@ final class FaceOffGame {
     bowl: bowl == null ? this.bowl : List.unmodifiable(bowl),
     team: team ?? this.team,
     scores: scores == null ? this.scores : List.unmodifiable(scores),
-    lastGuess: lastGuess ?? this.lastGuess,
+    guesses: guesses == null ? this.guesses : List.unmodifiable(guesses),
   );
 }

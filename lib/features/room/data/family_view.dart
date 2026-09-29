@@ -33,6 +33,8 @@ Map<String, Object?> familyViewFor(FamilyGame game, String? playerId) {
   final involved = inGame && move != null && (mine || game.headOf(playerId) == game.headOf(move.askerId));
   return {
     'v': game.version,
+    // Lets a phone tell a new ask from an old one, to play its sound once.
+    'asks': game.events.length,
     'me': inGame ? pub(playerId) : null,
     'myHead': pubOrNull(myHead),
     'canAsk': inGame && game.canAsk(playerId),

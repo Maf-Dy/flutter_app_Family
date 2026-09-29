@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'core/audio/game_sounds.dart';
 import 'core/l10n/l10n.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -24,6 +25,7 @@ class FamilyApp extends StatelessWidget {
     required this.openWifiSettings,
     required this.settingsStore,
     required this.settings,
+    required this.soundPlayer,
   });
 
   final NetworkAccess network;
@@ -36,6 +38,9 @@ class FamilyApp extends StatelessWidget {
 
   /// Loaded before the first frame, so the right language shows from the start.
   final AppSettings settings;
+
+  /// Plays [GameSounds], which stay quiet while the "Sound effects" setting is off.
+  final SoundPlayer soundPlayer;
 
   @override
   Widget build(BuildContext context) {
@@ -51,23 +56,26 @@ class FamilyApp extends StatelessWidget {
       ],
       child: BlocProvider(
         create: (_) => SettingsCubit(settingsStore, settings),
-        child: BlocBuilder<SettingsCubit, AppSettings>(
-          buildWhen: (previous, current) => previous.language != current.language,
-          builder: (context, _) => MaterialApp(
-            onGenerateTitle: (context) => context.l10n.appTitle,
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.light(),
-            darkTheme: AppTheme.dark(),
-            locale: context.read<SettingsCubit>().locale,
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            initialRoute: AppRoutes.home,
-            onGenerateRoute: AppRoutes.onGenerateRoute,
+        child: RepositoryProvider<GameSounds>(
+          create: (context) => GameSounds(soundPlayer, enabled: () => context.read<SettingsCubit>().state.soundEffects),
+          child: BlocBuilder<SettingsCubit, AppSettings>(
+            buildWhen: (previous, current) => previous.language != current.language,
+            builder: (context, _) => MaterialApp(
+              onGenerateTitle: (context) => context.l10n.appTitle,
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light(),
+              darkTheme: AppTheme.dark(),
+              locale: context.read<SettingsCubit>().locale,
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              initialRoute: AppRoutes.home,
+              onGenerateRoute: AppRoutes.onGenerateRoute,
+            ),
           ),
         ),
       ),

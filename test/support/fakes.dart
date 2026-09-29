@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:family_game/core/audio/game_sounds.dart';
 import 'package:family_game/features/room/domain/network_access.dart';
 import 'package:family_game/features/room/domain/room.dart';
 import 'package:family_game/features/room/domain/room_beacon.dart';
@@ -132,4 +133,19 @@ class FakeRoomFinder implements RoomFinder {
   Stream<List<NearbyRoom>> watch() => controller.stream;
 
   Future<void> dispose() => controller.close();
+}
+
+/// Remembers what would have played, in order.
+class FakeSoundPlayer implements SoundPlayer {
+  final played = <GameSound>[];
+  final stopped = <GameSound>[];
+
+  @override
+  Future<void> play(GameSound sound) async => played.add(sound);
+
+  @override
+  Future<void> stop(GameSound sound) async => stopped.add(sound);
+
+  @override
+  Future<void> dispose() async {}
 }

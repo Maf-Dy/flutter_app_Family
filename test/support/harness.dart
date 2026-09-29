@@ -1,3 +1,4 @@
+import 'package:family_game/core/audio/game_sounds.dart';
 import 'package:family_game/core/l10n/l10n.dart';
 import 'package:family_game/core/router/app_router.dart';
 import 'package:family_game/core/theme/app_theme.dart';
@@ -37,6 +38,7 @@ Widget testApp({
   ScanJoinCode? scan,
   OpenWifiSettings? openWifiSettings,
   SettingsStore? settingsStore,
+  SoundPlayer? soundPlayer,
   AppSettings settings = const AppSettings(hostName: 'Mafdy'),
   Locale locale = const Locale('en'),
   TextDirection? direction,
@@ -56,29 +58,35 @@ Widget testApp({
     ],
     child: BlocProvider(
       create: (_) => SettingsCubit(settingsStore ?? FakeSettingsStore(), settings),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light(),
-        darkTheme: AppTheme.dark(),
-        themeMode: dark ? ThemeMode.dark : ThemeMode.light,
-        locale: locale,
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        // Reduced motion also stops the looping animations, so pumpAndSettle can settle.
-        builder: (context, child) {
-          Widget result = MediaQuery(
-            data: MediaQuery.of(context).copyWith(disableAnimations: reducedMotion),
-            child: child!,
-          );
-          if (direction != null) result = Directionality(textDirection: direction, child: result);
-          return result;
-        },
-        onGenerateRoute: AppRoutes.onGenerateRoute,
+      child: RepositoryProvider<GameSounds>(
+        create: (context) => GameSounds(
+          soundPlayer ?? FakeSoundPlayer(),
+          enabled: () => context.read<SettingsCubit>().state.soundEffects,
+        ),
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light(),
+          darkTheme: AppTheme.dark(),
+          themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+          locale: locale,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          // Reduced motion also stops the looping animations, so pumpAndSettle can settle.
+          builder: (context, child) {
+            Widget result = MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: reducedMotion),
+              child: child!,
+            );
+            if (direction != null) result = Directionality(textDirection: direction, child: result);
+            return result;
+          },
+          onGenerateRoute: AppRoutes.onGenerateRoute,
+        ),
       ),
     ),
   );

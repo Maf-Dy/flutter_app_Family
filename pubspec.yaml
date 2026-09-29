@@ -9,6 +9,7 @@ environment:
   flutter: ">=3.44.0"
 
 dependencies:
+  audioplayers: ^6.8.1
   connectivity_plus: ^7.3.1
   flutter:
     sdk: flutter
@@ -76,3 +77,6 @@ flutter:
     - assets/fonts/OFL-kalam.txt
     - assets/fonts/OFL-baloobhaijaan2.txt
     - assets/fonts/OFL-arefruqaa.txt
+    - assets/sounds/drumroll.wav
+    - assets/sounds/zaghrouta.wav
+    - assets/sounds/trombone.wav

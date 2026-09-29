@@ -232,6 +232,8 @@ final class EnglishJoinStrings extends JoinStrings {
     'bonus': 'Extra asks saved: {count}',
     'rumorWho': 'About who?',
     'rumorWhich': 'Which name?',
+    'soundOn': '🔊 Sounds on',
+    'soundOff': '🔇 Sounds off',
     'sending': 'sending…',
     'gameOverBye': 'The game is over. Thanks for playing!',
   };
@@ -421,6 +423,8 @@ final class ArabicJoinStrings extends JoinStrings {
     'bonus': 'أسئلة زيادة معاكم: {count}',
     'rumorWho': 'على مين؟',
     'rumorWhich': 'أنهي اسم؟',
+    'soundOn': '🔊 الصوت شغال',
+    'soundOff': '🔇 الصوت مقفول',
     'sending': 'بيتبعت…',
     'gameOverBye': 'اللعبة خلصت. شكرًا إنكم لعبتوا!',
   };
