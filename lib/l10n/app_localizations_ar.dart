@@ -1383,4 +1383,52 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get faceOffDoubleShort => 'رهان دبل';
+
+  @override
+  String get awardsTitle => 'جوايز القعدة';
+
+  @override
+  String get awardWorstLiar => '🤥 أسوأ كداب';
+
+  @override
+  String get awardWorstLiarDetail => 'أول واحد اتقفش';
+
+  @override
+  String get awardPokerFace => '😐 وش البوكر';
+
+  @override
+  String get awardPokerFaceDetail => 'محدش عرف يقفشه';
+
+  @override
+  String get awardWronged => '😤 أكتر واحد اتظلم';
+
+  @override
+  String get awardDetective => '🕵️ المخبر';
+
+  @override
+  String get familyTreeTitle => 'شجرة العيلة';
+
+  @override
+  String awardWrongedDetail(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'اتظلم $count مرات',
+      two: 'اتظلم مرتين',
+      one: 'اتظلم مرة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String awardDetectiveDetail(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'قفش $count',
+      two: 'قفش اتنين',
+      one: 'قفش واحد',
+    );
+    return '$_temp0';
+  }
 }

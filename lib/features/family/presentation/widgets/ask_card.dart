@@ -101,7 +101,13 @@ class AskCard extends StatelessWidget {
 
 /// A labelled dropdown for picking a person or a name.
 class FamilyPicker<T> extends StatelessWidget {
-  const FamilyPicker({super.key, required this.label, required this.value, required this.items, required this.onChanged});
+  const FamilyPicker({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+  });
 
   final String label;
   final T? value;

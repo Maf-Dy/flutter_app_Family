@@ -12,7 +12,9 @@ import '../../../../core/widgets/keep_screen_on.dart';
 import '../../../../core/widgets/share_card.dart';
 import '../../../room/presentation/category_label.dart';
 import '../../../round/presentation/widgets/confetti.dart';
+import '../../../../core/theme/game_colors.dart';
 import '../../domain/family_game.dart';
+import '../../domain/night_awards.dart';
 import '../../family_route.dart';
 import '../family_style.dart';
 import '../state/family_cubit.dart';
@@ -20,6 +22,7 @@ import '../widgets/ask_card.dart';
 import '../widgets/family_board.dart';
 import '../widgets/family_chat.dart';
 import '../widgets/ideas_card.dart';
+import '../widgets/night_awards_card.dart';
 import '../widgets/table_notices.dart';
 import '../widgets/turn_banner.dart';
 import '../widgets/twist_cards.dart';
@@ -137,16 +140,42 @@ class _FamilyViewState extends State<_FamilyView> {
     final l10n = context.l10n;
     final colors = FamilyColors(widget.args.joinOrder, game);
     const shown = 8;
+    final ink = context.gameColors.slipInk;
+    // The awards and the family tree are the fun part to post; the names follow if there's room.
+    final awards = nightAwards(game);
+    final names = (shown - awards.length).clamp(0, shown);
     showShareCard(
       context,
       ShareCard(
         title: _headline(l10n, game),
         subtitle: categoryLabel(l10n, widget.args.category),
         rows: [
-          for (final slip in game.slips.take(shown))
+          for (final award in awards)
+            (
+              label: awardTitle(l10n, award.kind),
+              value: game.nameOf(award.playerId),
+              color: colors.of(context, award.playerId),
+            ),
+          for (final slip in game.slips.take(names))
             (label: slip.text, value: game.nameOf(slip.writerId), color: colors.of(context, slip.writerId)),
         ],
-        more: game.slips.length - shown,
+        more: game.slips.length - names,
+        extra: Container(
+          margin: const EdgeInsets.only(top: 6, bottom: 8),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(color: context.gameColors.slipPaper, borderRadius: BorderRadius.circular(6)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.familyTreeTitle,
+                style: TextStyle(color: ink, fontWeight: FontWeight.w800, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              FamilyTreeView(game: game, colorOf: (id) => colors.of(context, id), ink: ink),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -223,6 +252,7 @@ class _FamilyViewState extends State<_FamilyView> {
           const SizedBox(height: 10),
         ],
       TurnBanner(game: game, me: me),
+      if (over) ...[const SizedBox(height: 10), NightAwardsCard(game: game, colorOf: (id) => colors.of(context, id))],
       if (!over && game.turnStalled) AwayTurnCard(onSkip: cubit.skipTurn),
       if (!over && game.pending != null) ...[
         const SizedBox(height: 10),

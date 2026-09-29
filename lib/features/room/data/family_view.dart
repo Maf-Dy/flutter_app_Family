@@ -1,4 +1,5 @@
 import '../../family/domain/family_game.dart';
+import '../../family/domain/night_awards.dart';
 
 /// The id phones use for a player: their place in the game. A player's real id
 /// is their browser's cookie, so it never leaves the server — anyone who learned
@@ -88,6 +89,11 @@ Map<String, Object?> familyViewFor(FamilyGame game, String? playerId) {
           ],
     'myClaim': claim == null ? null : {'player': pub(claim.playerId), 'status': claim.status.name},
     'winner': pubOrNull(game.winner),
+    'awards': game.isOver
+        ? [
+            for (final a in nightAwards(game)) {'kind': a.kind.name, 'player': pub(a.playerId), 'count': a.count},
+          ]
+        : const <Object?>[],
     'chatOn': game.chatEnabled,
     'players': [
       for (final p in game.players) {'id': pub(p.id), 'name': p.name, 'head': pub(game.headSeenBy(playerId, p.id))},

@@ -12,7 +12,14 @@ typedef ShareCardRow = ({String label, String value, Color? color});
 
 /// A picture of the night, made to be posted in the family group.
 class ShareCard extends StatelessWidget {
-  const ShareCard({super.key, required this.title, required this.subtitle, required this.rows, this.more = 0});
+  const ShareCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.rows,
+    this.more = 0,
+    this.extra,
+  });
 
   static const width = 360.0;
 
@@ -22,6 +29,9 @@ class ShareCard extends StatelessWidget {
 
   /// Rows left off the card to keep it readable.
   final int more;
+
+  /// Drawn under the rows, such as the family tree.
+  final Widget? extra;
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +100,7 @@ class ShareCard extends StatelessWidget {
                 ],
               ),
             ),
+          ?extra,
           if (more > 0)
             Text(l10n.moreOnCard(more), style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant)),
         ],

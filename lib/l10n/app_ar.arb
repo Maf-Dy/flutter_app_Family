@@ -374,5 +374,15 @@
   "faceOffWritersAtEnd": "مين كتب إيه سر لحد الآخر، محدش يفتي.",
   "faceOffWhoWroteWhat": "مين كتب إيه",
   "faceOffTeamSaid": "{team} قالوا {name}",
-  "faceOffDoubleShort": "رهان دبل"
+  "faceOffDoubleShort": "رهان دبل",
+  "awardsTitle": "جوايز القعدة",
+  "awardWorstLiar": "🤥 أسوأ كداب",
+  "awardWorstLiarDetail": "أول واحد اتقفش",
+  "awardPokerFace": "😐 وش البوكر",
+  "awardPokerFaceDetail": "محدش عرف يقفشه",
+  "awardWronged": "😤 أكتر واحد اتظلم",
+  "awardDetective": "🕵️ المخبر",
+  "familyTreeTitle": "شجرة العيلة",
+  "awardWrongedDetail": "{count, plural, =1{اتظلم مرة} =2{اتظلم مرتين} other{اتظلم {count} مرات}}",
+  "awardDetectiveDetail": "{count, plural, =1{قفش واحد} =2{قفش اتنين} other{قفش {count}}}"
 }

@@ -1386,4 +1386,50 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get faceOffDoubleShort => 'double bet';
+
+  @override
+  String get awardsTitle => 'Awards of the night';
+
+  @override
+  String get awardWorstLiar => '🤥 Worst liar';
+
+  @override
+  String get awardWorstLiarDetail => 'First one caught';
+
+  @override
+  String get awardPokerFace => '😐 Poker face';
+
+  @override
+  String get awardPokerFaceDetail => 'Nobody could read them';
+
+  @override
+  String get awardWronged => '😤 Most wrongly accused';
+
+  @override
+  String get awardDetective => '🕵️ The detective';
+
+  @override
+  String get familyTreeTitle => 'Family tree';
+
+  @override
+  String awardWrongedDetail(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Accused wrongly $count times',
+      one: 'Accused wrongly once',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String awardDetectiveDetail(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Caught $count people',
+      one: 'Caught 1 person',
+    );
+    return '$_temp0';
+  }
 }

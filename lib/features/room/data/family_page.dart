@@ -29,6 +29,10 @@ String familyBody(JoinStrings s, String Function(String) esc, {required String h
         <h2 id="wantedTitle"></h2>
         <p class="help" id="wantedHelp"></p>
       </section>
+      <section class="card" id="awardsCard" hidden>
+        <h2>${esc(s.family['awards']!)}</h2>
+        <div id="awards" class="list"></div>
+      </section>
       <section class="card" id="claimCard" hidden>
         <h2 id="claimTitle"></h2>
         <p class="help" id="claimHelp"></p>
@@ -392,6 +396,14 @@ const _script = r'''
           : t('turnOther', { name: nameOf(st.turn) });
     renderClaim();
     renderPending(pend);
+    var awards = $('awards'); clear(awards);
+    show($('awardsCard'), !!won && st.awards.length > 0);
+    st.awards.forEach(function(a){
+      var row = el('div', 'idea');
+      row.appendChild(el('span', '', S['award_' + a.kind] || a.kind));
+      row.appendChild(el('b', '', nameOf(a.player))).dir = 'auto';
+      awards.appendChild(row);
+    });
     sounds();
     renderWanted();
     renderRumors();

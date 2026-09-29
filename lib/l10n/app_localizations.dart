@@ -2347,6 +2347,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'double bet'**
   String get faceOffDoubleShort;
+
+  /// No description provided for @awardsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Awards of the night'**
+  String get awardsTitle;
+
+  /// No description provided for @awardWorstLiar.
+  ///
+  /// In en, this message translates to:
+  /// **'🤥 Worst liar'**
+  String get awardWorstLiar;
+
+  /// No description provided for @awardWorstLiarDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'First one caught'**
+  String get awardWorstLiarDetail;
+
+  /// No description provided for @awardPokerFace.
+  ///
+  /// In en, this message translates to:
+  /// **'😐 Poker face'**
+  String get awardPokerFace;
+
+  /// No description provided for @awardPokerFaceDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody could read them'**
+  String get awardPokerFaceDetail;
+
+  /// No description provided for @awardWronged.
+  ///
+  /// In en, this message translates to:
+  /// **'😤 Most wrongly accused'**
+  String get awardWronged;
+
+  /// No description provided for @awardDetective.
+  ///
+  /// In en, this message translates to:
+  /// **'🕵️ The detective'**
+  String get awardDetective;
+
+  /// No description provided for @familyTreeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Family tree'**
+  String get familyTreeTitle;
+
+  /// No description provided for @awardWrongedDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Accused wrongly once} other{Accused wrongly {count} times}}'**
+  String awardWrongedDetail(int count);
+
+  /// No description provided for @awardDetectiveDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Caught 1 person} other{Caught {count} people}}'**
+  String awardDetectiveDetail(int count);
 }
 
 class _AppLocalizationsDelegate

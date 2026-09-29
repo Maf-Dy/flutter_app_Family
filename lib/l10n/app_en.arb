@@ -862,5 +862,29 @@
       }
     }
   },
-  "faceOffDoubleShort": "double bet"
+  "faceOffDoubleShort": "double bet",
+  "awardsTitle": "Awards of the night",
+  "awardWorstLiar": "🤥 Worst liar",
+  "awardWorstLiarDetail": "First one caught",
+  "awardPokerFace": "😐 Poker face",
+  "awardPokerFaceDetail": "Nobody could read them",
+  "awardWronged": "😤 Most wrongly accused",
+  "awardDetective": "🕵️ The detective",
+  "familyTreeTitle": "Family tree",
+  "awardWrongedDetail": "{count, plural, =1{Accused wrongly once} other{Accused wrongly {count} times}}",
+  "@awardWrongedDetail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "awardDetectiveDetail": "{count, plural, =1{Caught 1 person} other{Caught {count} people}}",
+  "@awardDetectiveDetail": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
