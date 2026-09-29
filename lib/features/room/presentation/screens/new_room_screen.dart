@@ -144,14 +144,11 @@ class _NewRoomScreenState extends State<NewRoomScreen> {
               const SizedBox(height: 28),
               SectionLabel(l10n.rules),
               const SizedBox(height: 10),
-              Card(
-                clipBehavior: Clip.antiAlias,
-                child: SwitchListTile(
-                  value: state.allowDuplicates,
-                  onChanged: cubit.setAllowDuplicates,
-                  title: Text(l10n.sameNameTwice, style: theme.textTheme.titleMedium),
-                  subtitle: Text(state.allowDuplicates ? l10n.sameNameTwiceOn : l10n.sameNameTwiceOff),
-                ),
+              RulesCard(
+                allowDuplicates: state.allowDuplicates,
+                onAllowDuplicates: cubit.setAllowDuplicates,
+                handwritten: state.handwritten,
+                onHandwritten: cubit.setHandwritten,
               ),
               const SizedBox(height: 28),
               SectionLabel(l10n.connection),

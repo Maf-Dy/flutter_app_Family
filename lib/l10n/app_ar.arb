@@ -384,5 +384,14 @@
   "awardDetective": "🕵️ المخبر",
   "familyTreeTitle": "شجرة العيلة",
   "awardWrongedDetail": "{count, plural, =1{اتظلم مرة} =2{اتظلم مرتين} other{اتظلم {count} مرات}}",
-  "awardDetectiveDetail": "{count, plural, =1{قفش واحد} =2{قفش اتنين} other{قفش {count}}}"
+  "awardDetectiveDetail": "{count, plural, =1{قفش واحد} =2{قفش اتنين} other{قفش {count}}}",
+  "faceOffYouSaid": "انتو قلتوا {name}",
+  "handwritten": "بخط إيدك",
+  "handwrittenOn": "كل واحد يكتب الأسامي بصباعه، وبعدين الكل هيشوف الشخبطة الحقيقية. الخط بيفضح، فغيّر خطك يا فنان!",
+  "handwrittenOff": "مقفولة. الأسامي بتتكتب بالكيبورد.",
+  "inkHint": "اكتب الاسم هنا بصباعك",
+  "inkClear": "امسح",
+  "inkHidden": "متخبي. دوس عشان تشوفه تاني",
+  "handwrittenName": "اسم مكتوب بخط الإيد",
+  "inkMissing": "اكتب كل اسم على ورقته الأول."
 }

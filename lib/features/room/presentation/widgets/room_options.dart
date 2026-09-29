@@ -173,6 +173,49 @@ class TeamSettings extends StatelessWidget {
   }
 }
 
+/// The room's rules: the same name twice, and writing names by hand.
+class RulesCard extends StatelessWidget {
+  const RulesCard({
+    super.key,
+    required this.allowDuplicates,
+    required this.onAllowDuplicates,
+    required this.handwritten,
+    required this.onHandwritten,
+  });
+
+  final bool allowDuplicates;
+  final ValueChanged<bool> onAllowDuplicates;
+  final bool handwritten;
+  final ValueChanged<bool> onHandwritten;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          SwitchListTile(
+            value: allowDuplicates,
+            onChanged: onAllowDuplicates,
+            title: Text(l10n.sameNameTwice, style: theme.textTheme.titleMedium),
+            subtitle: Text(allowDuplicates ? l10n.sameNameTwiceOn : l10n.sameNameTwiceOff),
+          ),
+          const Divider(height: 1, indent: 16, endIndent: 16),
+          SwitchListTile(
+            value: handwritten,
+            onChanged: onHandwritten,
+            secondary: const Icon(Icons.draw_rounded),
+            title: Text(l10n.handwritten, style: theme.textTheme.titleMedium),
+            subtitle: Text(handwritten ? l10n.handwrittenOn : l10n.handwrittenOff),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class NamesPerPlayerCard extends StatelessWidget {
   const NamesPerPlayerCard({
     super.key,

@@ -55,6 +55,7 @@ final class RoomState {
     this.stage = RoomStage.setup,
     this.category = const GameCategory.preset(PresetCategory.famousPeople),
     this.allowDuplicates = true,
+    this.handwritten = false,
     this.mode = GameMode.classic,
     this.teamSetup = const TeamSetup(),
     this.familyChat = true,
@@ -71,6 +72,9 @@ final class RoomState {
   final RoomStage stage;
   final GameCategory category;
   final bool allowDuplicates;
+
+  /// Names are written with a finger instead of typed; see [Room.handwritten].
+  final bool handwritten;
   final GameMode mode;
   final TeamSetup teamSetup;
 
@@ -103,6 +107,7 @@ final class RoomState {
     RoomStage? stage,
     GameCategory? category,
     bool? allowDuplicates,
+    bool? handwritten,
     GameMode? mode,
     TeamSetup? teamSetup,
     bool? familyChat,
@@ -119,6 +124,7 @@ final class RoomState {
     stage: stage ?? this.stage,
     category: category ?? this.category,
     allowDuplicates: allowDuplicates ?? this.allowDuplicates,
+    handwritten: handwritten ?? this.handwritten,
     mode: mode ?? this.mode,
     teamSetup: teamSetup ?? this.teamSetup,
     familyChat: familyChat ?? this.familyChat,

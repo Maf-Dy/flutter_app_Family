@@ -5,9 +5,11 @@ import 'package:flutter/foundation.dart';
 import '../../family/domain/family_game.dart';
 
 import 'category.dart';
+import 'slip_ink.dart';
 
 export 'category.dart';
 export '../../family/domain/family_game.dart' show FamilyTwists;
+export 'slip_ink.dart';
 
 /// How the room plays once the names are in.
 enum GameMode {
@@ -82,22 +84,36 @@ enum SubmissionError {
 /// One name in the bowl.
 @immutable
 final class Slip {
-  const Slip({required this.text, required this.writerId, required this.writerName});
+  const Slip({required this.text, required this.writerId, required this.writerName, this.ink});
 
+  /// What was typed; [SlipInk.marker] when the name was written by hand.
   final String text;
   final String writerId;
   final String writerName;
+
+  /// The name as written by hand, in a [Room.handwritten] room.
+  final SlipInk? ink;
 }
 
 @immutable
 final class Player {
-  const Player({required this.id, required this.name, this.secrets = const [], this.isHost = false, this.team});
+  const Player({
+    required this.id,
+    required this.name,
+    this.secrets = const [],
+    this.inks = const [],
+    this.isHost = false,
+    this.team,
+  });
 
   static const hostId = 'host';
 
   final String id;
   final String name;
   final List<String> secrets;
+
+  /// The drawings behind [secrets], one each, in a [Room.handwritten] room; empty otherwise.
+  final List<SlipInk> inks;
   final bool isHost;
 
   /// The team the player chose on the join page (0-based), if the room lets them choose.
@@ -105,8 +121,17 @@ final class Player {
 
   bool get hasSubmitted => secrets.isNotEmpty;
 
-  Player withSecrets(List<String> secrets) =>
-      Player(id: id, name: name, secrets: List.unmodifiable(secrets), isHost: isHost, team: team);
+  /// The drawing of the [index]th secret name, if it was written by hand.
+  SlipInk? inkAt(int index) => index < inks.length ? inks[index] : null;
+
+  Player withSecrets(List<String> secrets, {List<SlipInk> inks = const []}) => Player(
+    id: id,
+    name: name,
+    secrets: List.unmodifiable(secrets),
+    inks: List.unmodifiable(inks),
+    isHost: isHost,
+    team: team,
+  );
 }
 
 /// A game room: who joined, what they wrote, and whether the bowl is open.
@@ -121,6 +146,7 @@ final class Room {
     required this.namesPerPlayer,
     required this.hostName,
     this.allowDuplicates = true,
+    this.handwritten = false,
     this.mode = GameMode.classic,
     this.teamSetup = const TeamSetup(),
     this.familyChat = true,
@@ -159,6 +185,10 @@ final class Room {
   /// Whether two slips may carry the same name. Different spellings of one
   /// person always get through; that is part of the fun.
   final bool allowDuplicates;
+
+  /// Every name is written with a finger instead of typed, and everyone later
+  /// sees the real scribbles: the handwriting becomes a clue.
+  final bool handwritten;
   final GameMode mode;
 
   /// Only used in [GameMode.celebrity].
@@ -216,18 +246,32 @@ final class Room {
   /// The names that go into the game: only from players who are all in.
   List<Slip> get slips => [
     for (final p in playersIn)
-      for (final s in p.secrets) Slip(text: s, writerId: p.id, writerName: p.name),
+      for (final (i, s) in p.secrets.indexed) Slip(text: s, writerId: p.id, writerName: p.name, ink: p.inkAt(i)),
   ];
 
   /// Checks a friend's form before it is accepted. Returns null when valid.
   /// [playerId] lets a friend resubmit their own names without clashing with themselves.
-  SubmissionError? validate({required String name, required List<String> secrets, String? playerId, int? team}) {
+  ///
+  /// In a [handwritten] room the names are the [inks], one per name, and
+  /// [secrets] are ignored: a missing drawing is a missing name. Two drawings
+  /// never count as the same name.
+  SubmissionError? validate({
+    required String name,
+    List<String> secrets = const [],
+    List<SlipInk?> inks = const [],
+    String? playerId,
+    int? team,
+  }) {
     if (!isCollecting) return SubmissionError.roomClosed;
     if (team != null && (!playersPickTeams || team < 0 || team >= teamSetup.count)) return SubmissionError.invalidTeam;
     final cleanName = tidy(name);
-    final cleanSecrets = secrets.map(tidy).toList();
     if (cleanName.isEmpty) return SubmissionError.missingName;
     if (_nameTaken(cleanName, exceptPlayer: playerId)) return SubmissionError.nameTaken;
+    if (handwritten) {
+      if (inks.length != namesPerPlayer || inks.contains(null)) return SubmissionError.missingSecret;
+      return cleanName.length > maxNameLength ? SubmissionError.tooLong : null;
+    }
+    final cleanSecrets = secrets.map(tidy).toList();
     if (cleanSecrets.length != namesPerPlayer || cleanSecrets.any((s) => s.isEmpty)) {
       return SubmissionError.missingSecret;
     }
@@ -239,9 +283,11 @@ final class Room {
   }
 
   /// Why the host's own [secret] can't go in the bowl, or null when it can.
-  SubmissionError? validateHostSecret(String secret) {
-    final clean = tidy(secret);
+  /// In a [handwritten] room the name is the [ink] and [secret] is ignored.
+  SubmissionError? validateHostSecret(String secret, {SlipInk? ink}) {
     if (!isCollecting) return SubmissionError.roomClosed;
+    if (handwritten) return ink == null ? SubmissionError.missingSecret : null;
+    final clean = tidy(secret);
     if (clean.isEmpty) return SubmissionError.missingSecret;
     if (clean.length > maxSecretLength) return SubmissionError.tooLong;
     if (!allowDuplicates && _clashes([...?host?.secrets, clean], exceptPlayer: Player.hostId)) {
@@ -261,7 +307,9 @@ final class Room {
     final taken = <String>{
       for (final p in players)
         if (p.id != exceptPlayer)
-          for (final s in p.secrets) matchKey(s),
+          for (final (i, s) in p.secrets.indexed)
+            // A drawing is never the same name as anything else.
+            if (p.inkAt(i) == null) matchKey(s),
     };
     final mine = <String>{};
     for (final s in secrets) {
@@ -272,12 +320,24 @@ final class Room {
   }
 
   /// Adds a friend, or replaces what they sent before. Call [validate] first.
-  Room withSubmission({required String playerId, required String name, required List<String> secrets, int? team}) {
+  Room withSubmission({
+    required String playerId,
+    required String name,
+    List<String> secrets = const [],
+    List<SlipInk?> inks = const [],
+    int? team,
+  }) {
     assert(
-      validate(name: name, secrets: secrets, playerId: playerId, team: team) == null,
+      validate(name: name, secrets: secrets, inks: inks, playerId: playerId, team: team) == null,
       'Submission must be validated first',
     );
-    final player = Player(id: playerId, name: tidy(name), secrets: List.unmodifiable(secrets.map(tidy)), team: team);
+    final player = Player(
+      id: playerId,
+      name: tidy(name),
+      secrets: List.unmodifiable(handwritten ? List.filled(inks.length, SlipInk.marker) : secrets.map(tidy)),
+      inks: handwritten ? List.unmodifiable(inks.nonNulls) : const [],
+      team: team,
+    );
     final index = joinIndexOf(playerId);
     if (index < 0 && players.length >= maxPlayers) return this;
     return _copy(
@@ -287,24 +347,15 @@ final class Room {
     );
   }
 
-  /// Adds one of the host's own secret names, up to [namesPerPlayer].
-  Room withHostSecret(String secret) {
-    if (validateHostSecret(secret) != null || hostSecretsLeft <= 0) return this;
-    final clean = tidy(secret);
-    final current = host;
-    if (current == null) {
-      return _copy(
-        players: [
-          ...players,
-          Player(id: Player.hostId, name: hostName, secrets: List.unmodifiable([clean]), isHost: true),
-        ],
-      );
-    }
-    return _copy(
-      players: [
-        for (final p in players) p.isHost ? p.withSecrets([...p.secrets, clean]) : p,
-      ],
-    );
+  /// Adds one of the host's own secret names, up to [namesPerPlayer]. In a
+  /// [handwritten] room the name is the [ink].
+  Room withHostSecret(String secret, {SlipInk? ink}) {
+    if (validateHostSecret(secret, ink: ink) != null || hostSecretsLeft <= 0) return this;
+    final clean = handwritten ? SlipInk.marker : tidy(secret);
+    final inks = [...?host?.inks, if (handwritten && ink != null) ink];
+    final current = host ?? Player(id: Player.hostId, name: hostName, isHost: true);
+    final next = current.withSecrets([...current.secrets, clean], inks: inks);
+    return _copy(players: host == null ? [...players, next] : [for (final p in players) p.isHost ? next : p]);
   }
 
   /// The host takes a friend out of the room, e.g. an old entry left behind when
@@ -328,6 +379,7 @@ final class Room {
     family: FamilyGame.start(
       players: [for (final p in playersIn) FamilyPlayer(id: p.id, name: p.name)],
       slips: [for (final s in slips) (text: s.text, writerId: s.writerId)],
+      inks: [for (final s in slips) s.ink],
       chatEnabled: familyChat,
       random: random,
       twists: familyTwists,
@@ -354,6 +406,7 @@ final class Room {
         namesPerPlayer: namesPerPlayer,
         hostName: hostName,
         allowDuplicates: allowDuplicates,
+        handwritten: handwritten,
         mode: mode,
         teamSetup: teamSetup,
         familyChat: familyChat,

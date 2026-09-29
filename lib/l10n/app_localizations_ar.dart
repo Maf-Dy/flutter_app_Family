@@ -1431,4 +1431,34 @@ class AppLocalizationsAr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String faceOffYouSaid(String name) {
+    return 'انتو قلتوا $name';
+  }
+
+  @override
+  String get handwritten => 'بخط إيدك';
+
+  @override
+  String get handwrittenOn =>
+      'كل واحد يكتب الأسامي بصباعه، وبعدين الكل هيشوف الشخبطة الحقيقية. الخط بيفضح، فغيّر خطك يا فنان!';
+
+  @override
+  String get handwrittenOff => 'مقفولة. الأسامي بتتكتب بالكيبورد.';
+
+  @override
+  String get inkHint => 'اكتب الاسم هنا بصباعك';
+
+  @override
+  String get inkClear => 'امسح';
+
+  @override
+  String get inkHidden => 'متخبي. دوس عشان تشوفه تاني';
+
+  @override
+  String get handwrittenName => 'اسم مكتوب بخط الإيد';
+
+  @override
+  String get inkMissing => 'اكتب كل اسم على ورقته الأول.';
 }

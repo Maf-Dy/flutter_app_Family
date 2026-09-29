@@ -27,6 +27,7 @@ final class PassPhoneState {
     this.category = const GameCategory.preset(PresetCategory.famousPeople),
     this.namesPerPlayer = 1,
     this.allowDuplicates = true,
+    this.handwritten = false,
     this.mode = GameMode.classic,
     this.teamSetup = const TeamSetup(),
     this.stage = PassStage.setup,
@@ -38,6 +39,9 @@ final class PassPhoneState {
   final GameCategory category;
   final int namesPerPlayer;
   final bool allowDuplicates;
+
+  /// Everyone writes their names with a finger; see [Room.handwritten].
+  final bool handwritten;
 
   /// [GameMode.classic] or [GameMode.celebrity]; the family game needs everyone's phone.
   final GameMode mode;
@@ -57,6 +61,7 @@ final class PassPhoneState {
     GameCategory? category,
     int? namesPerPlayer,
     bool? allowDuplicates,
+    bool? handwritten,
     GameMode? mode,
     TeamSetup? teamSetup,
     PassStage? stage,
@@ -67,6 +72,7 @@ final class PassPhoneState {
     category: category ?? this.category,
     namesPerPlayer: namesPerPlayer ?? this.namesPerPlayer,
     allowDuplicates: allowDuplicates ?? this.allowDuplicates,
+    handwritten: handwritten ?? this.handwritten,
     mode: mode ?? this.mode,
     teamSetup: teamSetup ?? this.teamSetup,
     stage: stage ?? this.stage,
@@ -87,6 +93,8 @@ class PassPhoneCubit extends Cubit<PassPhoneState> {
 
   void setAllowDuplicates(bool allow) => emit(state.copyWith(allowDuplicates: allow));
 
+  void setHandwritten(bool on) => emit(state.copyWith(handwritten: on));
+
   void setMode(GameMode mode) {
     if (mode == GameMode.family) return;
     emit(state.copyWith(mode: mode, namesPerPlayer: Room.namesForMode(state.namesPerPlayer, mode)));
@@ -105,6 +113,7 @@ class PassPhoneCubit extends Cubit<PassPhoneState> {
           category: state.category,
           namesPerPlayer: state.namesPerPlayer,
           allowDuplicates: state.allowDuplicates,
+          handwritten: state.handwritten,
           mode: state.mode,
           teamSetup: state.teamSetup,
         ),
@@ -112,16 +121,17 @@ class PassPhoneCubit extends Cubit<PassPhoneState> {
     );
   }
 
-  /// Puts one person's names in the bowl and hides them. Returns why not, or null.
-  PassError? submit({required String name, required List<String> secrets}) {
+  /// Puts one person's names (typed [secrets], or drawn [inks]) in the bowl
+  /// and hides them. Returns why not, or null.
+  PassError? submit({required String name, List<String> secrets = const [], List<SlipInk?> inks = const []}) {
     final bowl = state.bowl;
     if (bowl == null || state.stage != PassStage.typing) return PassError.full;
-    final error = bowl.validate(name: name, secrets: secrets);
+    final error = bowl.validate(name: name, secrets: secrets, inks: inks);
     if (error != null) return error;
     emit(
       state.copyWith(
         stage: PassStage.passed,
-        bowl: bowl.submit(name: name, secrets: secrets),
+        bowl: bowl.submit(name: name, secrets: secrets, inks: inks),
         lastName: Room.tidy(name),
       ),
     );

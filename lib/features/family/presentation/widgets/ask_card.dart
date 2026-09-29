@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/l10n.dart';
 import '../../domain/family_game.dart';
+import '../../../round/presentation/widgets/paper_slip.dart';
 
 /// "Who wrote which name?" pickers, and the button that asks (the head, on the
 /// family's turn) or suggests the idea to the family (everyone else).
@@ -67,6 +68,7 @@ class AskCard extends StatelessWidget {
               label: l10n.familyWhich,
               value: slip,
               items: [for (final s in names) (value: s.id, label: s.text)],
+              inks: {for (final s in names) s.id: ?s.ink},
               onChanged: onSlip,
             ),
             if (error != null) ...[
@@ -107,11 +109,15 @@ class FamilyPicker<T> extends StatelessWidget {
     required this.value,
     required this.items,
     required this.onChanged,
+    this.inks = const {},
   });
 
   final String label;
   final T? value;
   final List<({T value, String label})> items;
+
+  /// Handwritten names, shown as their drawing instead of the label.
+  final Map<T, SlipInk> inks;
   final ValueChanged<T?> onChanged;
 
   @override
@@ -127,7 +133,12 @@ class FamilyPicker<T> extends StatelessWidget {
             for (final item in items)
               DropdownMenuItem(
                 value: item.value,
-                child: Text(item.label, overflow: TextOverflow.ellipsis),
+                child: SlipLabel(
+                  text: item.label,
+                  ink: inks[item.value],
+                  inkHeight: 34,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
           ],
           onChanged: onChanged,

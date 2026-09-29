@@ -96,7 +96,7 @@ class _RevealScreenState extends State<RevealScreen> with SingleTickerProviderSt
               Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 280),
-                  child: PaperSlip(text: guess.slip.text, tiltDegrees: -2),
+                  child: PaperSlip(text: guess.slip.text, ink: guess.slip.ink, tiltDegrees: -2),
                 ),
               ),
               const SizedBox(height: 16),

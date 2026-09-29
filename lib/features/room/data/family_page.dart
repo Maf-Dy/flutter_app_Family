@@ -100,6 +100,8 @@ const familyCss = '''
 .chip.head{border-color:var(--primary)}
 .chip.slip{background:var(--slip);color:var(--slip-ink);border-color:var(--slip-edge);border-radius:6px}
 .chip.done{opacity:.55}
+img.ink{height:30px;max-width:100%;vertical-align:middle;margin-inline-end:4px}
+.idea img.ink{display:block;height:36px}
 select{width:100%;height:50px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:16px;padding:0 12px}
 .list{display:flex;flex-direction:column;gap:8px}
 .idea{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:14px;background:var(--bg)}
@@ -151,7 +153,9 @@ const _script = r'''
   function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function nameOf(id){ for (var i = 0; i < st.players.length; i++) if (st.players[i].id === id) return st.players[i].name; return ''; }
   function slipOf(id){ for (var i = 0; i < st.slips.length; i++) if (st.slips[i].id === id) return st.slips[i]; return null; }
-  // Caught people's names are out, so asking them again can't be right.
+  // A handwritten name reads as a numbered ✍️ in text, and shows as its drawing where there is room.
+  function slipText(x){ return x.ink ? '\u270D\uFE0F' + (x.id + 1) : x.text; }
+  function inkImg(x){ var i = el('img', 'ink'); i.src = '/ink/' + x.id + '.png'; i.alt = slipText(x); return i; }
   var lastRumor = null, lastAsks = null;
   var sfx = window.sfx || { drumroll: function(){}, joy: function(){}, wrong: function(){}, muted: true, setMuted: function(){} };
   function soundLabel(){ $('sound').textContent = sfx.muted ? S.soundOff : S.soundOn; }
@@ -293,11 +297,11 @@ const _script = r'''
     });
   }
 
-  function slipText(id){ var x = slipOf(id); return x ? x.text : ''; }
+  function slipName(id){ var x = slipOf(id); return x ? slipText(x) : ''; }
 
   function pendTitle(pend){
     var asker = nameOf(pend.asker);
-    return pend.kind === 'letMeGo' ? t('letMeGoAsked', { asker: asker, name: slipText(pend.slip) })
+    return pend.kind === 'letMeGo' ? t('letMeGoAsked', { asker: asker, name: slipName(pend.slip) })
       : t(pend.kind + 'Title', { asker: asker });
   }
 
@@ -319,7 +323,8 @@ const _script = r'''
     function button(label, cls, onclick){ var b = el('button', cls, label); b.type = 'button'; b.onclick = onclick; btns.appendChild(b); return b; }
     function pickSlips(){
       (pend.slips || []).forEach(function(id){
-        var c = el('button', 'chip pick', slipText(id)); c.type = 'button';
+        var c = el('button', 'chip pick', slipName(id)); c.type = 'button';
+        var x = slipOf(id); if (x && x.ink) c.insertBefore(inkImg(x), c.firstChild);
         c.onclick = function(){ picked = id; var all = slips.children; for (var i = 0; i < all.length; i++) all[i].className = 'chip pick'; c.className = 'chip slip'; };
         slips.appendChild(c);
       });
@@ -353,7 +358,7 @@ const _script = r'''
   function renderWanted(){
     var x = st.wanted == null ? null : slipOf(st.wanted), open = !!x && !x.writer && !st.winner;
     show($('wantedCard'), open || st.bonus > 0);
-    $('wantedTitle').textContent = open ? t('wantedTitle', { name: x.text }) : '';
+    $('wantedTitle').textContent = open ? t('wantedTitle', { name: slipText(x) }) : '';
     $('wantedHelp').textContent = (open ? S.wantedDetail : '') + (st.bonus > 0 ? (open ? ' ' : '') + t('bonus', { count: st.bonus }) : '');
   }
 
@@ -365,12 +370,12 @@ const _script = r'''
     var top = st.rumors.length ? st.rumors[0].id : -1;
     // A rumor that lands while the page is open stands out, and the phone buzzes once.
     var fresh = lastRumor !== null && top > lastRumor;
-    st.rumors.forEach(function(r){ list.appendChild(el('p', 'rumor' + (fresh && r.id === top ? ' new' : ''), t('rumorLine', { target: nameOf(r.target), name: slipText(r.slip) }))); });
+    st.rumors.forEach(function(r){ list.appendChild(el('p', 'rumor' + (fresh && r.id === top ? ' new' : ''), t('rumorLine', { target: nameOf(r.target), name: slipName(r.slip) }))); });
     if (fresh) { try { navigator.vibrate && navigator.vibrate(60); } catch (e) {} }
     if (lastRumor === null || top > lastRumor) lastRumor = top;
     show($('rumorForm'), st.canRumor && !!st.me);
     fill($('rumorWho'), st.players.filter(function(p){ return p.id !== st.me; }).map(function(p){ return { value: p.id, label: p.name }; }));
-    fill($('rumorWhich'), st.slips.filter(function(x){ return !x.writer; }).map(function(x){ return { value: String(x.id), label: x.text }; }));
+    fill($('rumorWhich'), st.slips.filter(function(x){ return !x.writer; }).map(function(x){ return { value: String(x.id), label: slipText(x) }; }));
   }
 
   function render(){
@@ -421,7 +426,7 @@ const _script = r'''
 
       // The host works out who can be asked and which names are still open to this family.
       fill($('who'), st.askable.map(function(id){ return { value: id, label: nameOf(id) }; }));
-      fill($('which'), st.open.map(function(id){ return { value: String(id), label: slipText(id) }; }));
+      fill($('which'), st.open.map(function(id){ return { value: String(id), label: slipName(id) }; }));
       var line = $('cardLine');
       show(line, st.twists.letMeGo && !won);
       line.textContent = st.card ? S.cardReady : S.cardUsed;
@@ -435,7 +440,8 @@ const _script = r'''
       st.ideas.forEach(function(idea){
         var row = el('div', 'idea');
         var slip = slipOf(idea.slip);
-        row.appendChild(el('span', '', t('ideaText', { name: nameOf(idea.target), slip: slip ? slip.text : '' })));
+        var ideaText = row.appendChild(el('span', '', t('ideaText', { name: nameOf(idea.target), slip: slip ? slipText(slip) : '' })));
+        if (slip && slip.ink) ideaText.appendChild(inkImg(slip));
         row.appendChild(el('small', '', t('votes', { count: idea.votes })));
         var vote = el('button', idea.mine ? 'ghostb' : '', idea.mine ? S.voted : S.vote);
         vote.type = 'button';
@@ -461,10 +467,13 @@ const _script = r'''
       fams.appendChild(line);
     });
     var names = $('names'); clear(names);
-    st.slips.forEach(function(x){ names.appendChild(el('span', 'chip slip' + (x.writer ? ' done' : '') + (x.id === st.wanted && !x.writer ? ' wantedslip' : ''), iso(x.text) + (x.writer ? ' · ' + iso(nameOf(x.writer)) : ''))); });
+    st.slips.forEach(function(x){
+      var chip = names.appendChild(el('span', 'chip slip' + (x.writer ? ' done' : '') + (x.id === st.wanted && !x.writer ? ' wantedslip' : ''), iso(slipText(x)) + (x.writer ? ' · ' + iso(nameOf(x.writer)) : '')));
+      if (x.ink) chip.insertBefore(inkImg(x), chip.firstChild);
+    });
     var events = $('events'); clear(events);
     st.events.forEach(function(e){
-      var vars = { asker: nameOf(e.asker), target: nameOf(e.target), slip: slipText(e.slip) };
+      var vars = { asker: nameOf(e.asker), target: nameOf(e.target), slip: slipName(e.slip) };
       if (e.hidden) { events.appendChild(el('p', 'event secret', t('eventSecret', vars))); return; }
       var p = el('p', 'event' + (e.correct && !e.blocked ? ' ok' : '') + (e.kind !== 'ask' ? ' tag' : ''));
       if (e.kind === 'counter' || e.kind === 'revenge') p.appendChild(el('b', '', (e.kind === 'counter' ? S.tagCounter : S.tagRevenge) + ' '));

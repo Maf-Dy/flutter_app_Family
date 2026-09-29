@@ -886,5 +886,21 @@
         "type": "int"
       }
     }
-  }
+  },
+  "faceOffYouSaid": "You said {name}",
+  "@faceOffYouSaid": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "handwritten": "Write by hand",
+  "handwrittenOn": "Everyone writes each name with a finger, and later you all see the real scribbles. Handwriting gives people away, so disguise yours!",
+  "handwrittenOff": "Off. Names are typed.",
+  "inkHint": "Write the name here with your finger",
+  "inkClear": "Clear",
+  "inkHidden": "Hidden. Tap to see it again",
+  "handwrittenName": "A handwritten name",
+  "inkMissing": "Write every name on its slip first."
 }

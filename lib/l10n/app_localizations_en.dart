@@ -1432,4 +1432,34 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String faceOffYouSaid(String name) {
+    return 'You said $name';
+  }
+
+  @override
+  String get handwritten => 'Write by hand';
+
+  @override
+  String get handwrittenOn =>
+      'Everyone writes each name with a finger, and later you all see the real scribbles. Handwriting gives people away, so disguise yours!';
+
+  @override
+  String get handwrittenOff => 'Off. Names are typed.';
+
+  @override
+  String get inkHint => 'Write the name here with your finger';
+
+  @override
+  String get inkClear => 'Clear';
+
+  @override
+  String get inkHidden => 'Hidden. Tap to see it again';
+
+  @override
+  String get handwrittenName => 'A handwritten name';
+
+  @override
+  String get inkMissing => 'Write every name on its slip first.';
 }

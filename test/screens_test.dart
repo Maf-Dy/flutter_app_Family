@@ -260,7 +260,7 @@ void main() {
       expect(find.text('مين كتب\nإيه؟'), findsOneWidget);
       await tapVisible(tester, find.text('افتح قعدة'));
       await tapVisible(tester, find.text('لعيبة كورة'));
-      await tapVisible(tester, find.byType(Switch));
+      await tapVisible(tester, find.byType(Switch).first);
       expect(find.textContaining('ممنوع'), findsOneWidget);
       await tapVisible(tester, find.text('افتح القعدة'));
       host

@@ -136,11 +136,12 @@ class _WhoWroteScreenState extends State<WhoWroteScreen> {
                       final slip = state.slips[i];
                       final revealed = state.revealed.contains(i);
                       final color = game.player(widget.players.indexOf(slip.writerId));
+                      final name = slip.ink == null ? slip.text : context.l10n.handwrittenName;
                       return Semantics(
                         button: !revealed,
                         label: revealed
-                            ? context.l10n.writtenBy(slip.text, slip.writerName)
-                            : context.l10n.tapToReveal(slip.text),
+                            ? context.l10n.writtenBy(name, slip.writerName)
+                            : context.l10n.tapToReveal(name),
                         excludeSemantics: true,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
@@ -148,7 +149,7 @@ class _WhoWroteScreenState extends State<WhoWroteScreen> {
                           child: Row(
                             children: [
                               Expanded(
-                                child: PaperSlip(text: slip.text, tiltDegrees: slipTilt(i) / 2),
+                                child: PaperSlip(text: slip.text, ink: slip.ink, tiltDegrees: slipTilt(i) / 2),
                               ),
                               const SizedBox(width: 12),
                               Expanded(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/l10n.dart';
+import '../../../round/presentation/widgets/paper_slip.dart';
 import '../../domain/family_game.dart';
 
 /// The family's ideas for the next guess, most backed first. The host can back
@@ -48,6 +49,7 @@ class IdeasCard extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 6),
                 child: _IdeaRow(
                   text: l10n.familyIdea(game.nameOf(idea.targetId), game.slip(idea.slipId)?.text ?? ''),
+                  ink: game.slip(idea.slipId)?.ink,
                   backers: l10n.familyBackers(idea.voters.length),
                   mine: idea.voters.contains(me),
                   onToggle: () => idea.voters.contains(me) ? onUnback() : onBack(idea),
@@ -62,9 +64,19 @@ class IdeasCard extends StatelessWidget {
 }
 
 class _IdeaRow extends StatelessWidget {
-  const _IdeaRow({required this.text, required this.backers, required this.mine, required this.onToggle, this.onUse});
+  const _IdeaRow({
+    required this.text,
+    required this.backers,
+    required this.mine,
+    required this.onToggle,
+    this.onUse,
+    this.ink,
+  });
 
   final String text;
+
+  /// The handwritten name the idea is about, shown under [text].
+  final SlipInk? ink;
   final String backers;
   final bool mine;
   final VoidCallback onToggle;
@@ -87,6 +99,7 @@ class _IdeaRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(text, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700)),
+                if (ink != null) SlipLabel(text: '', ink: ink, inkHeight: 36),
                 Text(backers, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
               ],
             ),

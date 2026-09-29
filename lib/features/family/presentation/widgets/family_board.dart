@@ -4,6 +4,7 @@ import '../../../../core/l10n/l10n.dart';
 import '../../../../core/theme/game_colors.dart';
 import '../../../../core/widgets/player_avatar.dart';
 import '../../domain/family_game.dart';
+import '../../../round/presentation/widgets/paper_slip.dart';
 import '../family_style.dart';
 
 /// One family's members, head first with a crown.
@@ -106,6 +107,8 @@ class FamilyBoard extends StatelessWidget {
                     text: game.writerShownTo(me, slip.id) ? '${slip.text} · ${game.nameOf(slip.writerId)}' : slip.text,
                     out: game.writerShownTo(me, slip.id),
                     wanted: slip.id == game.wanted && !game.isOver,
+                    ink: slip.ink,
+                    writer: game.writerShownTo(me, slip.id) ? game.nameOf(slip.writerId) : null,
                     paper: paper,
                   ),
               ],
@@ -170,6 +173,10 @@ class _EventLine extends StatelessWidget {
       children: [
         Icon(icon, size: 18, color: color),
         const SizedBox(width: 6),
+        if ((seen ? game.slip(e.slipId)?.ink : null) case final ink?) ...[
+          SlipLabel(text: '', ink: ink, inkHeight: 26),
+          const SizedBox(width: 6),
+        ],
         Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),
       ],
     );
@@ -177,9 +184,20 @@ class _EventLine extends StatelessWidget {
 }
 
 class _SlipChip extends StatelessWidget {
-  const _SlipChip({required this.text, required this.out, required this.paper, this.wanted = false});
+  const _SlipChip({
+    required this.text,
+    required this.out,
+    required this.paper,
+    this.wanted = false,
+    this.ink,
+    this.writer,
+  });
 
   final String text;
+
+  /// A handwritten name: the drawing shows instead of [text], then the [writer] once caught.
+  final SlipInk? ink;
+  final String? writer;
   final bool out;
   final GameColors paper;
 
@@ -200,14 +218,31 @@ class _SlipChip extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: paper.slipInk,
-            fontWeight: FontWeight.w700,
-            decoration: out ? TextDecoration.lineThrough : null,
-          ),
-        ),
+        child: ink == null
+            ? Text(
+                text,
+                style: TextStyle(
+                  color: paper.slipInk,
+                  fontWeight: FontWeight.w700,
+                  decoration: out ? TextDecoration.lineThrough : null,
+                ),
+              )
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SlipLabel(
+                    text: text,
+                    ink: ink,
+                    inkHeight: 32,
+                    style: TextStyle(color: paper.slipInk),
+                  ),
+                  if (writer != null)
+                    Text(
+                      ' · $writer',
+                      style: TextStyle(color: paper.slipInk, fontWeight: FontWeight.w700),
+                    ),
+                ],
+              ),
       ),
     );
   }

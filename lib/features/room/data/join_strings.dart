@@ -22,6 +22,13 @@ sealed class JoinStrings {
   String secretLabel(int index, int total);
   String get secretPlaceholder;
   String get privacyNote;
+
+  /// Handwritten rooms: the pad's hint, its Clear button, the missing-drawing
+  /// error and a nudge to disguise the handwriting.
+  String get inkHint;
+  String get inkClear;
+  String inkMissing(int names);
+  String get inkNote;
   String get submit;
   String get youreIn;
   String inTheBowl(int slips, String countHtml);
@@ -90,6 +97,15 @@ final class EnglishJoinStrings extends JoinStrings {
   String get secretPlaceholder => 'Write it on the slip';
   @override
   String get privacyNote => 'Nobody sees who wrote what until the game is over.';
+  @override
+  String get inkHint => 'Write the name here with your finger';
+  @override
+  String get inkClear => 'Clear';
+  @override
+  String inkMissing(int names) =>
+      names == 1 ? 'Write the name with your finger first.' : 'Write all $names names with your finger.';
+  @override
+  String get inkNote => 'Everyone will see your handwriting later. Disguise it!';
   @override
   String get submit => 'Drop it in the bowl';
   @override
@@ -286,6 +302,14 @@ final class ArabicJoinStrings extends JoinStrings {
   String get secretPlaceholder => 'اكتبه على الورقة';
   @override
   String get privacyNote => 'محدش هيعرف مين كتب إيه غير في آخر اللعبة. متقلقش.';
+  @override
+  String get inkHint => 'اكتب الاسم هنا بصباعك';
+  @override
+  String get inkClear => 'امسح';
+  @override
+  String inkMissing(int names) => names == 1 ? 'اكتب الاسم بصباعك الأول.' : 'اكتب الـ $names أسامي بصباعك.';
+  @override
+  String get inkNote => 'الكل هيشوف خطك بعدين... غيّره لو تقدر 😉';
   @override
   String get submit => 'ارميه في الطبق';
   @override
