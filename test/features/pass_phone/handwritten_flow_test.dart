@@ -31,12 +31,30 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// The writing area of one pad, not its buttons.
+  Finder padArea(int pad) => find.descendant(of: find.byType(InkPad).at(pad), matching: find.byType(CustomPaint)).first;
+
+  /// Opens a covered pad with its own button, the only way in.
+  Future<void> open(WidgetTester tester, int pad) async {
+    final button = find.descendant(of: find.byType(InkPad).at(pad), matching: find.byType(FilledButton));
+    if (button.evaluate().isNotEmpty) await tapVisible(tester, button);
+  }
+
   Future<void> write(WidgetTester tester, {int pad = 0}) async {
-    final finder = find.byType(InkPad).at(pad);
+    final finder = padArea(pad);
     await tester.ensureVisible(finder);
     await tester.pumpAndSettle();
     await tester.drag(finder, const Offset(80, 12));
     await tester.pumpAndSettle();
+  }
+
+  /// The error sits under the tall pads, so scroll down to it.
+  Future<void> expectMissingInk(WidgetTester tester, {String? reason}) async {
+    const missing = 'Write every name on its slip first.';
+    expect(find.text(missing, skipOffstage: false), findsOneWidget, reason: reason);
+    await tester.ensureVisible(find.text(missing, skipOffstage: false));
+    await tester.pumpAndSettle();
+    expect(find.text(missing), findsOneWidget, reason: reason);
   }
 
   testWidgets('with "Write by hand" on, everyone writes with a finger and the reader sees the scribbles', (
@@ -62,13 +80,24 @@ void main() {
 
     // Nothing drawn yet: that is a missing name.
     await dropInBowl(tester);
-    expect(find.text('Write every name on its slip first.'), findsOneWidget);
+    await expectMissingInk(tester);
+
+    // The second pad opens only with its button, and that tap leaves no mark.
+    expect(find.text('Tap to write'), findsOneWidget);
+    await tester.ensureVisible(padArea(1));
+    await tester.pumpAndSettle();
+    await tester.tapAt(tester.getTopLeft(padArea(1)) + const Offset(24, 24));
+    await tester.pumpAndSettle();
+    expect(find.text('Tap to write'), findsOneWidget, reason: 'tapping the cover does not open it');
 
     // The first drawing covers itself once the second pad is opened.
     await write(tester);
-    expect(find.text('Hidden. Tap to see it again'), findsNothing);
-    await tapVisible(tester, find.byType(InkPad).at(1));
-    expect(find.text('Hidden. Tap to see it again'), findsOneWidget);
+    expect(find.text('Hidden so nobody can peek'), findsNothing);
+    await tapVisible(tester, find.text('Tap to write'));
+    expect(find.text('Hidden so nobody can peek'), findsOneWidget);
+    expect(find.text('Tap to write'), findsNothing);
+    await dropInBowl(tester);
+    await expectMissingInk(tester, reason: 'opening the second pad drew nothing on it');
     await write(tester, pad: 1);
 
     // Leaving the app mid-turn wipes the drawings.
@@ -81,14 +110,14 @@ void main() {
     }
     await tester.pumpAndSettle();
     await dropInBowl(tester);
-    expect(find.text('Write every name on its slip first.'), findsOneWidget);
+    await expectMissingInk(tester);
 
     Future<void> takeTurn(String? name) async {
       if (name != null) await tester.enterText(find.widgetWithText(TextField, 'Your name'), name);
       // Opens the first pad again if it is covered.
-      await tapVisible(tester, find.byType(InkPad).first);
+      await open(tester, 0);
       await write(tester);
-      await tapVisible(tester, find.byType(InkPad).at(1));
+      await open(tester, 1);
       await write(tester, pad: 1);
       await dropInBowl(tester);
     }

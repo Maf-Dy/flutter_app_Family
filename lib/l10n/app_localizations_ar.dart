@@ -1405,7 +1405,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get inkClear => 'امسح';
 
   @override
-  String get inkHidden => 'متخبي. دوس عشان تشوفه تاني';
+  String get inkUndo => 'تراجع';
+
+  @override
+  String get inkHidden => 'متخبي عشان محدش يبص';
+
+  @override
+  String get inkReveal => 'دوس عشان تكتب';
 
   @override
   String get handwrittenName => 'اسم مكتوب بخط الإيد';

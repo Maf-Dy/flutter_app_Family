@@ -1404,7 +1404,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inkClear => 'Clear';
 
   @override
-  String get inkHidden => 'Hidden. Tap to see it again';
+  String get inkUndo => 'Undo';
+
+  @override
+  String get inkHidden => 'Hidden so nobody can peek';
+
+  @override
+  String get inkReveal => 'Tap to write';
 
   @override
   String get handwrittenName => 'A handwritten name';

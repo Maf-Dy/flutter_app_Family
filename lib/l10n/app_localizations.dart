@@ -2360,11 +2360,23 @@ abstract class AppLocalizations {
   /// **'Clear'**
   String get inkClear;
 
+  /// No description provided for @inkUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get inkUndo;
+
   /// No description provided for @inkHidden.
   ///
   /// In en, this message translates to:
-  /// **'Hidden. Tap to see it again'**
+  /// **'Hidden so nobody can peek'**
   String get inkHidden;
+
+  /// No description provided for @inkReveal.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to write'**
+  String get inkReveal;
 
   /// No description provided for @handwrittenName.
   ///
