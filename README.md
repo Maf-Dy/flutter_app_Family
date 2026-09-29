@@ -34,10 +34,10 @@ The app speaks English and Egyptian Arabic (right to left). It follows the phone
 Pick **Face-off** (فريق قصاد فريق) when opening a room. Everyone writes names as usual, then:
 
 1. **Teams.** 2–4 teams of at least 2, made one of three ways: the app shuffles (with Reshuffle), friends pick on the join page, or the host taps players to move them.
-2. **Turns.** The app draws a name written by someone on another team. The team on turn talks it over and picks who wrote it, while the other team keeps a straight face. Right is +1.
+2. **Turns.** Everyone writes 3 names by default (up to 5). The app draws a name written by someone on another team. The team on turn talks it over and picks who wrote it, while the other team keeps a straight face. After a drumroll the app says only right (+1) or wrong; who wrote what stays secret until the end.
 3. **Bet double.** A team that's sure can bet double: +2 if right, −1 if wrong.
 4. **One pass through the bowl.** Each name comes out once; when the bowl is empty the game ends.
-5. **Results** with confetti. *Share this night* makes a picture of the scores for the family group; the classic mode's *Who wrote what?* has one too.
+5. **Results** with confetti and every writer revealed. *Share this night* makes a picture of the scores for the family group; the classic mode's *Who wrote what?* has one too.
 
 ## Family online mode
 
@@ -48,6 +48,17 @@ Pick **Family online** when opening a room to play the classic game with the app
 3. **Family ideas.** Members suggest guesses and back them; the head can pick one with *Use*.
 4. **Family chat** (a room option, on by default) is private to each family and follows people when families merge.
 5. A host who put no name in watches the board, and so does anyone who arrives after the start.
+6. **Awards of the night** at the end (أسوأ كداب, وش البوكر, أكتر واحد اتظلم, المخبر) and a **family tree** of who caught whom, on the screen and in the share picture.
+
+**House rules** (switches when opening the room, all off by default):
+- **Secret catches (مسكة في السر):** only your family sees your ask's result; caught people secretly join you and keep acting free. Turns go round every player. Everything is revealed at the end.
+- **Counter-catch (رد المسكة):** when caught, you get one shot back at a name in the catcher's family; right, and they all join you.
+- **Wanted (مطلوب):** a flagged name; catching its writer earns an extra ask, saved for your next miss.
+- **Revenge (التار):** a wrongly accused person gets a free ask on their accuser.
+- **Rumors (إشاعة):** once a game, spread an anonymous true-or-false rumor to every phone.
+- **"فكّك مني!":** once a game, cancel an ask on you; nobody learns if it was right, and the asker loses the turn.
+
+**Other room options:** *Write by hand (بخط إيدك)* has everyone draw their names with a finger, and the scribbles are what everyone sees. *Sound effects* (in settings) plays a drumroll, a zaghrouta and a sad trombone; friends' pages have their own mute button.
 
 ## Running it
 
