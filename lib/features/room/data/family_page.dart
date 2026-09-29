@@ -15,6 +15,18 @@ String familyBody(JoinStrings s, String Function(String) esc, {required String h
     <div class="stack fam">
       <div id="net" class="net" role="status" aria-live="polite" hidden></div>
       <div id="banner" class="banner" role="status" aria-live="polite"></div>
+      <section class="card stack twist" id="pendCard" hidden>
+        <h2 id="pendTitle"></h2>
+        <p class="help" id="pendHelp"></p>
+        <div class="field" id="pendWhoF"><label for="pendWho">${esc(s.family['who']!)}</label><select id="pendWho"></select></div>
+        <div id="pendSlips" class="chips"></div>
+        <p id="pendErr" class="error" hidden></p>
+        <div id="pendBtns" class="row"></div>
+      </section>
+      <section class="card wanted" id="wantedCard" hidden>
+        <h2 id="wantedTitle"></h2>
+        <p class="help" id="wantedHelp"></p>
+      </section>
       <section class="card" id="claimCard" hidden>
         <h2 id="claimTitle"></h2>
         <p class="help" id="claimHelp"></p>
@@ -24,12 +36,25 @@ String familyBody(JoinStrings s, String Function(String) esc, {required String h
       <section class="card" id="mineCard">
         <h2 id="mineTitle"></h2>
         <div id="mine" class="chips"></div>
+        <p class="help" id="cardLine" hidden></p>
       </section>
       <section class="card stack" id="actCard">
         <div class="field"><label for="who">${esc(s.family['who']!)}</label><select id="who"></select></div>
         <div class="field"><label for="which">${esc(s.family['which']!)}</label><select id="which"></select></div>
         <p id="err" class="error" hidden></p>
         <button id="go" type="button"></button>
+      </section>
+      <section class="card stack" id="rumorCard" hidden>
+        <h2>${esc(s.family['rumors']!)}</h2>
+        <div id="rumorList" class="list"></div>
+        <details id="rumorForm">
+          <summary id="rumorOpen">${esc(s.family['rumorSpread']!)}</summary>
+          <p class="help">${esc(s.family['rumorHint']!)}</p>
+          <div class="field"><label for="rumorWho">${esc(s.family['rumorWho']!)}</label><select id="rumorWho"></select></div>
+          <div class="field"><label for="rumorWhich">${esc(s.family['rumorWhich']!)}</label><select id="rumorWhich"></select></div>
+          <p id="rumorErr" class="error" hidden></p>
+          <button id="rumorGo" type="button">${esc(s.family['rumorSend']!)}</button>
+        </details>
       </section>
       <section class="card" id="ideasCard">
         <h2>${esc(s.family['ideas']!)}</h2>
@@ -93,6 +118,17 @@ select{width:100%;height:50px;border-radius:14px;border:1.5px solid var(--line);
 .msg.pending{opacity:.6}
 .msg.pending i{display:block;font-size:12px}
 button:disabled{opacity:.5}
+.twist{border:2px solid var(--primary)}
+.wanted{border:2px solid #B3261E}
+.wanted h2{color:#B3261E}
+.chip.wantedslip{border:2px solid #B3261E}
+.rumor{margin:0;padding:10px 12px;border-radius:14px;background:var(--bg);font-weight:700}
+.rumor.new{outline:2px solid var(--primary)}
+.event.secret{font-style:italic}
+.event.tag b{color:var(--primary)}
+summary{cursor:pointer;font-weight:800;color:var(--primary);padding:6px 0}
+details .field,details .help,details button{margin-top:10px}
+#pendBtns button{flex:1}
 ''';
 
 const _script = r'''
@@ -108,7 +144,7 @@ const _script = r'''
   function nameOf(id){ for (var i = 0; i < st.players.length; i++) if (st.players[i].id === id) return st.players[i].name; return ''; }
   function slipOf(id){ for (var i = 0; i < st.slips.length; i++) if (st.slips[i].id === id) return st.slips[i]; return null; }
   // Caught people's names are out, so asking them again can't be right.
-  function caught(id){ for (var i = 0; i < st.slips.length; i++) if (st.slips[i].writer === id) return true; return false; }
+  var lastRumor = null;
   function clear(e){ while (e.firstChild) e.removeChild(e.firstChild); }
   function show(e, on){ e.hidden = !on; }
 
@@ -159,7 +195,13 @@ const _script = r'''
   }
 
   // While offline, a guess can't be sent, so it can't be lost or sent twice.
-  function controls(){ $('go').disabled = offline; }
+  function controls(){
+    var busy = !!(st && st.pending);
+    $('go').disabled = offline || (busy && $('go').dataset.action === 'guess');
+    $('rumorGo').disabled = offline;
+    var b = $('pendBtns').getElementsByTagName('button');
+    for (var i = 0; i < b.length; i++) b[i].disabled = offline;
+  }
 
   function post(path, data, err){
     var body = new URLSearchParams(data);
@@ -225,13 +267,99 @@ const _script = r'''
     });
   }
 
+  function slipText(id){ var x = slipOf(id); return x ? x.text : ''; }
+
+  function pendTitle(pend){
+    var asker = nameOf(pend.asker);
+    return pend.kind === 'letMeGo' ? t('letMeGoAsked', { asker: asker, name: slipText(pend.slip) })
+      : t(pend.kind + 'Title', { asker: asker });
+  }
+
+  // Someone asked this phone, caught it or wrongly accused it: it answers here.
+  function renderPending(pend){
+    var card = $('pendCard'), mine = !!(pend && pend.mine && st.me);
+    show(card, mine);
+    if (!mine) { card.dataset.key = ''; return; }
+    // Redrawing on every poll would drop what the person is picking.
+    var key = pend.kind + ':' + pend.asker + ':' + pend.slip;
+    if (card.dataset.key === key) { controls(); return; }
+    card.dataset.key = key;
+    try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) {}
+    var err = $('pendErr'), btns = $('pendBtns'), slips = $('pendSlips'), who = $('pendWho');
+    who.value = '';
+    clear(btns); clear(slips); show(err, false);
+    var asker = nameOf(pend.asker), picked = null;
+    function button(label, cls, onclick){ var b = el('button', cls, label); b.type = 'button'; b.onclick = onclick; btns.appendChild(b); return b; }
+    function pickSlips(){
+      (pend.slips || []).forEach(function(id){
+        var c = el('button', 'chip pick', slipText(id)); c.type = 'button';
+        c.onclick = function(){ picked = id; var all = slips.children; for (var i = 0; i < all.length; i++) all[i].className = 'chip pick'; c.className = 'chip slip'; };
+        slips.appendChild(c);
+      });
+    }
+    show($('pendWhoF'), pend.kind === 'counter');
+    $('pendTitle').textContent = pendTitle(pend);
+    if (pend.kind === 'letMeGo') {
+      $('pendHelp').textContent = S.letMeGoHint;
+      button(S.letMeGoUse, '', function(){ post('/game/letmego', { use: '1' }, err); });
+      button(S.letMeGoAnswer, 'ghostb', function(){ post('/game/letmego', { use: '0' }, err); });
+    } else if (pend.kind === 'counter') {
+      $('pendHelp').textContent = S.counterHint;
+      fill(who, (pend.targets || []).map(function(id){ return { value: id, label: nameOf(id) }; }));
+      pickSlips();
+      button(S.counterShoot, '', function(){
+        if (!who.value || picked == null) { err.textContent = S.err_pickBoth; show(err, true); return; }
+        post('/game/counter', { target: who.value, slip: picked }, err);
+      });
+      button(S.pass, 'ghostb', function(){ post('/game/passcounter', {}, err); });
+    } else {
+      $('pendHelp').textContent = t('revengeHint', { asker: asker });
+      pickSlips();
+      button(S.revengeTake, '', function(){
+        if (picked == null) { err.textContent = S.err_pickBoth; show(err, true); return; }
+        post('/game/revenge', { slip: picked }, err);
+      });
+      button(S.pass, 'ghostb', function(){ post('/game/passrevenge', {}, err); });
+    }
+  }
+
+  function renderWanted(){
+    var x = st.wanted == null ? null : slipOf(st.wanted), open = !!x && !x.writer && !st.winner;
+    show($('wantedCard'), open || st.bonus > 0);
+    $('wantedTitle').textContent = open ? t('wantedTitle', { name: x.text }) : '';
+    $('wantedHelp').textContent = (open ? S.wantedDetail : '') + (st.bonus > 0 ? (open ? ' ' : '') + t('bonus', { count: st.bonus }) : '');
+  }
+
+  function renderRumors(){
+    var on = st.twists.rumors;
+    show($('rumorCard'), on && (st.rumors.length > 0 || st.canRumor));
+    if (!on) return;
+    var list = $('rumorList'); clear(list);
+    var top = st.rumors.length ? st.rumors[0].id : -1;
+    // A rumor that lands while the page is open stands out, and the phone buzzes once.
+    var fresh = lastRumor !== null && top > lastRumor;
+    st.rumors.forEach(function(r){ list.appendChild(el('p', 'rumor' + (fresh && r.id === top ? ' new' : ''), t('rumorLine', { target: nameOf(r.target), name: slipText(r.slip) }))); });
+    if (fresh) { try { navigator.vibrate && navigator.vibrate(60); } catch (e) {} }
+    if (lastRumor === null || top > lastRumor) lastRumor = top;
+    show($('rumorForm'), st.canRumor && !!st.me);
+    fill($('rumorWho'), st.players.filter(function(p){ return p.id !== st.me; }).map(function(p){ return { value: p.id, label: p.name }; }));
+    fill($('rumorWhich'), st.slips.filter(function(x){ return !x.writer; }).map(function(x){ return { value: String(x.id), label: x.text }; }));
+  }
+
   function render(){
     var me = st.me, mine = st.myHead, won = st.winner;
-    var myTurn = !won && mine && st.turn === mine;
+    var pend = won ? null : st.pending;
+    // With secret catches, turns go round every player, so "your turn" is yours alone.
+    var myTurn = !won && mine && (st.secret ? st.turnPlayer === me : st.turn === mine);
     var banner = $('banner');
-    banner.className = 'banner' + (won ? ' won' : myTurn ? ' mine' : '');
+    banner.className = 'banner' + (won ? ' won' : (myTurn && !pend) || (pend && pend.mine) ? ' mine' : '');
     banner.textContent = won
       ? (mine === won ? S.youWin : t('familyWins', { name: nameOf(won) }))
+      : pend
+        ? (pend.mine ? pendTitle(pend)
+            : pend.responder ? t('waiting', { name: nameOf(pend.responder) }) : S.waitingSomeone)
+      : st.secret
+        ? (myTurn ? S.youAsk : isAway(st.turnPlayer) ? t('familyAway', { name: nameOf(st.turnPlayer), host: HOST }) : t('playerAsks', { name: nameOf(st.turnPlayer) }))
       : myTurn
         ? (st.canAsk && me !== mine
             ? t('actingHead', { name: nameOf(mine) })
@@ -240,6 +368,9 @@ const _script = r'''
           ? t('familyAway', { name: nameOf(st.turn), host: HOST })
           : t('turnOther', { name: nameOf(st.turn) });
     renderClaim();
+    renderPending(pend);
+    renderWanted();
+    renderRumors();
     if (myTurn && !wasMyTurn) { try { navigator.vibrate && navigator.vibrate([120, 80, 120]); } catch (e) {} }
     wasMyTurn = !!myTurn;
 
@@ -252,8 +383,12 @@ const _script = r'''
       var box = $('mine'); clear(box);
       st.players.forEach(function(p){ if (p.head === mine) box.appendChild(el('span', 'chip' + (p.id === mine ? ' head' : '') + (isAway(p.id) ? ' away' : ''), (p.id === mine ? '👑 ' : '') + iso(p.name) + (p.id === me ? ' ' + S.youTag : '') + (isAway(p.id) ? ' · ' + S.offline : ''))); });
 
-      fill($('who'), st.players.filter(function(p){ return p.head !== mine && !caught(p.id); }).map(function(p){ return { value: p.id, label: p.name }; }));
-      fill($('which'), st.slips.filter(function(x){ return x.writer == null && !x.mine; }).map(function(x){ return { value: String(x.id), label: x.text }; }));
+      // The host works out who can be asked and which names are still open to this family.
+      fill($('who'), st.askable.map(function(id){ return { value: id, label: nameOf(id) }; }));
+      fill($('which'), st.open.map(function(id){ return { value: String(id), label: slipText(id) }; }));
+      var line = $('cardLine');
+      show(line, st.twists.letMeGo && !won);
+      line.textContent = st.card ? S.cardReady : S.cardUsed;
       var go = $('go');
       go.textContent = st.canAsk ? S.ask : S.suggest;
       go.dataset.action = st.canAsk ? 'guess' : 'suggest';
@@ -290,11 +425,16 @@ const _script = r'''
       fams.appendChild(line);
     });
     var names = $('names'); clear(names);
-    st.slips.forEach(function(x){ names.appendChild(el('span', 'chip slip' + (x.writer ? ' done' : ''), iso(x.text) + (x.writer ? ' · ' + iso(nameOf(x.writer)) : ''))); });
+    st.slips.forEach(function(x){ names.appendChild(el('span', 'chip slip' + (x.writer ? ' done' : '') + (x.id === st.wanted && !x.writer ? ' wantedslip' : ''), iso(x.text) + (x.writer ? ' · ' + iso(nameOf(x.writer)) : ''))); });
     var events = $('events'); clear(events);
     st.events.forEach(function(e){
-      var slip = slipOf(e.slip), vars = { asker: nameOf(e.asker), target: nameOf(e.target), slip: slip ? slip.text : '' };
-      events.appendChild(el('p', 'event' + (e.correct ? ' ok' : ''), t(e.correct ? 'eventCorrect' : 'eventWrong', vars)));
+      var vars = { asker: nameOf(e.asker), target: nameOf(e.target), slip: slipText(e.slip) };
+      if (e.hidden) { events.appendChild(el('p', 'event secret', t('eventSecret', vars))); return; }
+      var p = el('p', 'event' + (e.correct && !e.blocked ? ' ok' : '') + (e.kind !== 'ask' ? ' tag' : ''));
+      if (e.kind === 'counter' || e.kind === 'revenge') p.appendChild(el('b', '', (e.kind === 'counter' ? S.tagCounter : S.tagRevenge) + ' '));
+      p.appendChild(document.createTextNode(e.blocked ? t('eventBlocked', vars) : t(e.correct ? 'eventCorrect' : 'eventWrong', vars)));
+      if (e.wanted) p.appendChild(document.createTextNode(' ' + S.tagWanted));
+      events.appendChild(p);
     });
   }
 
@@ -328,6 +468,11 @@ const _script = r'''
     post('/game/' + this.dataset.action, { target: who, slip: which }).then(function(res){
       if (res && !res.error) { $('who').value = ''; $('which').value = ''; }
     });
+  };
+  $('rumorGo').onclick = function(){
+    var who = $('rumorWho').value, which = $('rumorWhich').value, err = $('rumorErr');
+    if (!who || !which) { err.textContent = S.err_pickBoth; show(err, true); return; }
+    post('/game/rumor', { target: who, slip: which }, err).then(function(res){ if (res && !res.error) $('rumorForm').open = false; });
   };
   $('chatForm').onsubmit = function(ev){
     ev.preventDefault();

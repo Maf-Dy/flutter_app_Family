@@ -130,7 +130,19 @@ class LanRoomHost implements RoomHost {
           } else {
             _json(response, familyViewFor(game, clientId));
           }
-        case ('POST', '/game/guess' || '/game/suggest' || '/game/unvote' || '/game/say'):
+        case (
+          'POST',
+          '/game/guess' ||
+              '/game/suggest' ||
+              '/game/unvote' ||
+              '/game/say' ||
+              '/game/letmego' ||
+              '/game/counter' ||
+              '/game/passcounter' ||
+              '/game/revenge' ||
+              '/game/passrevenge' ||
+              '/game/rumor',
+        ):
           await _familyAction(request, clientId, request.uri.pathSegments.last);
         case ('POST', '/game/claim'):
           await _claim(request, clientId);
@@ -211,6 +223,15 @@ class LanRoomHost implements RoomHost {
       'guess' => (game.checkGuess(clientId, target, slip), game.guess(clientId, target, slip)),
       'suggest' => (game.checkSuggestion(clientId, target, slip), game.suggest(clientId, target, slip)),
       'unvote' => (null, game.unvote(clientId)),
+      'letmego' => (
+        game.checkAnswer(clientId, PendingKind.letMeGo),
+        game.answerLetMeGo(clientId, use: form['use'] == '1'),
+      ),
+      'counter' => (game.checkCounter(clientId, target, slip), game.counterCatch(clientId, target, slip)),
+      'passcounter' => (game.checkAnswer(clientId, PendingKind.counter), game.passCounter(clientId)),
+      'revenge' => (game.checkRevenge(clientId, slip), game.revenge(clientId, slip)),
+      'passrevenge' => (game.checkAnswer(clientId, PendingKind.revenge), game.passRevenge(clientId)),
+      'rumor' => (game.checkRumor(clientId, target, slip), game.spreadRumor(clientId, target, slip)),
       _ => (game.checkMessage(clientId, text), game.say(clientId, text, nonce: _nonceOf(form))),
     };
     if (error == null) _set(_room.withFamily(next));

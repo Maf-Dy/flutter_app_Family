@@ -133,4 +133,71 @@ void main() {
     final watcher = [for (final s in (familyViewFor(game, 'zz')['slips'] as List)) s as Map];
     expect(watcher.any((s) => s.containsKey('mine')), isFalse);
   });
+
+  group('house rules', () {
+    const four = [...players, FamilyPlayer(id: 'd', name: 'Sami')];
+    FamilyGame startWith(FamilyTwists twists) {
+      for (var seed = 0; ; seed++) {
+        final game = FamilyGame.start(
+          players: four,
+          slips: const [
+            (text: 'Messi', writerId: 'a'),
+            (text: 'Fairuz', writerId: 'b'),
+            (text: 'Adele', writerId: 'c'),
+            (text: 'Chaplin', writerId: 'd'),
+          ],
+          chatEnabled: true,
+          random: Random(seed),
+          twists: twists,
+        );
+        if (game.turnPlayer == 'a') return game;
+      }
+    }
+
+    test('with secret catches, only the catcher\'s family learns the catch', () {
+      final begun = startWith(const FamilyTwists(secretCatches: true));
+      final game = begun.guess('a', 'b', slipBy(begun, 'b'));
+      final omar = familyViewFor(game, 'a'), yara = familyViewFor(game, 'c');
+      final pubB = familyPublicId(game, 'b'), pubA = familyPublicId(game, 'a');
+      Map<String, Object?> nourIn(Map<String, Object?> view) =>
+          listOf(view, 'players').firstWhere((p) => p['id'] == pubB);
+      expect(nourIn(omar)['head'], pubA);
+      expect(nourIn(yara)['head'], pubB, reason: 'Nour still looks free to everyone else');
+      expect(listOf(yara, 'events').single, {'asker': pubA, 'hidden': true});
+      expect(listOf(omar, 'events').single['correct'], isTrue);
+      expect(listOf(yara, 'slips').where((s) => s.containsKey('writer') && s['mine'] != true), isEmpty);
+      expect(yara['secret'], isTrue);
+      expect(yara['turnPlayer'], isNot(pubA), reason: 'turns go round every player');
+    });
+
+    test('the person asked gets the "let me go" choice; everyone else waits', () {
+      final begun = startWith(const FamilyTwists(letMeGo: true));
+      final game = begun.guess('a', 'c', slipBy(begun, 'c'));
+      final yara = familyViewFor(game, 'c'), sami = familyViewFor(game, 'd');
+      expect(yara['pending'], {
+        'kind': 'letMeGo',
+        'asker': familyPublicId(game, 'a'),
+        'responder': familyPublicId(game, 'c'),
+        'mine': true,
+        'slip': slipBy(game, 'c'),
+      });
+      expect((sami['pending']! as Map)['mine'], isFalse);
+      expect((sami['pending']! as Map).containsKey('slip'), isFalse, reason: 'only the one asked sees the name');
+      expect(yara['card'], isTrue);
+      final after = familyViewFor(game.answerLetMeGo('c', use: true), 'c');
+      expect(after['pending'], isNull);
+      expect(after['card'], isFalse);
+      expect(listOf(after, 'events').single['blocked'], isTrue);
+    });
+
+    test('rumors show to everyone, without who spread them', () {
+      final begun = startWith(const FamilyTwists(rumors: true));
+      final game = begun.spreadRumor('d', 'a', slipBy(begun, 'c'));
+      final view = familyViewFor(game, 'b');
+      expect(listOf(view, 'rumors').single, {'id': 1, 'target': familyPublicId(game, 'a'), 'slip': slipBy(game, 'c')});
+      expect(jsonEncode(view['rumors']), isNot(contains(familyPublicId(game, 'd'))));
+      expect(familyViewFor(game, 'd')['canRumor'], isFalse);
+      expect(view['canRumor'], isTrue);
+    });
+  });
 }
