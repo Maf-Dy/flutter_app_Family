@@ -169,11 +169,6 @@ class _EventLine extends StatelessWidget {
         e.correct ? Icons.check_circle_rounded : Icons.cancel_rounded,
         e.correct ? paper.live : theme.colorScheme.error,
         [
-          switch (e.kind) {
-            AskKind.counter => l10n.familyEventCounterTag,
-            AskKind.revenge => l10n.familyEventRevengeTag,
-            AskKind.ask => '',
-          },
           (e.correct ? l10n.familyEventCorrect : l10n.familyEventWrong)(asker, target, game.slip(e.slipId)?.text ?? ''),
           if (e.wantedCaught) l10n.familyEventWantedTag,
         ].where((part) => part.isNotEmpty).join(' '),

@@ -42,13 +42,7 @@ Map<String, Object?> familyViewFor(FamilyGame game, String? playerId) {
     'turn': pub(game.secret ? game.headSeenBy(playerId, game.turnPlayer) : game.turn),
     'turnPlayer': pub(game.asker),
     'secret': game.secret,
-    'twists': {
-      'counter': game.twists.counterCatch,
-      'wanted': game.twists.wanted,
-      'revenge': game.twists.revenge,
-      'rumors': game.twists.rumors,
-      'letMeGo': game.twists.letMeGo,
-    },
+    'twists': {'wanted': game.twists.wanted, 'rumors': game.twists.rumors, 'letMeGo': game.twists.letMeGo},
     'askable': myHead == null ? const <Object?>[] : [for (final p in game.askableFor(myHead)) pub(p.id)],
     'open': myHead == null
         ? const <Object?>[]
@@ -65,17 +59,12 @@ Map<String, Object?> familyViewFor(FamilyGame game, String? playerId) {
             if (!game.secret || involved) 'responder': pub(move.responderId),
             'mine': mine,
             if (mine) 'slip': move.slipId,
-            if (mine && move.kind == PendingKind.counter)
-              'targets': [for (final id in game.counterTargetsFor(playerId)) pub(id)],
-            if (mine && move.kind != PendingKind.letMeGo)
-              'slips': [
-                for (final s in move.kind == PendingKind.revenge ? game.revengeSlipsFor(playerId) : game.slips)
-                  if (!game.revealed.contains(s.id) && s.writerId != playerId) s.id,
-              ],
           },
     'wanted': game.wanted,
     'bonus': myHead == null ? 0 : game.bonus[myHead] ?? 0,
     'card': inGame && game.hasCard(playerId),
+    // The one "فكّك مني" card is in plain sight: everyone knows who holds it.
+    'cardHolder': game.twists.letMeGo ? pubOrNull(game.cardHolder) : null,
     'canRumor': inGame && game.canSpreadRumor(playerId),
     'rumors': [
       for (final r in game.rumors.reversed.take(5)) {'id': r.id, 'target': pub(r.targetId), 'slip': r.slipId},
@@ -141,7 +130,6 @@ Map<String, Object?> familyViewFor(FamilyGame game, String? playerId) {
             'target': pub(e.targetId),
             'slip': e.slipId,
             'correct': e.correct,
-            'kind': e.kind.name,
             if (e.blocked) 'blocked': true,
             if (e.wantedCaught) 'wanted': true,
           }

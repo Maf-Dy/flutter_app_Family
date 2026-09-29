@@ -282,9 +282,7 @@ class FamilyTwistsCard extends StatelessWidget {
     final l10n = context.l10n;
     final rules = [
       (l10n.twistSecret, l10n.twistSecretDetail, twists.secretCatches, (bool on) => twists.copyWith(secretCatches: on)),
-      (l10n.twistCounter, l10n.twistCounterDetail, twists.counterCatch, (bool on) => twists.copyWith(counterCatch: on)),
       (l10n.twistWanted, l10n.twistWantedDetail, twists.wanted, (bool on) => twists.copyWith(wanted: on)),
-      (l10n.twistRevenge, l10n.twistRevengeDetail, twists.revenge, (bool on) => twists.copyWith(revenge: on)),
       (l10n.twistRumors, l10n.twistRumorsDetail, twists.rumors, (bool on) => twists.copyWith(rumors: on)),
       (l10n.twistLetMeGo, l10n.twistLetMeGoDetail, twists.letMeGo, (bool on) => twists.copyWith(letMeGo: on)),
     ];

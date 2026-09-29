@@ -52,18 +52,6 @@ class FamilyCubit extends Cubit<FamilyGame> {
   FamilyActionError? answerLetMeGo({required bool use}) =>
       _move((g, me) => g.checkAnswer(me, PendingKind.letMeGo), (g, me) => g.answerLetMeGo(me, use: use));
 
-  FamilyActionError? counterCatch(String targetId, int slipId) =>
-      _move((g, me) => g.checkCounter(me, targetId, slipId), (g, me) => g.counterCatch(me, targetId, slipId));
-
-  FamilyActionError? passCounter() =>
-      _move((g, me) => g.checkAnswer(me, PendingKind.counter), (g, me) => g.passCounter(me));
-
-  FamilyActionError? revenge(int slipId) =>
-      _move((g, me) => g.checkRevenge(me, slipId), (g, me) => g.revenge(me, slipId));
-
-  FamilyActionError? passRevenge() =>
-      _move((g, me) => g.checkAnswer(me, PendingKind.revenge), (g, me) => g.passRevenge(me));
-
   FamilyActionError? spreadRumor(String targetId, int slipId) =>
       _move((g, me) => g.checkRumor(me, targetId, slipId), (g, me) => g.spreadRumor(me, targetId, slipId));
 

@@ -105,6 +105,11 @@ Branch: `claude/dreamy-edison-kyjdky`. `flutter analyze` is clean and all 210 te
 - Guests' pages say "The face-off is on!" and to keep a straight face. Internals keep the `celebrity` names (`GameMode.celebrity`, `CelebrityCubit`).
 - **Tests:** `test/features/celebrity/face_off_game_test.dart` (turns, scoring, bets, duplicates, skipped team, 3 teams, cubit) and the full flow in `screens_test.dart`.
 
+### House rules review (2026-09-29)
+- Dropped Counter-catch and Revenge (Mafdy: joining a family means knowing its names, and you can already ask anyone back). Their code is removed.
+- "فكّك مني" is now one card in the whole game that passes to whoever was blocked (Mafdy picked "hot potato").
+- Kept: Secret catches, Wanted, Rumors, Handwritten slips.
+
 ### Family online back to the table's rules (2026-09-29, Mafdy's review)
 - Anyone outside your family can be asked, caught people included; the app no longer narrows the list.
 - Names are typed from memory (matched like the room matches names), and only caught names show on the board until the end. Handwritten rooms still pick the drawing. Classic's "Names on the table" now shows folded slips.

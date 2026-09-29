@@ -266,15 +266,9 @@ class _FamilyViewState extends State<_FamilyView> {
       if (!over && game.pending != null) ...[
         const SizedBox(height: 10),
         PendingCard(
-          // A new question gets a fresh card, not the last one's half-typed name.
-          key: ObjectKey(game.pending),
           game: game,
           me: me,
           onLetMeGo: ({required use}) => _report(cubit.answerLetMeGo(use: use)),
-          onCounter: (target, slip) => _report(cubit.counterCatch(target, slip)),
-          onPassCounter: () => _report(cubit.passCounter()),
-          onRevenge: (slip) => _report(cubit.revenge(slip)),
-          onPassRevenge: () => _report(cubit.passRevenge()),
         ),
       ],
       if (!over && game.twists.wanted) ...[const SizedBox(height: 10), WantedCard(game: game, myHead: myHead)],

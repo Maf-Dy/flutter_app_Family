@@ -152,16 +152,7 @@ class LanRoomHost implements RoomHost {
           }
         case (
           'POST',
-          '/game/guess' ||
-              '/game/suggest' ||
-              '/game/unvote' ||
-              '/game/say' ||
-              '/game/letmego' ||
-              '/game/counter' ||
-              '/game/passcounter' ||
-              '/game/revenge' ||
-              '/game/passrevenge' ||
-              '/game/rumor',
+          '/game/guess' || '/game/suggest' || '/game/unvote' || '/game/say' || '/game/letmego' || '/game/rumor',
         ):
           await _familyAction(request, clientId, request.uri.pathSegments.last);
         case ('POST', '/game/claim'):
@@ -282,12 +273,7 @@ class LanRoomHost implements RoomHost {
     final typed = form['name'];
     final slip = typed == null
         ? int.tryParse(form['slip'] ?? '') ?? -1
-        : game.slipNamed(
-                typed,
-                head: action == 'rumor' ? null : game.headOf(clientId),
-                targetId: action == 'revenge' ? game.pending?.askerId : target,
-              ) ??
-              -1;
+        : game.slipNamed(typed, head: action == 'rumor' ? null : game.headOf(clientId), targetId: target) ?? -1;
     if (typed != null && slip < 0) {
       response.statusCode = HttpStatus.conflict;
       _json(response, {'error': FamilyActionError.unknownName.name});
@@ -301,10 +287,6 @@ class LanRoomHost implements RoomHost {
         game.checkAnswer(clientId, PendingKind.letMeGo),
         game.answerLetMeGo(clientId, use: form['use'] == '1'),
       ),
-      'counter' => (game.checkCounter(clientId, target, slip), game.counterCatch(clientId, target, slip)),
-      'passcounter' => (game.checkAnswer(clientId, PendingKind.counter), game.passCounter(clientId)),
-      'revenge' => (game.checkRevenge(clientId, slip), game.revenge(clientId, slip)),
-      'passrevenge' => (game.checkAnswer(clientId, PendingKind.revenge), game.passRevenge(clientId)),
       'rumor' => (game.checkRumor(clientId, target, slip), game.spreadRumor(clientId, target, slip)),
       _ => (game.checkMessage(clientId, text), game.say(clientId, text, nonce: _nonceOf(form))),
     };

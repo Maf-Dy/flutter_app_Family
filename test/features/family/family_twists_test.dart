@@ -18,8 +18,8 @@ void main() {
     (text: 'Chaplin', writerId: 'd'),
   ];
 
-  /// A game whose first turn is Omar's.
-  FamilyGame start(FamilyTwists twists) {
+  /// A game whose first turn is Omar's, with the "فكّك مني" card in [holder]'s hand when that twist is on.
+  FamilyGame start(FamilyTwists twists, {String holder = 'b'}) {
     for (var seed = 0; ; seed++) {
       final game = FamilyGame.start(
         players: players,
@@ -28,7 +28,7 @@ void main() {
         random: Random(seed),
         twists: twists,
       );
-      if (game.turn == 'a' && game.turnPlayer == 'a') return game;
+      if (game.turn == 'a' && game.turnPlayer == 'a' && (!twists.letMeGo || game.cardHolder == holder)) return game;
     }
   }
 
@@ -37,7 +37,7 @@ void main() {
   group('فكّك مني', () {
     const twists = FamilyTwists(letMeGo: true);
 
-    test('the person asked is asked first; using it cancels the ask and passes the turn on', () {
+    test('only the card holder is asked first; using it cancels the ask and hands the card to the asker', () {
       var game = start(twists).guess('a', 'b', slip(start(twists), 'Fairuz'));
       expect(game.pending?.kind, PendingKind.letMeGo);
       expect(game.waitingOn, 'b');
@@ -49,72 +49,33 @@ void main() {
       expect(game.revealed, isEmpty);
       expect(game.events.last.blocked, isTrue);
       expect(game.turn, 'b', reason: 'the next family in join order');
+      expect(game.cardHolder, 'a', reason: 'hot potato: the card goes to the one who asked');
       expect(game.hasCard('b'), isFalse);
-      // Once used, Nour is asked like anyone else.
+      // Without the card, Nour is asked like anyone else, straight away.
       game = game.guess('b', 'c', slip(game, 'Adele'));
-      expect(game.pending?.responderId, 'c');
-      game = game.answerLetMeGo('c', use: false);
+      expect(game.pending, isNull);
       expect(game.headOf('c'), 'b');
     });
 
-    test("letting it go answers the ask as normal, and a dropped player's card is skipped", () {
-      var game = start(twists).guess('a', 'b', slip(start(twists), 'Fairuz')).answerLetMeGo('b', use: false);
+    test("letting it go answers the ask as normal and keeps the card, and a dropped holder isn't waited on", () {
+      final game = start(twists).guess('a', 'b', slip(start(twists), 'Fairuz')).answerLetMeGo('b', use: false);
       expect(game.headOf('b'), 'a');
       expect(game.hasCard('b'), isTrue, reason: 'not used');
-      game = game.withAway({'c'}).guess('a', 'c', slip(game, 'Adele'));
-      expect(game.pending, isNull);
-      expect(game.headOf('c'), 'a');
-    });
-  });
-
-  group('counter-catch', () {
-    const twists = FamilyTwists(counterCatch: true);
-
-    test('a right shot back flips the catch', () {
-      var game = start(twists).guess('a', 'b', slip(start(twists), 'Fairuz'));
-      expect(game.pending?.kind, PendingKind.counter);
-      expect(game.counterTargetsFor('b'), ['a']);
-      expect(game.checkCounter('b', 'c', slip(game, 'Adele')), FamilyActionError.invalidTarget);
-      game = game.counterCatch('b', 'a', slip(game, 'Salah'));
-      expect(game.headOf('a'), 'b');
-      expect(game.headOf('b'), 'b');
-      expect(game.turn, 'b');
-      expect(game.revealed, containsAll([slip(game, 'Messi'), slip(game, 'Salah'), slip(game, 'Fairuz')]));
-      expect(game.events.last.kind, AskKind.counter);
-      expect(game.events.last.intoHead, 'b');
+      final away = start(twists, holder: 'c');
+      final asked = away.withAway({'c'}).guess('a', 'c', slip(away, 'Adele'));
+      expect(asked.pending, isNull);
+      expect(asked.headOf('c'), 'a');
     });
 
-    test('a wrong shot back, or a pass, lets the catch stand and the catcher goes again', () {
-      final caught = start(twists).guess('a', 'b', slip(start(twists), 'Fairuz'));
-      final missed = caught.counterCatch('b', 'a', slip(caught, 'Adele'));
-      expect(missed.headOf('b'), 'a');
-      expect(missed.turn, 'a');
-      expect(missed.events.map((e) => (e.kind, e.correct)), [(AskKind.ask, true), (AskKind.counter, false)]);
-      expect(missed.events.first.intoHead, 'a');
-      final passed = caught.passCounter('b');
-      expect(passed.headOf('b'), 'a');
-      expect(passed.turn, 'a');
-    });
-  });
-
-  group('revenge', () {
-    const twists = FamilyTwists(revenge: true);
-
-    test('the wrongly accused gets a free shot at the accuser, then plays their turn', () {
-      var game = start(twists).guess('a', 'b', slip(start(twists), 'Adele'));
-      expect(game.pending?.kind, PendingKind.revenge);
-      expect(game.revengeSlipsFor('b').map((s) => s.text), unorderedEquals(['Messi', 'Salah']));
-      game = game.revenge('b', slip(game, 'Messi'));
-      expect(game.headOf('a'), 'b');
-      expect(game.turn, 'b');
-      expect(game.events.last.kind, AskKind.revenge);
-    });
-
-    test('a missed revenge costs nothing', () {
-      var game = start(twists).guess('a', 'b', slip(start(twists), 'Adele'));
-      game = game.revenge('b', slip(game, 'Chaplin'));
-      expect(game.familyHeads, ['a', 'b', 'c', 'd']);
-      expect(game.turn, 'b');
+    test('there is only one card in the game', () {
+      final game = start(twists);
+      expect(
+        [
+          for (final p in players)
+            if (game.hasCard(p.id)) p.id,
+        ],
+        ['b'],
+      );
     });
   });
 

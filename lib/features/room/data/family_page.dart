@@ -20,9 +20,6 @@ String familyBody(JoinStrings s, String Function(String) esc, {required String h
       <section class="card stack twist" id="pendCard" hidden>
         <h2 id="pendTitle"></h2>
         <p class="help" id="pendHelp"></p>
-        <div class="field" id="pendWhoF"><label for="pendWho">${esc(s.family['who']!)}</label><select id="pendWho"></select></div>
-        <div id="pendSlips" class="chips"></div>
-        <input id="pendName" maxlength="60" autocomplete="off" placeholder="${esc(s.family['nameHint']!)}">
         <p id="pendErr" class="error" hidden></p>
         <div id="pendBtns" class="row"></div>
       </section>
@@ -137,7 +134,6 @@ button:disabled{opacity:.5}
 .rumor{margin:0;padding:10px 12px;border-radius:14px;background:var(--bg);font-weight:700}
 .rumor.new{outline:2px solid var(--primary)}
 .event.secret{font-style:italic}
-.event.tag b{color:var(--primary)}
 summary{cursor:pointer;font-weight:800;color:var(--primary);padding:6px 0}
 details .field,details .help,details button{margin-top:10px}
 #pendBtns button{flex:1}
@@ -313,8 +309,7 @@ const _script = r'''
 
   function pendTitle(pend){
     var asker = nameOf(pend.asker);
-    return pend.kind === 'letMeGo' ? t('letMeGoAsked', { asker: asker, name: slipName(pend.slip) })
-      : t(pend.kind + 'Title', { asker: asker });
+    return t('letMeGoAsked', { asker: asker, name: slipName(pend.slip) });
   }
 
   // Someone asked this phone, caught it or wrongly accused it: it answers here.
@@ -328,49 +323,13 @@ const _script = r'''
     card.dataset.key = key;
     sfx.drumroll();
     try { navigator.vibrate && navigator.vibrate([200, 100, 200]); } catch (e) {}
-    var err = $('pendErr'), btns = $('pendBtns'), slips = $('pendSlips'), who = $('pendWho');
-    who.value = '';
-    clear(btns); clear(slips); show(err, false);
-    var asker = nameOf(pend.asker), chosen = null;
-    $('pendName').value = '';
-    show($('pendName'), pend.kind !== 'letMeGo' && !hand());
-    function pick(){ if (hand()) return chosen == null ? null : { slip: chosen }; var text = $('pendName').value.trim(); return text ? { name: text } : null; }
+    var err = $('pendErr'), btns = $('pendBtns');
+    clear(btns); show(err, false);
     function button(label, cls, onclick){ var b = el('button', cls, label); b.type = 'button'; b.onclick = onclick; btns.appendChild(b); return b; }
-    function pickSlips(){
-      if (!hand()) return;
-      (pend.slips || []).forEach(function(id){
-        var c = el('button', 'chip pick', slipName(id)); c.type = 'button';
-        var x = slipOf(id); if (x && x.ink) c.insertBefore(inkImg(x), c.firstChild);
-        c.onclick = function(){ chosen = id; var all = slips.children; for (var i = 0; i < all.length; i++) all[i].className = 'chip pick'; c.className = 'chip slip'; };
-        slips.appendChild(c);
-      });
-    }
-    show($('pendWhoF'), pend.kind === 'counter');
     $('pendTitle').textContent = pendTitle(pend);
-    if (pend.kind === 'letMeGo') {
-      $('pendHelp').textContent = S.letMeGoHint;
-      button(S.letMeGoUse, '', function(){ post('/game/letmego', { use: '1' }, err); });
-      button(S.letMeGoAnswer, 'ghostb', function(){ post('/game/letmego', { use: '0' }, err); });
-    } else if (pend.kind === 'counter') {
-      $('pendHelp').textContent = S.counterHint;
-      fill(who, (pend.targets || []).map(function(id){ return { value: id, label: nameOf(id) }; }));
-      pickSlips();
-      button(S.counterShoot, '', function(){
-        var p = pick();
-        if (!who.value || !p) { err.textContent = S.err_pickBoth; show(err, true); return; }
-        post('/game/counter', withPick({ target: who.value }, p), err);
-      });
-      button(S.pass, 'ghostb', function(){ post('/game/passcounter', {}, err); });
-    } else {
-      $('pendHelp').textContent = t('revengeHint', { asker: asker });
-      pickSlips();
-      button(S.revengeTake, '', function(){
-        var p = pick();
-        if (!p) { err.textContent = S.err_pickBoth; show(err, true); return; }
-        post('/game/revenge', p, err);
-      });
-      button(S.pass, 'ghostb', function(){ post('/game/passrevenge', {}, err); });
-    }
+    $('pendHelp').textContent = S.letMeGoHint;
+    button(S.letMeGoUse, '', function(){ post('/game/letmego', { use: '1' }, err); });
+    button(S.letMeGoAnswer, 'ghostb', function(){ post('/game/letmego', { use: '0' }, err); });
   }
 
   function renderWanted(){
@@ -449,7 +408,7 @@ const _script = r'''
       fill($('which'), st.open.map(function(id){ return { value: String(id), label: slipName(id) }; }));
       var line = $('cardLine');
       show(line, st.twists.letMeGo && !won);
-      line.textContent = st.card ? S.cardReady : S.cardUsed;
+      line.textContent = st.card ? S.cardReady : t('cardHeld', { name: nameOf(st.cardHolder) });
       var go = $('go');
       go.textContent = st.canAsk ? S.ask : S.suggest;
       go.dataset.action = st.canAsk ? 'guess' : 'suggest';
@@ -498,8 +457,7 @@ const _script = r'''
     st.events.forEach(function(e){
       var vars = { asker: nameOf(e.asker), target: nameOf(e.target), slip: slipName(e.slip) };
       if (e.hidden) { events.appendChild(el('p', 'event secret', t('eventSecret', vars))); return; }
-      var p = el('p', 'event' + (e.correct && !e.blocked ? ' ok' : '') + (e.kind !== 'ask' ? ' tag' : ''));
-      if (e.kind === 'counter' || e.kind === 'revenge') p.appendChild(el('b', '', (e.kind === 'counter' ? S.tagCounter : S.tagRevenge) + ' '));
+      var p = el('p', 'event' + (e.correct && !e.blocked ? ' ok' : ''));
       p.appendChild(document.createTextNode(e.blocked ? t('eventBlocked', vars) : t(e.correct ? 'eventCorrect' : 'eventWrong', vars)));
       if (e.wanted) p.appendChild(document.createTextNode(' ' + S.tagWanted));
       events.appendChild(p);

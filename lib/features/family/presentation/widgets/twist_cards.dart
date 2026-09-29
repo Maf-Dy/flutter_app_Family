@@ -61,71 +61,24 @@ class WantedCard extends StatelessWidget {
   }
 }
 
-/// What the game waits on: the host's own answer ("فكّك مني", a counter-catch
-/// or revenge), or who everyone is waiting for.
-class PendingCard extends StatefulWidget {
-  const PendingCard({
-    super.key,
-    required this.game,
-    required this.me,
-    required this.onLetMeGo,
-    required this.onCounter,
-    required this.onPassCounter,
-    required this.onRevenge,
-    required this.onPassRevenge,
-  });
+/// What the game waits on: the host's own answer to "فكّك مني", or who
+/// everyone is waiting for.
+class PendingCard extends StatelessWidget {
+  const PendingCard({super.key, required this.game, required this.me, required this.onLetMeGo});
 
   final FamilyGame game;
 
   /// The host's id, or null when watching.
   final String? me;
   final void Function({required bool use}) onLetMeGo;
-  final void Function(String targetId, int slipId) onCounter;
-  final VoidCallback onPassCounter;
-  final void Function(int slipId) onRevenge;
-  final VoidCallback onPassRevenge;
-
-  @override
-  State<PendingCard> createState() => _PendingCardState();
-}
-
-class _PendingCardState extends State<PendingCard> {
-  String? _target;
-  int? _slip;
-  final _name = TextEditingController();
-  String? _error;
-
-  @override
-  void dispose() {
-    _name.dispose();
-    super.dispose();
-  }
-
-  /// The name picked, or typed and matched against [targetId]'s; shows why when it can't be found.
-  int? _pickedSlip(FamilyGame game, String me, String? targetId) {
-    final slip = game.handwritten ? _slip : game.slipNamed(_name.text, head: game.headOf(me), targetId: targetId);
-    if (slip == null) setState(() => _error = context.l10n.familyErrorUnknownName);
-    return slip;
-  }
-
-  List<Widget> get _errorLine => [
-    if (_error case final error?) ...[
-      const SizedBox(height: 8),
-      Text(
-        error,
-        style: TextStyle(color: Theme.of(context).colorScheme.error, fontWeight: FontWeight.w700),
-      ),
-    ],
-  ];
 
   @override
   Widget build(BuildContext context) {
-    final game = widget.game;
     final move = game.pending;
     if (move == null) return const SizedBox.shrink();
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final me = widget.me;
+    final me = this.me;
     final asker = game.nameOf(move.askerId);
     if (me == null || move.responderId != me) {
       // With secret catches, people outside the ask don't learn who was asked.
@@ -137,120 +90,34 @@ class _PendingCardState extends State<PendingCard> {
         child: ListTile(leading: const Icon(Icons.hourglass_top_rounded), title: Text(text)),
       );
     }
-
-    final List<Widget> body;
-    switch (move.kind) {
-      case PendingKind.letMeGo:
-        body = [
-          Text(l10n.letMeGoAsked(asker, game.slip(move.slipId)?.text ?? ''), style: theme.textTheme.titleMedium),
-          const SizedBox(height: 4),
-          Text(l10n.letMeGoHint, style: theme.textTheme.bodyMedium),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () => widget.onLetMeGo(use: true),
-                  icon: const Icon(Icons.back_hand_rounded),
-                  label: Text(l10n.letMeGoUse),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: OutlinedButton(onPressed: () => widget.onLetMeGo(use: false), child: Text(l10n.letMeGoAnswer)),
-              ),
-            ],
-          ),
-        ];
-      case PendingKind.counter:
-        final targets = game.counterTargetsFor(me);
-        final slips = [
-          for (final s in game.slips)
-            if (!game.revealed.contains(s.id) && s.writerId != me) s,
-        ];
-        final target = targets.contains(_target) ? _target : null;
-        body = [
-          Text(l10n.counterTitle(asker), style: theme.textTheme.titleMedium),
-          const SizedBox(height: 4),
-          Text(l10n.counterHint, style: theme.textTheme.bodyMedium),
-          const SizedBox(height: 12),
-          FamilyPicker<String>(
-            label: l10n.familyWho,
-            value: target,
-            items: [for (final id in targets) (value: id, label: game.nameOf(id))],
-            onChanged: (id) => setState(() => _target = id),
-          ),
-          const SizedBox(height: 10),
-          NameEntry(
-            game: game,
-            controller: _name,
-            slips: slips,
-            slip: _slip,
-            onSlip: (id) => setState(() => _slip = id),
-          ),
-          ..._errorLine,
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: target == null
-                      ? null
-                      : () {
-                          final slip = _pickedSlip(game, me, target);
-                          if (slip != null) widget.onCounter(target, slip);
-                        },
-                  icon: const Icon(Icons.replay_rounded),
-                  label: Text(l10n.counterShoot),
-                ),
-              ),
-              const SizedBox(width: 10),
-              OutlinedButton(onPressed: widget.onPassCounter, child: Text(l10n.passShot)),
-            ],
-          ),
-        ];
-      case PendingKind.revenge:
-        final slips = [
-          for (final s in game.slips)
-            if (!game.revealed.contains(s.id) && s.writerId != me) s,
-        ];
-        body = [
-          Text(l10n.revengeTitle(asker), style: theme.textTheme.titleMedium),
-          const SizedBox(height: 4),
-          Text(l10n.revengeHint(asker), style: theme.textTheme.bodyMedium),
-          const SizedBox(height: 12),
-          NameEntry(
-            game: game,
-            controller: _name,
-            slips: slips,
-            slip: _slip,
-            onSlip: (id) => setState(() => _slip = id),
-          ),
-          ..._errorLine,
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: () {
-                    final slip = _pickedSlip(game, me, move.askerId);
-                    if (slip != null) widget.onRevenge(slip);
-                  },
-                  icon: const Icon(Icons.bolt_rounded),
-                  label: Text(l10n.revengeTake),
-                ),
-              ),
-              const SizedBox(width: 10),
-              OutlinedButton(onPressed: widget.onPassRevenge, child: Text(l10n.passShot)),
-            ],
-          ),
-        ];
-    }
     return Card(
       color: theme.colorScheme.primaryContainer,
       child: Padding(
         padding: const EdgeInsets.all(14),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: body),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(l10n.letMeGoAsked(asker, game.slip(move.slipId)?.text ?? ''), style: theme.textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(l10n.letMeGoHint, style: theme.textTheme.bodyMedium),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: FilledButton.icon(
+                    onPressed: () => onLetMeGo(use: true),
+                    icon: const Icon(Icons.back_hand_rounded),
+                    label: Text(l10n.letMeGoUse),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: OutlinedButton(onPressed: () => onLetMeGo(use: false), child: Text(l10n.letMeGoAnswer)),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -380,7 +247,7 @@ class _RumorDialogState extends State<RumorDialog> {
   }
 }
 
-/// The host's own "فكّك مني" card: ready or used.
+/// The one "فكّك مني" card: in the host's hand, or whose it is now.
 class LetMeGoChip extends StatelessWidget {
   const LetMeGoChip({super.key, required this.game, required this.me});
 
@@ -395,8 +262,8 @@ class LetMeGoChip extends StatelessWidget {
     return Align(
       alignment: AlignmentDirectional.centerStart,
       child: Chip(
-        avatar: Icon(ready ? Icons.back_hand_rounded : Icons.check_rounded, size: 18),
-        label: Text(ready ? l10n.letMeGoReady : l10n.letMeGoUsed),
+        avatar: Icon(ready ? Icons.back_hand_rounded : Icons.front_hand_outlined, size: 18),
+        label: Text(ready ? l10n.letMeGoReady : l10n.letMeGoHeld(game.nameOf(game.cardHolder ?? ''))),
       ),
     );
   }

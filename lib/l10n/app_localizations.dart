@@ -62,7 +62,8 @@ import 'app_localizations_en.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations)!;
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,15 +84,19 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('ar'), Locale('en')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
+    Locale('en'),
+  ];
 
   /// No description provided for @appTitle.
   ///
@@ -2060,18 +2066,6 @@ abstract class AppLocalizations {
   /// **'Only your family sees whether you were right. A caught player joins in secret and keeps acting free.'**
   String get twistSecretDetail;
 
-  /// No description provided for @twistCounter.
-  ///
-  /// In en, this message translates to:
-  /// **'Counter-catch'**
-  String get twistCounter;
-
-  /// No description provided for @twistCounterDetail.
-  ///
-  /// In en, this message translates to:
-  /// **'Caught? One shot back at the catcher\'s family. Right, and they all join you.'**
-  String get twistCounterDetail;
-
   /// No description provided for @twistWanted.
   ///
   /// In en, this message translates to:
@@ -2083,18 +2077,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The app puts up a wanted name. Catch its writer and your family earns an extra ask.'**
   String get twistWantedDetail;
-
-  /// No description provided for @twistRevenge.
-  ///
-  /// In en, this message translates to:
-  /// **'Revenge'**
-  String get twistRevenge;
-
-  /// No description provided for @twistRevengeDetail.
-  ///
-  /// In en, this message translates to:
-  /// **'Wrongly accused? You get a free shot at whoever accused you.'**
-  String get twistRevengeDetail;
 
   /// No description provided for @twistRumors.
   ///
@@ -2117,7 +2099,7 @@ abstract class AppLocalizations {
   /// No description provided for @twistLetMeGoDetail.
   ///
   /// In en, this message translates to:
-  /// **'Once a game, cancel an ask about you. Nobody learns if it was right, and the asker loses the turn.'**
+  /// **'One card goes round the game. Whoever holds it can cancel an ask about them: nobody learns if it was right, the asker loses the turn and gets the card.'**
   String get twistLetMeGoDetail;
 
   /// No description provided for @familyTurnYouAsk.
@@ -2143,18 +2125,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{target} told {asker} “Let me go!”'**
   String familyEventBlocked(String asker, String target);
-
-  /// No description provided for @familyEventCounterTag.
-  ///
-  /// In en, this message translates to:
-  /// **'Counter-catch!'**
-  String get familyEventCounterTag;
-
-  /// No description provided for @familyEventRevengeTag.
-  ///
-  /// In en, this message translates to:
-  /// **'Revenge!'**
-  String get familyEventRevengeTag;
 
   /// No description provided for @familyEventWantedTag.
   ///
@@ -2213,7 +2183,7 @@ abstract class AppLocalizations {
   /// No description provided for @letMeGoHint.
   ///
   /// In en, this message translates to:
-  /// **'Once a game. Nobody learns if they were right, and they lose the turn.'**
+  /// **'Nobody learns if they were right. They lose the turn, and the card goes to them.'**
   String get letMeGoHint;
 
   /// No description provided for @letMeGoReady.
@@ -2221,54 +2191,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your “Let me go!” card is ready'**
   String get letMeGoReady;
-
-  /// No description provided for @letMeGoUsed.
-  ///
-  /// In en, this message translates to:
-  /// **'You used your “Let me go!” card'**
-  String get letMeGoUsed;
-
-  /// No description provided for @counterTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{asker} caught you! One shot back:'**
-  String counterTitle(String asker);
-
-  /// No description provided for @counterHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Guess who in their family wrote a name. Right, and they all join you.'**
-  String get counterHint;
-
-  /// No description provided for @counterShoot.
-  ///
-  /// In en, this message translates to:
-  /// **'Shoot back'**
-  String get counterShoot;
-
-  /// No description provided for @revengeTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{asker} accused you wrongly. Revenge!'**
-  String revengeTitle(String asker);
-
-  /// No description provided for @revengeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Which of these did {asker} write? Right, and their whole family joins you.'**
-  String revengeHint(String asker);
-
-  /// No description provided for @revengeTake.
-  ///
-  /// In en, this message translates to:
-  /// **'Take revenge'**
-  String get revengeTake;
-
-  /// No description provided for @passShot.
-  ///
-  /// In en, this message translates to:
-  /// **'Pass'**
-  String get passShot;
 
   /// No description provided for @rumorsTitle.
   ///
@@ -2485,9 +2407,16 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Play from memory! The names stay hidden until the end.'**
   String get boardHintHidden;
+
+  /// No description provided for @letMeGoHeld.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has the “Let me go!” card'**
+  String letMeGoHeld(String name);
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -2496,7 +2425,8 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['ar', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['ar', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;

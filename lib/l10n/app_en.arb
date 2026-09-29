@@ -720,16 +720,12 @@
   "twistsNote": "Twists for the family game. Turn on as many as you like.",
   "twistSecret": "Secret catches",
   "twistSecretDetail": "Only your family sees whether you were right. A caught player joins in secret and keeps acting free.",
-  "twistCounter": "Counter-catch",
-  "twistCounterDetail": "Caught? One shot back at the catcher's family. Right, and they all join you.",
   "twistWanted": "Wanted",
   "twistWantedDetail": "The app puts up a wanted name. Catch its writer and your family earns an extra ask.",
-  "twistRevenge": "Revenge",
-  "twistRevengeDetail": "Wrongly accused? You get a free shot at whoever accused you.",
   "twistRumors": "Rumors",
   "twistRumorsDetail": "Once a game, spread an anonymous rumor. True, or a total lie.",
   "twistLetMeGo": "Let me go!",
-  "twistLetMeGoDetail": "Once a game, cancel an ask about you. Nobody learns if it was right, and the asker loses the turn.",
+  "twistLetMeGoDetail": "One card goes round the game. Whoever holds it can cancel an ask about them: nobody learns if it was right, the asker loses the turn and gets the card.",
   "familyTurnYouAsk": "Your turn! You ask for your family.",
   "familyTurnPlayer": "{name} is asking",
   "@familyTurnPlayer": {
@@ -758,8 +754,6 @@
       }
     }
   },
-  "familyEventCounterTag": "Counter-catch!",
-  "familyEventRevengeTag": "Revenge!",
   "familyEventWantedTag": "(wanted!)",
   "wantedTitle": "Wanted: “{name}”",
   "@wantedTitle": {
@@ -800,37 +794,8 @@
   },
   "letMeGoUse": "Let me go!",
   "letMeGoAnswer": "Answer it",
-  "letMeGoHint": "Once a game. Nobody learns if they were right, and they lose the turn.",
+  "letMeGoHint": "Nobody learns if they were right. They lose the turn, and the card goes to them.",
   "letMeGoReady": "Your “Let me go!” card is ready",
-  "letMeGoUsed": "You used your “Let me go!” card",
-  "counterTitle": "{asker} caught you! One shot back:",
-  "@counterTitle": {
-    "placeholders": {
-      "asker": {
-        "type": "String"
-      }
-    }
-  },
-  "counterHint": "Guess who in their family wrote a name. Right, and they all join you.",
-  "counterShoot": "Shoot back",
-  "revengeTitle": "{asker} accused you wrongly. Revenge!",
-  "@revengeTitle": {
-    "placeholders": {
-      "asker": {
-        "type": "String"
-      }
-    }
-  },
-  "revengeHint": "Which of these did {asker} write? Right, and their whole family joins you.",
-  "@revengeHint": {
-    "placeholders": {
-      "asker": {
-        "type": "String"
-      }
-    }
-  },
-  "revengeTake": "Take revenge",
-  "passShot": "Pass",
   "rumorsTitle": "Rumors",
   "rumorLine": "They say {target} wrote “{name}” 👀",
   "@rumorLine": {
@@ -919,6 +884,14 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "letMeGoHeld": "{name} has the “Let me go!” card",
+  "@letMeGoHeld": {
+    "placeholders": {
+      "name": {
+        "type": "String"
       }
     }
   }
