@@ -325,11 +325,24 @@ void main() {
           await tapVisible(tester, find.byType(ChoiceChip).first);
           if (i == 0) await tapVisible(tester, find.text('Bet double'));
           await tapVisible(tester, find.textContaining('wrote it!'));
-          expect(find.textContaining('wrote \u201c'), findsOneWidget);
+          // Right or wrong only: who wrote it stays secret until the results.
+          expect(find.textContaining(RegExp(r'^(Right|Wrong)!$')), findsOneWidget);
+          expect(find.textContaining('wrote \u201c'), findsNothing);
+          expect(find.textContaining('said'), findsNothing);
+          expect(find.text('Who wrote what stays secret until the end.'), findsOneWidget);
           if (i == 0) expect(find.text('It was a double bet.'), findsOneWidget);
           await tapVisible(tester, find.text(i < 11 ? 'Next team' : 'See results'));
         }
         expect(find.textContaining(RegExp('wins!|draw')), findsOneWidget);
+        // The results reveal every writer, and how the guessing team did.
+        await tester.scrollUntilVisible(find.text('Who wrote what'), 200, scrollable: find.byType(Scrollable).first);
+        await tester.scrollUntilVisible(
+          find.text('Omar wrote \u201cMessi\u201d'),
+          200,
+          scrollable: find.byType(Scrollable).first,
+        );
+        expect(find.textContaining(' said '), findsWidgets);
+        expect(find.textContaining('double bet'), findsWidgets);
         await tapVisible(tester, find.byTooltip('Share this night'));
         expect(find.text('Share'), findsWidgets);
         await tester.tapAt(const Offset(4, 4));

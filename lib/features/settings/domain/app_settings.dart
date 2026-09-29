@@ -5,7 +5,7 @@ enum AppLanguage { system, english, arabic }
 /// Choices the host keeps between games.
 @immutable
 final class AppSettings {
-  const AppSettings({this.hostName = '', this.language = AppLanguage.system});
+  const AppSettings({this.hostName = '', this.language = AppLanguage.system, this.soundEffects = true});
 
   static const maxNameLength = 30;
 
@@ -13,8 +13,14 @@ final class AppSettings {
   final String hostName;
   final AppLanguage language;
 
-  AppSettings copyWith({String? hostName, AppLanguage? language}) =>
-      AppSettings(hostName: hostName ?? this.hostName, language: language ?? this.language);
+  /// Drumrolls, cheers and sad trombones on this phone.
+  final bool soundEffects;
+
+  AppSettings copyWith({String? hostName, AppLanguage? language, bool? soundEffects}) => AppSettings(
+    hostName: hostName ?? this.hostName,
+    language: language ?? this.language,
+    soundEffects: soundEffects ?? this.soundEffects,
+  );
 }
 
 abstract interface class SettingsStore {

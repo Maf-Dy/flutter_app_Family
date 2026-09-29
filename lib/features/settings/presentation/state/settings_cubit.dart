@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/app_settings.dart';
 
-/// App-wide choices: the host's name and the language. Lives for the whole app.
+/// App-wide choices: the host's name, the language and sound. Lives for the whole app.
 class SettingsCubit extends Cubit<AppSettings> {
   SettingsCubit(this._store, AppSettings initial) : super(initial);
 
@@ -27,6 +27,12 @@ class SettingsCubit extends Cubit<AppSettings> {
   Future<void> setLanguage(AppLanguage language) async {
     if (language == state.language) return;
     emit(state.copyWith(language: language));
+    await _store.save(state);
+  }
+
+  Future<void> setSoundEffects(bool on) async {
+    if (on == state.soundEffects) return;
+    emit(state.copyWith(soundEffects: on));
     await _store.save(state);
   }
 }

@@ -2012,12 +2012,6 @@ abstract class AppLocalizations {
   /// **'{writer} wrote “{name}”'**
   String faceOffWroteIt(String writer, String name);
 
-  /// No description provided for @faceOffYouSaid.
-  ///
-  /// In en, this message translates to:
-  /// **'You said {name}'**
-  String faceOffYouSaid(String name);
-
   /// No description provided for @faceOffNoPoints.
   ///
   /// In en, this message translates to:
@@ -2035,6 +2029,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'It was a double bet.'**
   String get faceOffWasDouble;
+
+  /// No description provided for @soundEffects.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound effects'**
+  String get soundEffects;
+
+  /// No description provided for @soundEffectsDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Drumrolls, cheers and sad trombones'**
+  String get soundEffectsDetail;
+
+  /// No description provided for @faceOffSuspense.
+  ///
+  /// In en, this message translates to:
+  /// **'And the answer is…'**
+  String get faceOffSuspense;
+
+  /// No description provided for @faceOffWritersAtEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Who wrote what stays secret until the end.'**
+  String get faceOffWritersAtEnd;
+
+  /// No description provided for @faceOffWhoWroteWhat.
+  ///
+  /// In en, this message translates to:
+  /// **'Who wrote what'**
+  String get faceOffWhoWroteWhat;
+
+  /// No description provided for @faceOffTeamSaid.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} said {name}'**
+  String faceOffTeamSaid(String team, String name);
+
+  /// No description provided for @faceOffDoubleShort.
+  ///
+  /// In en, this message translates to:
+  /// **'double bet'**
+  String get faceOffDoubleShort;
 }
 
 class _AppLocalizationsDelegate

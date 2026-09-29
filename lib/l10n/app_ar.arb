@@ -319,8 +319,14 @@
   "faceOffRight": "صح!",
   "faceOffWrong": "غلط!",
   "faceOffWroteIt": "{writer} هو اللي كتب «{name}»",
-  "faceOffYouSaid": "انتو قلتوا {name}",
   "faceOffNoPoints": "مفيش نقط لـ{team}",
   "faceOffLosesPoint": "{team} خسر نقطة",
-  "faceOffWasDouble": "كان رهان دبل."
+  "faceOffWasDouble": "كان رهان دبل.",
+  "soundEffects": "المؤثرات الصوتية",
+  "soundEffectsDetail": "طبلة وزغاريط وترومبون حزين",
+  "faceOffSuspense": "والإجابة هي…",
+  "faceOffWritersAtEnd": "مين كتب إيه سر لحد الآخر، محدش يفتي.",
+  "faceOffWhoWroteWhat": "مين كتب إيه",
+  "faceOffTeamSaid": "{team} قالوا {name}",
+  "faceOffDoubleShort": "رهان دبل"
 }

@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'app.dart';
+import 'core/audio/game_sounds.dart';
 import 'features/room/data/device_network.dart';
 import 'features/room/data/lan_room_host.dart';
 import 'features/room/data/udp_room_beacon.dart';
@@ -23,6 +24,7 @@ Future<void> main() async {
       openWifiSettings: DeviceNetwork.openWifiSettings,
       settingsStore: settingsStore,
       settings: await settingsStore.load(),
+      soundPlayer: AudioSoundPlayer(),
     ),
   );
 }

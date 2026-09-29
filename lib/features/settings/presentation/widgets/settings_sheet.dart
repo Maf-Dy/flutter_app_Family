@@ -37,6 +37,7 @@ class _SettingsSheetState extends State<_SettingsSheet> {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final language = context.select((SettingsCubit cubit) => cubit.state.language);
+    final soundEffects = context.select((SettingsCubit cubit) => cubit.state.soundEffects);
     return PopScope<Object?>(
       onPopInvokedWithResult: (_, _) => context.read<SettingsCubit>().setHostName(_name.text),
       child: Padding(
@@ -76,6 +77,14 @@ class _SettingsSheetState extends State<_SettingsSheet> {
                         RadioListTile<AppLanguage>(value: value, title: Text(label), contentPadding: EdgeInsets.zero),
                     ],
                   ),
+                ),
+                SwitchListTile(
+                  value: soundEffects,
+                  onChanged: context.read<SettingsCubit>().setSoundEffects,
+                  secondary: const Icon(Icons.volume_up_rounded),
+                  title: Text(l10n.soundEffects),
+                  subtitle: Text(l10n.soundEffectsDetail),
+                  contentPadding: EdgeInsets.zero,
                 ),
                 const SizedBox(height: 8),
                 FilledButton(onPressed: _close, child: Text(l10n.done)),

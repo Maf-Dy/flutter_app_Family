@@ -9,6 +9,7 @@ class PrefsSettingsStore implements SettingsStore {
 
   static const _hostNameKey = 'settings.hostName';
   static const _languageKey = 'settings.language';
+  static const _soundEffectsKey = 'settings.soundEffects';
 
   final SharedPreferencesAsync _prefs;
 
@@ -19,6 +20,7 @@ class PrefsSettingsStore implements SettingsStore {
       return AppSettings(
         hostName: await _prefs.getString(_hostNameKey) ?? '',
         language: AppLanguage.values.asNameMap()[language] ?? AppLanguage.system,
+        soundEffects: await _prefs.getBool(_soundEffectsKey) ?? true,
       );
     } catch (error) {
       // Unreadable preferences must not stop the game from starting.
@@ -32,6 +34,7 @@ class PrefsSettingsStore implements SettingsStore {
     try {
       await _prefs.setString(_hostNameKey, settings.hostName);
       await _prefs.setString(_languageKey, settings.language.name);
+      await _prefs.setBool(_soundEffectsKey, settings.soundEffects);
     } catch (error) {
       debugPrint('PrefsSettingsStore: could not save ($error)');
     }

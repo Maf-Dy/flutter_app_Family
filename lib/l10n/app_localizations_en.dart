@@ -1174,11 +1174,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String faceOffYouSaid(String name) {
-    return 'You said $name';
-  }
-
-  @override
   String faceOffNoPoints(String team) {
     return 'No points for $team';
   }
@@ -1190,4 +1185,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get faceOffWasDouble => 'It was a double bet.';
+
+  @override
+  String get soundEffects => 'Sound effects';
+
+  @override
+  String get soundEffectsDetail => 'Drumrolls, cheers and sad trombones';
+
+  @override
+  String get faceOffSuspense => 'And the answer is…';
+
+  @override
+  String get faceOffWritersAtEnd =>
+      'Who wrote what stays secret until the end.';
+
+  @override
+  String get faceOffWhoWroteWhat => 'Who wrote what';
+
+  @override
+  String faceOffTeamSaid(String team, String name) {
+    return '$team said $name';
+  }
+
+  @override
+  String get faceOffDoubleShort => 'double bet';
 }

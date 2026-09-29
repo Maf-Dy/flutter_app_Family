@@ -1175,11 +1175,6 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String faceOffYouSaid(String name) {
-    return 'انتو قلتوا $name';
-  }
-
-  @override
   String faceOffNoPoints(String team) {
     return 'مفيش نقط لـ$team';
   }
@@ -1191,4 +1186,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get faceOffWasDouble => 'كان رهان دبل.';
+
+  @override
+  String get soundEffects => 'المؤثرات الصوتية';
+
+  @override
+  String get soundEffectsDetail => 'طبلة وزغاريط وترومبون حزين';
+
+  @override
+  String get faceOffSuspense => 'والإجابة هي…';
+
+  @override
+  String get faceOffWritersAtEnd => 'مين كتب إيه سر لحد الآخر، محدش يفتي.';
+
+  @override
+  String get faceOffWhoWroteWhat => 'مين كتب إيه';
+
+  @override
+  String faceOffTeamSaid(String team, String name) {
+    return '$team قالوا $name';
+  }
+
+  @override
+  String get faceOffDoubleShort => 'رهان دبل';
 }

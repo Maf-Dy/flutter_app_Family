@@ -697,14 +697,6 @@
       }
     }
   },
-  "faceOffYouSaid": "You said {name}",
-  "@faceOffYouSaid": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "faceOffNoPoints": "No points for {team}",
   "@faceOffNoPoints": {
     "placeholders": {
@@ -721,5 +713,22 @@
       }
     }
   },
-  "faceOffWasDouble": "It was a double bet."
+  "faceOffWasDouble": "It was a double bet.",
+  "soundEffects": "Sound effects",
+  "soundEffectsDetail": "Drumrolls, cheers and sad trombones",
+  "faceOffSuspense": "And the answer is…",
+  "faceOffWritersAtEnd": "Who wrote what stays secret until the end.",
+  "faceOffWhoWroteWhat": "Who wrote what",
+  "faceOffTeamSaid": "{team} said {name}",
+  "@faceOffTeamSaid": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "faceOffDoubleShort": "double bet"
 }
